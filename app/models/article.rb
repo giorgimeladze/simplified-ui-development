@@ -7,7 +7,7 @@ class Article < ApplicationRecord
 
   aasm column: 'status' do
     state :draft, initial: true
-    state :review, :private, :published, :rejected, :archived
+    state :review, :privated, :published, :rejected, :archived
 
     event :submit do
       transitions from: :draft, to: :review
@@ -18,7 +18,7 @@ class Article < ApplicationRecord
     end
 
     event :approve do
-      transitions from: :review, to: [:private, :published]
+      transitions from: :review, to: [:privated, :published]
     end
 
     event :resubmit do
@@ -26,11 +26,19 @@ class Article < ApplicationRecord
     end
 
     event :archive do
-      transitions from: [:rejected, :published, :private], to: :archived
+      transitions from: [:rejected, :published, :privated], to: :archived
     end
 
     event :publish do
-      transitions from: [:private, :review], to: :published
+      transitions from: :review, to: :published
+    end
+
+    event :make_visible do
+      transitions from :private, to: :published
+    end
+
+    event :make_invisible do
+      transitions from :published, to: :private
     end
   end
 end
