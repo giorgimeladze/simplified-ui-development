@@ -30,6 +30,12 @@ gem 'rswag-api'
 gem 'rswag-ui'
 gem 'factory_bot_rails'
 
+gem 'devise'
+gem 'pundit'
+gem 'aasm'
+gem 'blueprinter'
+gem 'faker'
+
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
