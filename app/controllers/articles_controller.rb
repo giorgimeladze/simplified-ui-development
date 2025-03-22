@@ -1,8 +1,11 @@
 class ArticlesController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_article, only: [:show, :submit, :reject, :approve, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+  include Pundit
   include LinksRenderer
 
   def index
-    articles = Article.all
+    articles = Article.visible
 
     rendered_articles = ArticleBlueprint.render_as_hash(articles, view: :index, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles })
@@ -11,6 +14,107 @@ class ArticlesController < ApplicationController
     respond_to do |format|
       format.html { render :index }
       format.json { render json: { articles: rendered_articles, links: @links } }
+    end
+  end
+
+   # GET /articles/:id
+   def show
+    rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show)
+    @html_content = render_to_string(partial: 'article', locals: { article: rendered_article })
+
+    respond_to do |format|
+      format.html { render :show }
+      format.json { render json: { article: @html_content } }
+    end
+  end
+
+  # GET /articles/new
+  def new
+    @article = Article.new
+    authorize @article
+    @html_content = render_to_string(partial: 'form', locals: { article: @article })
+    respond_to do |format|
+      format.html { render :new }
+      format.json { render json: {form: @html_content } }
+    end
+  end
+
+  # POST /articles
+  def create
+    @article = Article.new(article_params)
+    authorize @article
+
+    if @article.save
+      respond_to do |format|
+        format.html { redirect_to article_path(@article), notice: 'Article was successfully created.' }
+        format.json { render json: { success: true, article: @article }, status: :created }
+      end
+    else
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @article.errors.full_messages }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # FSM Event Actions
+  def submit
+    transition_article(:submit)
+  end
+
+  def reject
+    transition_article(:reject)
+  end
+
+  def approve
+    transition_article(:approve)
+  end
+
+  def resubmit
+    transition_article(:resubmit)
+  end
+
+  def archive
+    transition_article(:archive)
+  end
+
+  def publish
+    transition_article(:publish)
+  end
+
+  def make_visible
+    transition_article(:make_visible)
+  end
+
+  def make_invisible
+    transition_article(:make_invisible)
+  end
+
+  private
+
+  def set_article
+    @article = Article.find(params[:id])
+  end
+
+  def article_params
+    params.require(:article).permit(:title, :content)
+  end
+
+  def transition_article(event)
+    authorize @article, event
+
+    if @article.aasm.may_fire_event?(event)
+      @article.aasm.fire!(event)
+      @article.save!
+      respond_to do |format|
+        format.html { redirect_to article_path(@article), notice: 'Article was successfully created.' }
+        format.json { render json: { success: true, article: @article }, status: :created }
+      end
+    else
+      respond_to do |format|
+        format.html { render :new, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: @article.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 end

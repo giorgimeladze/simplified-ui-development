@@ -42,4 +42,7 @@ class Article < ApplicationRecord
       transitions from: :published, to: :privated
     end
   end
+
+  scope :visible, -> { where(status: 'published') }
+  scope :admin_visible, -> { where(status: ['published', 'privated', 'review']) }  
 end

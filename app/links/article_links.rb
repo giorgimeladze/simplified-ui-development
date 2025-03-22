@@ -20,7 +20,7 @@ module ArticleLinks
     links
   end
 
-  def new_links(current_user)
+  def new_links
     [
       { name: 'Back to Listings', action: 'GET', href: "/articles" }
     ]

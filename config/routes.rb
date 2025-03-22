@@ -10,4 +10,13 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "articles#index"
+  resources :articles, except: [:edit, :update, :destroy]
+  post 'articles/submit'
+  post 'articles/reject'
+  post 'articles/approve'
+  post 'articles/resubmit'
+  post 'articles/archive'
+  post 'articles/publish'
+  post 'articles/make_visible'
+  post 'articles/make_invisible'
 end
