@@ -34,11 +34,11 @@ class Article < ApplicationRecord
     end
 
     event :make_visible do
-      transitions from :private, to: :published
+      transitions from: :privated, to: :published
     end
 
     event :make_invisible do
-      transitions from :published, to: :private
+      transitions from: :published, to: :privated
     end
   end
 end

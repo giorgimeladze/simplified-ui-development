@@ -1,0 +1,15 @@
+<div id="articles">
+  <ul class="list-group">
+    <% articles.each do |article| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <strong><%= article[:title] %></strong>
+          <p class="mb-0"><%= article[:content].truncate(50) %></p>
+        </span>
+        <span>
+          <%= render_links(article[:links]) %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+</div>
