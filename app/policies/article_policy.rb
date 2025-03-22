@@ -8,6 +8,10 @@ class ArticlePolicy < ApplicationPolicy
     true
   end
 
+  def new?
+    user.editor? || user.admin?
+  end
+
   def submit?
     user.editor? || user.admin?
   end

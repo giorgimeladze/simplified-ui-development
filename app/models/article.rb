@@ -1,5 +1,6 @@
 class Article < ApplicationRecord
   include AASM
+  include ArticleLinks
 
   belongs_to :user
 
