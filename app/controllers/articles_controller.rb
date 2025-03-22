@@ -1,25 +1,41 @@
-class ArticlesController < ApplicationController
-  before_action :authenticate_user!
-  before_action :set_article, only: [:show, :submit, :reject, :approve, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+class ArticlesController < ApplicationController  
   include Pundit
   include LinksRenderer
 
+  skip_before_action :authenticate_user!, only: [:index, :show]
+  before_action :set_article, only: [:show, :submit, :reject, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+
   def index
     articles = Article.visible
-
-    rendered_articles = ArticleBlueprint.render_as_hash(articles, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles })
-    @links = ArticleLinks.general_index(current_user)
-
-    respond_to do |format|
-      format.html { render :index }
-      format.json { render json: { articles: rendered_articles, links: @links } }
-    end
+  
+    rendering_articles(articles, 'All Articles')
+  end
+  
+  def my_articles
+    articles = current_user.articles
+  
+    rendering_articles(articles, 'My Articles')
+  end
+  
+  def articles_for_review
+    authorize Article, :articles_for_review?
+  
+    articles = Article.where(status: 'review')
+  
+    rendering_articles(articles, 'Articles for Review')
+  end
+  
+  def deleted_articles
+    authorize Article, :deleted_articles?
+  
+    articles = current_user.admin? ? Article.where(status: 'archived') : current_user.articles.where(status: 'archived')
+  
+    rendering_articles(articles, 'Archived Articles')
   end
 
    # GET /articles/:id
    def show
-    rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show)
+    rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'article', locals: { article: rendered_article })
 
     respond_to do |format|
@@ -66,8 +82,8 @@ class ArticlesController < ApplicationController
     transition_article(:reject)
   end
 
-  def approve
-    transition_article(:approve)
+  def approve_private
+    transition_article(:approve_private)
   end
 
   def resubmit
@@ -100,8 +116,19 @@ class ArticlesController < ApplicationController
     params.require(:article).permit(:title, :content)
   end
 
+  def rendering_articles(articles, title)
+    rendered_articles = ArticleBlueprint.render_as_hash(articles, view: :index, context: { current_user: current_user })
+    @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles, title: title })
+    @links = ArticleLinks.general_index(current_user)
+  
+    respond_to do |format|
+      format.html { render :index }
+      format.json { render json: { articles: rendered_articles, links: @links } }
+    end
+  end
+
   def transition_article(event)
-    authorize @article, event
+    authorize @article
 
     if @article.aasm.may_fire_event?(event)
       @article.aasm.fire!(event)

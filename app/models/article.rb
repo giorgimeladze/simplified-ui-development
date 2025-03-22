@@ -18,8 +18,8 @@ class Article < ApplicationRecord
       transitions from: :review, to: :rejected
     end
 
-    event :approve do
-      transitions from: :review, to: [:privated, :published]
+    event :approve_private do
+      transitions from: :review, to: :privated
     end
 
     event :resubmit do

@@ -1,7 +1,11 @@
 class ArticlePolicy < ApplicationPolicy
 
-  def index?
-    true
+  def articles_for_review?
+    user.admin?
+  end
+
+  def deleted_articles?
+    user.editor? || user.admin?
   end
 
   def show?
@@ -16,8 +20,8 @@ class ArticlePolicy < ApplicationPolicy
     user.editor? || user.admin?
   end
 
-  def approve?
-    user.admin?
+  def approve_private?
+    user.admin? || user.editor?
   end
 
   def reject?

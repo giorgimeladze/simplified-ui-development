@@ -17,6 +17,7 @@
       <div class="alert alert-danger"><%= alert %></div>
     <% end %>
     <div class="container mt-4">
+      <%= render_links(@header_links) %>
       <%= yield %>
     </div>
   </body>
