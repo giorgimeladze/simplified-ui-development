@@ -1,15 +1,27 @@
 module LinksRenderer
   include ActionView::Helpers::UrlHelper
 
-  def render_links(links)
+  DEFAULT_STYLES = {
+    'GET' => { class: 'btn btn-outline-primary btn-sm mx-1', label: nil },
+    'DELETE' => { class: 'btn btn-outline-danger btn-sm mx-1', label: nil, confirm: 'Are you sure?' },
+    'POST' => { class: 'btn btn-outline-success btn-sm mx-1', label: nil }
+  }.freeze
+
+  def render_links(links, custom_styles = {})
     links.map do |link|
-      case link[:action]
+      action = link[:action]
+      style = DEFAULT_STYLES[action].merge(custom_styles[action] || {})
+
+      label = style[:label] || link[:name].capitalize
+      classes = style[:class]
+
+      case action
       when 'GET'
-        link_to link[:name].capitalize, link[:href], class: 'btn btn-outline-primary btn-sm mx-1'
+        link_to label, link[:href], class: classes
       when 'DELETE'
-        button_to link[:name].capitalize, link[:href], method: :delete, class: 'btn btn-outline-danger btn-sm mx-1', data: { confirm: 'Are you sure?' }
+        button_to label, link[:href], method: :delete, class: classes, data: { confirm: style[:confirm] }
       when 'POST'
-        button_to link[:name].capitalize, link[:href], method: :post, class: 'btn btn-outline-success btn-sm mx-1'
+        button_to label, link[:href], method: :post, class: classes
       end
     end.join(' ').html_safe
   end

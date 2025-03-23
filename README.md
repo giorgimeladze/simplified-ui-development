@@ -1,24 +1,23 @@
 # README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+when downloading the repository, run
 
-Things you may want to cover:
+* rails db:create
+* rails db:migrate
+* rails db:seed
+* rails s
+* go to localhost:3000
 
-* Ruby version
+After this you have a user with email:giorgi@mail.example and password:123456 which is admin and editor@example.com/qwerty12 as editor
 
-* System dependencies
 
-* Configuration
+the links_renderer helper method is in 
+* lib/links_renderer.rb -> 
+it has default values and also accepts custom values (which I havn't implemented yet, the template for user to choose button alignments or color)
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Furthermore interesting files for checking HATEOAS AND FSM
+* app/controllers/articles_controller.rb.
+* app/links/article_links.rb & app/links/general_links.rb
+* app/models/article.rb
+* app/policies/article_policy.rb
+* app/views/articles have partial files that are rendered in controller
