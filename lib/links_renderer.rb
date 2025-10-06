@@ -15,7 +15,6 @@ module LinksRenderer
       label = style[:label] || (link[:title] || link[:rel].to_s.humanize)
       classes = style[:class]
 
-      # If allowed is explicitly false, render disabled affordance in HTML
       case method
       when 'GET'
         link_to label, link[:href], class: classes

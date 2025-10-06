@@ -9,8 +9,8 @@ module ArticleLinks
     Article.aasm.events.each do |event|
       if self.aasm.may_fire_event?(event.name) && policy.respond_to?("#{event.name}?") && policy.public_send("#{event.name}?")
         links << {
-          rel: event.name.to_s.humanize,
-          title: 'Create Listing'
+          rel: "transition:#{event.name}",
+          title: event.name.to_s.humanize,
           method: 'POST',
           href: "/articles/#{self.id}/#{event.name}"
         }
@@ -36,8 +36,8 @@ module ArticleLinks
     Article.aasm.events.each do |event|
       if self.aasm.may_fire_event?(event.name) && policy.respond_to?("#{event.name}?") && policy.public_send("#{event.name}?")
         actions << {
-          rel: event.name.to_s.humanize,
-          title: 'Create Listing'
+          rel: "transition:#{event.name}",
+          title: event.name.to_s.humanize,
           method: 'POST',
           href: "/articles/#{self.id}/#{event.name}"
         }
