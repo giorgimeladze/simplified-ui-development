@@ -1,7 +1,7 @@
 class ArticleBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :title, :content
+  fields :title, :content, :status
 
   view :show do
     field :links do |article, _options|

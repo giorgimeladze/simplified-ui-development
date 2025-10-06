@@ -13,7 +13,7 @@ Rails.application.routes.draw do
   get 'articles/my_articles'
   get 'articles/articles_for_review'
   get 'articles/deleted_articles'
-  resources :articles, except: [:edit, :update, :destroy]
+  resources :articles, except: [:edit, :update]
   post 'articles/:id/submit', to: 'articles#submit'
   post 'articles/:id/reject', to: 'articles#reject'
   post 'articles/:id/approve_private', to: 'articles#approve_private'

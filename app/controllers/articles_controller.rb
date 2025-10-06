@@ -3,7 +3,7 @@ class ArticlesController < ApplicationController
   include LinksRenderer
 
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article, only: [:show, :submit, :reject, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+  before_action :set_article, only: [:show, :submit, :reject, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
 
   def index
     articles = Article.visible
@@ -73,6 +73,16 @@ class ArticlesController < ApplicationController
     end
   end
 
+  # DELETE /articles/:id
+  def destroy
+    authorize @article
+    @article.destroy
+    respond_to do |format|
+      format.html { redirect_to articles_path, notice: 'Article deleted.' }
+      format.json { head :no_content }
+    end
+  end
+
   # FSM Event Actions
   def submit
     transition_article(:submit)
@@ -128,18 +138,25 @@ class ArticlesController < ApplicationController
   end
 
   def transition_article(event)
-    authorize @article
+    # Event-level authorization
+    policy = ArticlePolicy.new(current_user, @article)
+    unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
+      raise Pundit::NotAuthorizedError
+    end
 
     if @article.aasm.may_fire_event?(event)
       @article.aasm.fire!(event)
       @article.save!
       respond_to do |format|
-        format.html { redirect_to article_path(@article), notice: 'Article was successfully created.' }
-        format.json { render json: { success: true, article: @article }, status: :created }
+        format.html { redirect_to article_path(@article), notice: 'Transition applied.' }
+        format.json do
+          rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
+          render json: { success: true, article: rendered_article }, status: :ok
+        end
       end
     else
       respond_to do |format|
-        format.html { render :new, status: :unprocessable_entity }
+        format.html { redirect_to article_path(@article), alert: 'Transition not allowed.' }
         format.json { render json: { success: false, errors: @article.errors.full_messages }, status: :unprocessable_entity }
       end
     end
