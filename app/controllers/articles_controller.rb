@@ -58,6 +58,7 @@ class ArticlesController < ApplicationController
   # POST /articles
   def create
     @article = Article.new(article_params)
+    @article.user = current_user
     authorize @article
 
     if @article.save
@@ -146,7 +147,6 @@ class ArticlesController < ApplicationController
 
     if @article.aasm.may_fire_event?(event)
       @article.aasm.fire!(event)
-      @article.save!
       respond_to do |format|
         format.html { redirect_to article_path(@article), notice: 'Transition applied.' }
         format.json do

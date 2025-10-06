@@ -3,25 +3,19 @@ module GeneralLinks
     user = current_user || User.new
     @header_links = []
 
-    @header_links << { name: 'All Articles', action: 'GET', href: articles_path } # everyone can see published
+    @header_links << { rel: 'collection', title: 'All Articles', method: 'GET', href: articles_path }
 
-    if user.editor? || user.admin?
-      @header_links << { name: 'My Articles', action: 'GET', href: articles_my_articles_path }
-    end
+    @header_links << { rel: 'my-articles', title: 'My Articles', method: 'GET', href: articles_my_articles_path }
 
-    if user.admin?
-      @header_links << { name: 'Review Articles', action: 'GET', href: articles_articles_for_review_path }
-    end
+    @header_links << { rel: 'review-articles', title: 'Review Articles', method: 'GET', href: articles_articles_for_review_path }
 
-    if user.admin? || user.editor?
-      @header_links << { name: 'Deleted Articles', action: 'GET', href: articles_deleted_articles_path }
-    end
+    @header_links << { rel: 'deleted-articles', title: 'Deleted Articles', method: 'GET', href: articles_deleted_articles_path }
 
     if user_signed_in?
-      @header_links << { name: 'Sign Out', action: 'DELETE', href: destroy_user_session_path}
+      @header_links << { rel: 'sign-out', title: 'Sign Out', method: 'DELETE', href: destroy_user_session_path}
     else
-      @header_links << { name: 'Sign In', action: 'GET', href: new_user_session_path }
-      @header_links << { name: 'Sign Up', action: 'GET', href: new_user_registration_path }
+      @header_links << { rel: 'sign-in', title: 'Sign In', method: 'GET', href: new_user_session_path }
+      @header_links << { rel: 'sign-up', title: 'Sign Up', method: 'GET', href: new_user_registration_path }
     end
   end
 end

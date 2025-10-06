@@ -9,18 +9,22 @@ module LinksRenderer
 
   def render_links(links, custom_styles = {})
     links.map do |link|
-      action = link[:action]
-      style = DEFAULT_STYLES[action].merge(custom_styles[action] || {})
+      method = (link[:method] || 'GET').to_s.upcase
+      style = DEFAULT_STYLES[method].merge(custom_styles[method] || {})
 
-      label = style[:label] || link[:name].capitalize
+      label = style[:label] || (link[:title] || link[:rel].to_s.humanize)
       classes = style[:class]
 
-      case action
+      # If allowed is explicitly false, render disabled affordance in HTML
+      case method
       when 'GET'
         link_to label, link[:href], class: classes
       when 'DELETE'
         button_to label, link[:href], method: :delete, class: classes, data: { confirm: style[:confirm] }
       when 'POST'
+        button_to label, link[:href], method: :post, class: classes
+      else
+        # Fallback to POST for unknown methods
         button_to label, link[:href], method: :post, class: classes
       end
     end.join(' ').html_safe

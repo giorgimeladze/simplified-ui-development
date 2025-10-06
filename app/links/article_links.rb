@@ -1,7 +1,7 @@
 module ArticleLinks
   def show_links(current_user)
     links = []
-    links << { name: 'Back to Listings', action: 'GET', href: "/articles" }
+    links << { rel: 'collection', title: 'Back to Listings', method: 'GET', href: "/articles" }
 
     policy = ArticlePolicy.new(current_user, self)
     current_state = self.aasm.current_state
@@ -9,8 +9,9 @@ module ArticleLinks
     Article.aasm.events.each do |event|
       if self.aasm.may_fire_event?(event.name) && policy.respond_to?("#{event.name}?") && policy.public_send("#{event.name}?")
         links << {
-          name: event.name.to_s.humanize,
-          action: 'POST',
+          rel: event.name.to_s.humanize,
+          title: 'Create Listing'
+          method: 'POST',
           href: "/articles/#{self.id}/#{event.name}"
         }
       end
@@ -21,7 +22,7 @@ module ArticleLinks
 
   def new_links
     [
-      { name: 'Back to Listings', action: 'GET', href: "/articles" }
+      { rel: 'collection', title: 'Back to Listings', method: 'GET', href: "/articles" }
     ]
   end
 
@@ -29,14 +30,15 @@ module ArticleLinks
     actions = []
     policy = ArticlePolicy.new(current_user, self)
 
-    actions << { name: 'Show', action: 'GET', href: "/articles/#{self.id}" }
-    actions << { name: 'Delete', action: 'DELETE', href: "/articles/#{self.id}" } if policy.destroy?
+    actions << { rel: 'self', title: 'Show', method: 'GET', href: "/articles/#{self.id}" }
+    actions << { rel: 'delete', title: 'Delete', method: 'DELETE', href: "/articles/#{self.id}" }
 
     Article.aasm.events.each do |event|
       if self.aasm.may_fire_event?(event.name) && policy.respond_to?("#{event.name}?") && policy.public_send("#{event.name}?")
         actions << {
-          name: event.name.to_s.humanize,
-          action: 'POST',
+          rel: event.name.to_s.humanize,
+          title: 'Create Listing'
+          method: 'POST',
           href: "/articles/#{self.id}/#{event.name}"
         }
       end
@@ -48,9 +50,7 @@ module ArticleLinks
   def self.general_index(current_user)
     links = []
 
-    if ArticlePolicy.new(current_user, Article).new?
-      links << { name: 'New', action: 'GET', href: '/articles/new' }
-    end
+    links << { rel: 'new', title: 'New', method: 'GET', href: '/articles/new' }
 
     links
   end
