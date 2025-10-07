@@ -1,6 +1,6 @@
 class ApplicationController < ActionController::Base
   include Pundit
-  include GeneralLinks
+  include LinksRenderer
 
   before_action :authenticate_user!
   before_action :configure_permitted_parameters, if: :devise_controller?
@@ -16,6 +16,10 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def set_header_links
+    @header_links = HasHypermediaLinks.hypermedia_navigation_links(current_user)
+  end
 
   def user_not_authorized
     flash[:alert] = "You are not authorized to perform this action."

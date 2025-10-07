@@ -1,0 +1,150 @@
+# Hypermedia Actions Configuration
+# This file defines the hypermedia affordances for each model and their actions
+# Supports dynamic ID replacement with #ID placeholder
+
+Article:
+  # Collection actions
+  index:
+    rel: 'collection'
+    title: 'All Articles'
+    method: 'GET'
+    link: '/articles'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  new:
+    rel: 'new'
+    title: 'New Article'
+    method: 'GET'
+    link: '/articles/new'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  create:
+    rel: 'create'
+    title: 'Create Article'
+    method: 'POST'
+    link: '/articles'
+    button_classes: 'btn btn-outline-success btn-sm mx-1'
+  
+  # Resource actions
+  show:
+    rel: 'self'
+    title: 'Show'
+    method: 'GET'
+    link: '/articles/#ID'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  destroy:
+    rel: 'delete'
+    title: 'Delete'
+    method: 'DELETE'
+    link: '/articles/#ID'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+    confirm: 'Are you sure?'
+  
+  # FSM State Transitions
+  submit:
+    rel: 'transition:submit'
+    title: 'Submit for Review'
+    method: 'POST'
+    link: '/articles/#ID/submit'
+    button_classes: 'btn btn-outline-warning btn-sm mx-1'
+  
+  reject:
+    rel: 'transition:reject'
+    title: 'Reject'
+    method: 'POST'
+    link: '/articles/#ID/reject'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+  
+  approve_private:
+    rel: 'transition:approve_private'
+    title: 'Approve Private'
+    method: 'POST'
+    link: '/articles/#ID/approve_private'
+    button_classes: 'btn btn-outline-info btn-sm mx-1'
+  
+  resubmit:
+    rel: 'transition:resubmit'
+    title: 'Resubmit'
+    method: 'POST'
+    link: '/articles/#ID/resubmit'
+    button_classes: 'btn btn-outline-warning btn-sm mx-1'
+  
+  archive:
+    rel: 'transition:archive'
+    title: 'Archive'
+    method: 'POST'
+    link: '/articles/#ID/archive'
+    button_classes: 'btn btn-outline-secondary btn-sm mx-1'
+  
+  publish:
+    rel: 'transition:publish'
+    title: 'Publish'
+    method: 'POST'
+    link: '/articles/#ID/publish'
+    button_classes: 'btn btn-outline-success btn-sm mx-1'
+  
+  make_visible:
+    rel: 'transition:make_visible'
+    title: 'Make Visible'
+    method: 'POST'
+    link: '/articles/#ID/make_visible'
+    button_classes: 'btn btn-outline-success btn-sm mx-1'
+  
+  make_invisible:
+    rel: 'transition:make_invisible'
+    title: 'Make Invisible'
+    method: 'POST'
+    link: '/articles/#ID/make_invisible'
+    button_classes: 'btn btn-outline-warning btn-sm mx-1'
+
+# Navigation links
+Navigation:
+  all_articles:
+    rel: 'collection'
+    title: 'All Articles'
+    method: 'GET'
+    link: '/articles'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  my_articles:
+    rel: 'my-articles'
+    title: 'My Articles'
+    method: 'GET'
+    link: '/articles/my_articles'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  review_articles:
+    rel: 'review-articles'
+    title: 'Review Articles'
+    method: 'GET'
+    link: '/articles/articles_for_review'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  deleted_articles:
+    rel: 'deleted-articles'
+    title: 'Deleted Articles'
+    method: 'GET'
+    link: '/articles/deleted_articles'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  sign_in:
+    rel: 'sign-in'
+    title: 'Sign In'
+    method: 'GET'
+    link: '/users/sign_in'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  sign_up:
+    rel: 'sign-up'
+    title: 'Sign Up'
+    method: 'GET'
+    link: '/users/sign_up'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  sign_out:
+    rel: 'sign-out'
+    title: 'Sign Out'
+    method: 'DELETE'
+    link: '/users/sign_out'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'

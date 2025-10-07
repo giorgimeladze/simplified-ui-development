@@ -16,6 +16,10 @@ class ArticlePolicy < ApplicationPolicy
     user.editor? || user.admin?
   end
 
+  def create?
+    user.editor? || user.admin?
+  end
+
   def submit?
     user.editor? || user.admin?
   end
