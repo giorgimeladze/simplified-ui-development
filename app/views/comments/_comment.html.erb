@@ -1,0 +1,8 @@
+<div class="card comment" id="comment-<%= comment[:id]%>">
+  <div class="card-body">
+    <h2 class="card-title"><%= comment[:text] %></p>
+    <div class="mt-3">
+      <%= render_links(comment[:links]) %>
+    </div>
+  </div>
+</div>

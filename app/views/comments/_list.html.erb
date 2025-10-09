@@ -1,0 +1,16 @@
+<h1 class="mb-4"><%= title %></h1>
+
+<div id="comments">
+  <ul class="list-group">
+    <% comments.each do |comment| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <strong><%= comment[:text] %></strong>
+        </span>
+        <span>
+          <%= render_links(comment[:links]) %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+</div>

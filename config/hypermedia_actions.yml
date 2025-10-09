@@ -98,6 +98,74 @@ Article:
     link: '/articles/#ID/make_invisible'
     button_classes: 'btn btn-outline-warning btn-sm mx-1'
 
+Comment:
+  # Collection actions
+  index:
+    rel: 'collection'
+    title: 'All Comments'
+    method: 'GET'
+    link: '/articles/#ARTICLE_ID/comments'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  new:
+    rel: 'new'
+    title: 'New Comment'
+    method: 'GET'
+    link: '/articles/#ARTICLE_ID/comments/new'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+  
+  create:
+    rel: 'create'
+    title: 'Add Comment'
+    method: 'POST'
+    link: '/articles/#ARTICLE_ID/comments'
+    button_classes: 'btn btn-outline-success btn-sm mx-1'
+  
+  # Resource actions
+  show:
+    rel: 'self'
+    title: 'View'
+    method: 'GET'
+    link: '/comments/#ID'
+    button_classes: 'btn btn-outline-info btn-sm mx-1'
+  
+  edit:
+    rel: 'edit'
+    title: 'Edit'
+    method: 'GET'
+    link: '/comments/#ID/edit'
+    button_classes: 'btn btn-outline-warning btn-sm mx-1'
+  
+  destroy:
+    rel: 'delete'
+    title: 'Delete'
+    method: 'DELETE'
+    link: '/comments/#ID'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+    confirm: 'Are you sure you want to delete this comment?'
+  
+  # FSM State Transitions
+  approve:
+    rel: 'transition:approve'
+    title: 'Approve'
+    method: 'POST'
+    link: '/comments/#ID/approve'
+    button_classes: 'btn btn-outline-success btn-sm mx-1'
+  
+  soft_delete:
+    rel: 'transition:soft_delete'
+    title: 'Delete Comment'
+    method: 'POST'
+    link: '/comments/#ID/soft_delete'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+    confirm: 'Delete this comment?'
+  
+  restore:
+    rel: 'transition:restore'
+    title: 'Restore'
+    method: 'POST'
+    link: '/comments/#ID/restore'
+    button_classes: 'btn btn-outline-info btn-sm mx-1'
 # Navigation links
 Navigation:
   all_articles:
@@ -126,6 +194,13 @@ Navigation:
     title: 'Deleted Articles'
     method: 'GET'
     link: '/articles/deleted_articles'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'  
+
+  pending_comments:
+    rel: 'pending-comments'
+    title: 'Pending Comments'
+    method: 'GET'
+    link: '/comments/pending_comments'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
   
   sign_in:

@@ -13,13 +13,24 @@ Rails.application.routes.draw do
   get 'articles/my_articles'
   get 'articles/articles_for_review'
   get 'articles/deleted_articles'
-  resources :articles, except: [:edit, :update]
-  post 'articles/:id/submit', to: 'articles#submit'
-  post 'articles/:id/reject', to: 'articles#reject'
-  post 'articles/:id/approve_private', to: 'articles#approve_private'
-  post 'articles/:id/resubmit', to: 'articles#resubmit'
-  post 'articles/:id/archive', to: 'articles#archive'
-  post 'articles/:id/publish', to: 'articles#publish'
-  post 'articles/:id/make_visible', to: 'articles#make_visible'
+  get 'comments/pending_comments'
+  resources :articles do
+    resources :comments, only: [:new, :create]
+    
+    # FSM transition routes for articles
+    member do
+      post :submit, :reject, :approve_private, :resubmit
+      post :archive, :publish, :make_visible, :make_invisible
+    end
+  end
+
+  resources :comments, only: [:show, :destroy] do
+    # FSM transition routes for comments
+    member do
+      post :approve
+      post :soft_delete
+      post :restore
+    end
+  end
   post 'articles/:id/make_invisible', to: 'articles#make_invisible'
 end

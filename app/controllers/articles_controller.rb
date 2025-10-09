@@ -1,7 +1,4 @@
 class ArticlesController < ApplicationController  
-  include Pundit
-  include LinksRenderer
-
   skip_before_action :authenticate_user!, only: [:index, :show]
   before_action :set_article, only: [:show, :submit, :reject, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
 
@@ -36,7 +33,8 @@ class ArticlesController < ApplicationController
    # GET /articles/:id
    def show
     rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'article', locals: { article: rendered_article })
+    article_comments = CommentBlueprint.render_as_hash(@article.comments.visible, view: :index, context: { current_user: current_user })
+    @html_content = render_to_string(partial: 'article', locals: { article: rendered_article, article_comments: article_comments })
 
     respond_to do |format|
       format.html { render :show }

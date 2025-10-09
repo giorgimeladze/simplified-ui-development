@@ -9,6 +9,8 @@ module LinksRenderer
   }.freeze
 
   def render_links(links, custom_styles = {})
+    return '' if links.blank?
+
     links.map do |link|
       method = (link[:method] || 'GET').to_s.upcase
       

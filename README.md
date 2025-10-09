@@ -119,6 +119,22 @@ This project implements a state-driven UI architecture that combines FSMs with H
         ┌─────────────────────┐
         │      ARCHIVED       │
         └─────────────────────┘
+
+
+
+┌─────────┐         ┌─────────┐
+│ PENDING │◄────────┤ DELETED │
+└────┬────┘ restore └────▲────┘
+     │                   │
+     │ approve           │
+     ▼                   │
+┌─────────┐              │
+│APPROVED │              │
+└────┬────┘              │
+     │                   │
+     │                   │
+     └───────────────────┘
+            delete
 ```
 
 ### FSM Events (Transitions)
