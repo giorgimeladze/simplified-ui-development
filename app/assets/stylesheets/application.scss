@@ -15,3 +15,45 @@
  */
  @import "bootstrap";
 
+// State-based styling
+.article, .comment {
+  position: relative;
+  
+  &[data-status="draft"] {
+    border-left: 4px solid #6c757d;
+  }
+  
+  &[data-status="review"] {
+    border-left: 4px solid #ffc107;
+  }
+  
+  &[data-status="rejected"] {
+    border-left: 4px solid #dc3545;
+  }
+  
+  &[data-status="published"],
+  &[data-status="approved"] {
+    border-left: 4px solid #28a745;
+  }
+  
+  &[data-status="privated"] {
+    border-left: 4px solid #17a2b8;
+  }
+  
+  &[data-status="archived"],
+  &[data-status="deleted"] {
+    border-left: 4px solid #343a40;
+    opacity: 0.7;
+  }
+  
+  &[data-status="pending"] {
+    border-left: 4px solid #ffc107;
+    background-color: #fff3cd;
+  }
+}
+
+.badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+}

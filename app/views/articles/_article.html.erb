@@ -1,6 +1,9 @@
 <div class="card article" id="article-<%= article[:id]%>">
   <div class="card-body">
-    <h2 class="card-title"><%= article[:title] %></h2>
+    <h2 class="card-title">
+      <%= article[:title] %>
+      <%= status_badge(article[:status], 'article') %>
+    </h2>
     <p class="card-text"><%= article[:content] %></p>
     <div class="mt-3">
       <%= render_links(article[:links]) %>
