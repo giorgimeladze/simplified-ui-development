@@ -3,6 +3,7 @@ class Article < ApplicationRecord
   include HasHypermediaLinks
 
   belongs_to :user
+  validates :user, presence: true
 
   validates :title, :content, presence: true
 
