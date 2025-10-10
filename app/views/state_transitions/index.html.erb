@@ -1,0 +1,24 @@
+<h1>State Transitions</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Transitionable</th>
+      <th>From State</th>
+      <th>To State</th>
+      <th>Event</th>
+      <th>User</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @state_transitions.each do |state_transition| %>
+      <tr>
+        <td><%= state_transition.transitionable.id %> & <%=state_transition.transitionable.class.name%> </td>
+        <td><%= state_transition.from_state %></td>
+        <td><%= state_transition.to_state %></td>
+        <td><%= state_transition.event %></td>
+        <td><%= state_transition.user.username %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

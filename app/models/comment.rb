@@ -1,6 +1,7 @@
 class Comment < ApplicationRecord
   include AASM
   include HasHypermediaLinks
+  include HasStateTransitions
 
   belongs_to :article
   belongs_to :user  # created_by

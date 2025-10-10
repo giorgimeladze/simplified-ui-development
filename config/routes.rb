@@ -30,4 +30,6 @@ Rails.application.routes.draw do
       post :approve, :delete, :restore
     end
   end
+
+  resources :state_transitions, only: [:index]
 end

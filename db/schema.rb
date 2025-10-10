@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_09_182737) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -33,6 +33,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_182737) do
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
+  create_table "state_transitions", force: :cascade do |t|
+    t.string "transitionable_type", null: false
+    t.integer "transitionable_id", null: false
+    t.string "from_state", null: false
+    t.string "to_state", null: false
+    t.string "event", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["transitionable_type", "transitionable_id"], name: "index_state_transitions_on_transitionable"
+    t.index ["user_id"], name: "index_state_transitions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "username", null: false
@@ -50,4 +63,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_182737) do
   add_foreign_key "articles", "users"
   add_foreign_key "comments", "articles"
   add_foreign_key "comments", "users"
+  add_foreign_key "state_transitions", "users"
 end

@@ -202,6 +202,13 @@ Navigation:
     method: 'GET'
     link: '/comments/pending_comments'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
+
+  state_transitions:
+    rel: 'state-transitions'
+    title: 'State Transitions'
+    method: 'GET'
+    link: '/state_transitions'
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
   
   sign_in:
     rel: 'sign-in'

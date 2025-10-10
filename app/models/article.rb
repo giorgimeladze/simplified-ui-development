@@ -1,6 +1,7 @@
 class Article < ApplicationRecord
   include AASM
   include HasHypermediaLinks
+  include HasStateTransitions
 
   belongs_to :user
   validates :user, presence: true
