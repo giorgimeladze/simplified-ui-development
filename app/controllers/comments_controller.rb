@@ -57,7 +57,7 @@ class CommentsController < ApplicationController
     authorize @comment
     @comment.destroy
     respond_to do |format|
-      format.html { redirect_to article_path(@article), notice: 'Comment deleted.' }
+      format.html { redirect_to article_path(@comment.article), notice: 'Comment deleted.' }
       format.json { head :no_content }
     end
   end
@@ -99,7 +99,7 @@ class CommentsController < ApplicationController
     if @comment.aasm.may_fire_event?(event)
       @comment.aasm.fire!(event)
       respond_to do |format|
-        format.html { redirect_to article_path(@article), notice: 'Transition applied.' }
+        format.html { redirect_to article_path(@comment.article), notice: 'Transition applied.' }
         format.json do
           rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show, context: { current_user: current_user })
           render json: { success: true, comment: rendered_comment }, status: :ok
