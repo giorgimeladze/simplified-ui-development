@@ -1,19 +1,1907 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "API V1",
-    "version": "v1"
+    "title": "FSM + HATEOAS Rails API",
+    "version": "v1",
+    "description": "API demonstrating Finite State Machines with HATEOAS hypermedia controls for simplified UI development. This API provides self-descriptive resources where available actions are determined by the current state and user permissions.",
+    "contact": {
+      "name": "API Support",
+      "url": "https://github.com/yourusername/simplified-ui-development"
+    }
   },
   "paths": {
+    "/articles": {
+      "get": {
+        "summary": "Retrieves all published articles",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns a collection of published articles with hypermedia controls (HATEOAS). Each article includes its current FSM state and available state transitions based on user permissions.",
+        "responses": {
+          "200": {
+            "description": "articles found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticlesCollection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a new article",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Creates a new article in \"draft\" state. Requires authentication.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "201": {
+            "description": "article created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "article": {
+                      "$ref": "#/components/schemas/Article"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Introduction to FSM"
+                  },
+                  "content": {
+                    "type": "string",
+                    "example": "This article explains finite state machines..."
+                  }
+                },
+                "required": [
+                  "title",
+                  "content"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/my_articles": {
+      "get": {
+        "summary": "Retrieves current user's articles",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns all articles created by the authenticated user, regardless of state.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "my articles found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticlesCollection"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/articles_for_review": {
+      "get": {
+        "summary": "Retrieves articles pending review",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns all articles in \"review\" state. Requires editor or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "articles for review found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticlesCollection"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/deleted_articles": {
+      "get": {
+        "summary": "Retrieves archived articles",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns archived articles. Admins see all archived articles, regular users see only their own.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "archived articles found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArticlesCollection"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a specific article",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns a single article with its comments and available actions based on current state and user permissions.",
+        "responses": {
+          "200": {
+            "description": "article found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "article": {
+                      "type": "string",
+                      "description": "Rendered HTML content with hypermedia links"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes an article",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Permanently deletes an article. Requires ownership or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "article deleted"
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/new": {
+      "get": {
+        "summary": "Returns form for creating a new article",
+        "tags": [
+          "Articles"
+        ],
+        "description": "Returns an HTML form for creating a new article.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "form retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "form": {
+                      "type": "string",
+                      "description": "Rendered HTML form"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/submit": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Submit article for review (draft → review)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"draft\" to \"review\" state. Requires article ownership.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid state transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/publish": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Publish article (review → published)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"review\" to \"published\" state. Requires editor or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid state transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/reject": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Reject article (review → rejected)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"review\" to \"rejected\" state. Requires editor or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/approve_private": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Approve article as private (review → privated)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"review\" to \"privated\" state. Requires editor or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/resubmit": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Resubmit rejected article (rejected → review)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"rejected\" back to \"review\" state. Requires article ownership.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/archive": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Archive article",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article to \"archived\" state from rejected, published, or privated. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/make_visible": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Make article visible (privated → published)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"privated\" to \"published\" state. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{id}/make_invisible": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Make article invisible (published → privated)",
+        "tags": [
+          "Articles - FSM Transitions"
+        ],
+        "description": "Transitions article from \"published\" to \"privated\" state. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSuccess"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/pending_comments": {
+      "get": {
+        "summary": "Retrieves all pending comments",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Returns all comments in \"pending\" state awaiting moderation. Requires moderator or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "pending comments found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "comments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Comment"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Retrieves a specific comment",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Returns a single comment with available actions based on current state and user permissions.",
+        "responses": {
+          "200": {
+            "description": "comment found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "comment": {
+                      "type": "string",
+                      "description": "Rendered HTML content with hypermedia links"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "comment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes a comment",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Permanently deletes a comment. Requires ownership or admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "comment deleted"
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "comment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{article_id}/comments/new": {
+      "parameters": [
+        {
+          "name": "article_id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Returns form for creating a new comment",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Returns an HTML form for creating a new comment on the specified article.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "form retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "form": {
+                      "type": "string",
+                      "description": "Rendered HTML form"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/articles/{article_id}/comments": {
+      "parameters": [
+        {
+          "name": "article_id",
+          "in": "path",
+          "description": "Article ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Creates a new comment",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Creates a new comment in \"pending\" state. Requires authentication.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "201": {
+            "description": "comment created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "Great article! Very informative.",
+                    "minLength": 1,
+                    "maxLength": 250
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/approve": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Approve comment (pending → approved)",
+        "tags": [
+          "Comments - FSM Transitions"
+        ],
+        "description": "Transitions comment from \"pending\" to \"approved\" state, making it publicly visible. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid state transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/delete": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Soft delete comment (pending/approved → deleted)",
+        "tags": [
+          "Comments - FSM Transitions"
+        ],
+        "description": "Transitions comment to \"deleted\" state. Can be restored later. Requires comment ownership, admin, or editor role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid state transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/restore": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Restore deleted comment (deleted → pending)",
+        "tags": [
+          "Comments - FSM Transitions"
+        ],
+        "description": "Transitions comment from \"deleted\" back to \"pending\" state. Requires admin or editor role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "invalid state transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/state_transitions": {
+      "get": {
+        "summary": "Retrieves all state transitions (audit log)",
+        "tags": [
+          "State Transitions"
+        ],
+        "description": "Returns a complete audit log of all FSM state transitions for articles and comments. Shows who made the transition, when, and what changed. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "state transitions found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "state_transitions": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StateTransition"
+                      }
+                    }
+                  },
+                  "example": {
+                    "state_transitions": [
+                      {
+                        "id": 1,
+                        "transitionable_type": "Article",
+                        "transitionable_id": 5,
+                        "from_state": "draft",
+                        "to_state": "review",
+                        "event": "submit",
+                        "user_id": 1,
+                        "created_at": "2024-10-09T14:23:45Z",
+                        "updated_at": "2024-10-09T14:23:45Z"
+                      },
+                      {
+                        "id": 2,
+                        "transitionable_type": "Article",
+                        "transitionable_id": 5,
+                        "from_state": "review",
+                        "to_state": "published",
+                        "event": "publish",
+                        "user_id": 2,
+                        "created_at": "2024-10-09T15:30:12Z",
+                        "updated_at": "2024-10-09T15:30:12Z"
+                      },
+                      {
+                        "id": 3,
+                        "transitionable_type": "Comment",
+                        "transitionable_id": 12,
+                        "from_state": "pending",
+                        "to_state": "approved",
+                        "event": "approve",
+                        "user_id": 2,
+                        "created_at": "2024-10-09T16:45:33Z",
+                        "updated_at": "2024-10-09T16:45:33Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - requires admin role",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
   },
   "servers": [
     {
-      "url": "https://{defaultHost}",
+      "url": "http://{defaultHost}",
       "variables": {
         "defaultHost": {
           "default": "localhost:3000"
         }
       }
     }
-  ]
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer_auth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Authentication token required for protected endpoints"
+      }
+    },
+    "schemas": {
+      "HypermediaLink": {
+        "type": "object",
+        "properties": {
+          "rel": {
+            "type": "string",
+            "description": "Link relation type (RFC 5988)",
+            "example": "transition:publish"
+          },
+          "title": {
+            "type": "string",
+            "description": "Human-readable action label",
+            "example": "Publish Article"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ],
+            "description": "HTTP method",
+            "example": "POST"
+          },
+          "href": {
+            "type": "string",
+            "description": "URL endpoint",
+            "example": "/articles/1/publish"
+          },
+          "button_classes": {
+            "type": "string",
+            "description": "CSS classes for UI rendering",
+            "example": "btn btn-success",
+            "nullable": true
+          },
+          "confirm": {
+            "type": "string",
+            "description": "Confirmation message for destructive actions",
+            "example": "Are you sure?",
+            "nullable": true
+          }
+        },
+        "required": [
+          "rel",
+          "title",
+          "method",
+          "href"
+        ]
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "example": "Introduction to Rails"
+          },
+          "content": {
+            "type": "string",
+            "example": "This is a comprehensive guide to Ruby on Rails..."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "review",
+              "rejected",
+              "published",
+              "privated",
+              "archived"
+            ],
+            "example": "published",
+            "description": "Current FSM state of the article"
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1,
+            "description": "ID of the author"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T12:00:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:30:00Z"
+          },
+          "links": {
+            "type": "array",
+            "description": "HATEOAS hypermedia controls - available actions based on current state",
+            "items": {
+              "$ref": "#/components/schemas/HypermediaLink"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "content",
+          "status",
+          "links"
+        ]
+      },
+      "ArticlesCollection": {
+        "type": "object",
+        "properties": {
+          "articles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Article"
+            }
+          },
+          "links": {
+            "type": "array",
+            "description": "Global navigation links",
+            "items": {
+              "$ref": "#/components/schemas/HypermediaLink"
+            }
+          }
+        },
+        "required": [
+          "articles",
+          "links"
+        ]
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "text": {
+            "type": "string",
+            "example": "Great article! Very informative."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "deleted"
+            ],
+            "example": "approved",
+            "description": "Current FSM state of the comment"
+          },
+          "article_id": {
+            "type": "integer",
+            "example": 5,
+            "description": "ID of the parent article"
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 3,
+            "description": "ID of the comment author"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T13:45:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T13:45:00Z"
+          },
+          "links": {
+            "type": "array",
+            "description": "HATEOAS hypermedia controls - available actions based on current state",
+            "items": {
+              "$ref": "#/components/schemas/HypermediaLink"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "status",
+          "links"
+        ]
+      },
+      "StateTransition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1,
+            "description": "Transition log entry ID"
+          },
+          "transitionable_type": {
+            "type": "string",
+            "enum": [
+              "Article",
+              "Comment"
+            ],
+            "example": "Article",
+            "description": "Type of resource that transitioned"
+          },
+          "transitionable_id": {
+            "type": "integer",
+            "example": 5,
+            "description": "ID of the resource that transitioned"
+          },
+          "from_state": {
+            "type": "string",
+            "example": "draft",
+            "description": "State before transition"
+          },
+          "to_state": {
+            "type": "string",
+            "example": "review",
+            "description": "State after transition"
+          },
+          "event": {
+            "type": "string",
+            "example": "submit",
+            "description": "FSM event that triggered the transition"
+          },
+          "user_id": {
+            "type": "integer",
+            "example": 1,
+            "description": "ID of user who triggered the transition"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:23:45Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:23:45Z"
+          }
+        },
+        "required": [
+          "id",
+          "transitionable_type",
+          "transitionable_id",
+          "from_state",
+          "to_state",
+          "event",
+          "user_id"
+        ]
+      },
+      "TransitionSuccess": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "article": {
+            "$ref": "#/components/schemas/Article"
+          }
+        },
+        "required": [
+          "success",
+          "article"
+        ]
+      },
+      "TransitionError": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Transition not allowed from current state"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "errors"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Unauthorized",
+            "description": "Error message"
+          },
+          "status": {
+            "type": "integer",
+            "example": 401,
+            "description": "HTTP status code"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      }
+    }
+  }
 }

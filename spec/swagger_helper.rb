@@ -3,41 +3,236 @@
 require 'rails_helper'
 
 RSpec.configure do |config|
-  # Specify a root folder where Swagger JSON files are generated
-  # NOTE: If you're using the rswag-api to serve API descriptions, you'll need
-  # to ensure that it's configured to serve Swagger from the same folder
   config.openapi_root = Rails.root.join('swagger').to_s
 
-  # Define one or more Swagger documents and provide global metadata for each one
-  # When you run the 'rswag:specs:swaggerize' rake task, the complete Swagger will
-  # be generated at the provided relative path under openapi_root
-  # By default, the operations defined in spec files are added to the first
-  # document below. You can override this behavior by adding a openapi_spec tag to the
-  # the root example_group in your specs, e.g. describe '...', openapi_spec: 'v2/swagger.json'
   config.openapi_specs = {
     'v1/swagger.json' => {
       openapi: '3.0.1',
       info: {
-        title: 'API V1',
-        version: 'v1'
+        title: 'FSM + HATEOAS Rails API',
+        version: 'v1',
+        description: 'API demonstrating Finite State Machines with HATEOAS hypermedia controls for simplified UI development. This API provides self-descriptive resources where available actions are determined by the current state and user permissions.',
+        contact: {
+          name: 'API Support',
+          url: 'https://github.com/yourusername/simplified-ui-development'
+        }
       },
       paths: {},
       servers: [
         {
-          url: 'https://{defaultHost}',
+          url: 'http://{defaultHost}',
           variables: {
             defaultHost: {
               default: 'localhost:3000'
             }
           }
         }
-      ]
+      ],
+      components: {
+        securitySchemes: {
+          bearer_auth: {
+            type: :http,
+            scheme: :bearer,
+            bearerFormat: 'JWT',
+            description: 'Authentication token required for protected endpoints'
+          }
+        },
+        schemas: {
+          # Hypermedia Link Schema
+          HypermediaLink: {
+            type: :object,
+            properties: {
+              rel: { 
+                type: :string, 
+                description: 'Link relation type (RFC 5988)',
+                example: 'transition:publish'
+              },
+              title: { 
+                type: :string, 
+                description: 'Human-readable action label',
+                example: 'Publish Article'
+              },
+              method: { 
+                type: :string, 
+                enum: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                description: 'HTTP method',
+                example: 'POST'
+              },
+              href: { 
+                type: :string, 
+                description: 'URL endpoint',
+                example: '/articles/1/publish'
+              },
+              button_classes: {
+                type: :string,
+                description: 'CSS classes for UI rendering',
+                example: 'btn btn-success',
+                nullable: true
+              },
+              confirm: {
+                type: :string,
+                description: 'Confirmation message for destructive actions',
+                example: 'Are you sure?',
+                nullable: true
+              }
+            },
+            required: ['rel', 'title', 'method', 'href']
+          },
+
+          # Article Schema
+          Article: {
+            type: :object,
+            properties: {
+              id: { type: :integer, example: 1 },
+              title: { type: :string, example: 'Introduction to Rails' },
+              content: { type: :string, example: 'This is a comprehensive guide to Ruby on Rails...' },
+              status: { 
+                type: :string, 
+                enum: ['draft', 'review', 'rejected', 'published', 'privated', 'archived'],
+                example: 'published',
+                description: 'Current FSM state of the article'
+              },
+              user_id: { type: :integer, example: 1, description: 'ID of the author' },
+              created_at: { type: :string, format: 'date-time', example: '2024-10-09T12:00:00Z' },
+              updated_at: { type: :string, format: 'date-time', example: '2024-10-09T14:30:00Z' },
+              links: {
+                type: :array,
+                description: 'HATEOAS hypermedia controls - available actions based on current state',
+                items: { '$ref' => '#/components/schemas/HypermediaLink' }
+              }
+            },
+            required: ['id', 'title', 'content', 'status', 'links']
+          },
+
+          # Articles Collection Schema
+          ArticlesCollection: {
+            type: :object,
+            properties: {
+              articles: {
+                type: :array,
+                items: { '$ref' => '#/components/schemas/Article' }
+              },
+              links: {
+                type: :array,
+                description: 'Global navigation links',
+                items: { '$ref' => '#/components/schemas/HypermediaLink' }
+              }
+            },
+            required: ['articles', 'links']
+          },
+
+          # Comment Schema
+          Comment: {
+            type: :object,
+            properties: {
+              id: { type: :integer, example: 1 },
+              text: { type: :string, example: 'Great article! Very informative.' },
+              status: { 
+                type: :string, 
+                enum: ['pending', 'approved', 'deleted'],
+                example: 'approved',
+                description: 'Current FSM state of the comment'
+              },
+              article_id: { type: :integer, example: 5, description: 'ID of the parent article' },
+              user_id: { type: :integer, example: 3, description: 'ID of the comment author' },
+              created_at: { type: :string, format: 'date-time', example: '2024-10-09T13:45:00Z' },
+              updated_at: { type: :string, format: 'date-time', example: '2024-10-09T13:45:00Z' },
+              links: {
+                type: :array,
+                description: 'HATEOAS hypermedia controls - available actions based on current state',
+                items: { '$ref' => '#/components/schemas/HypermediaLink' }
+              }
+            },
+            required: ['id', 'text', 'status', 'links']
+          },
+
+          # State Transition Schema
+          StateTransition: {
+            type: :object,
+            properties: {
+              id: { type: :integer, example: 1, description: 'Transition log entry ID' },
+              transitionable_type: { 
+                type: :string, 
+                enum: ['Article', 'Comment'],
+                example: 'Article',
+                description: 'Type of resource that transitioned'
+              },
+              transitionable_id: { 
+                type: :integer, 
+                example: 5,
+                description: 'ID of the resource that transitioned'
+              },
+              from_state: { 
+                type: :string, 
+                example: 'draft',
+                description: 'State before transition'
+              },
+              to_state: { 
+                type: :string, 
+                example: 'review',
+                description: 'State after transition'
+              },
+              event: { 
+                type: :string, 
+                example: 'submit',
+                description: 'FSM event that triggered the transition'
+              },
+              user_id: { 
+                type: :integer, 
+                example: 1,
+                description: 'ID of user who triggered the transition'
+              },
+              created_at: { type: :string, format: 'date-time', example: '2024-10-09T14:23:45Z' },
+              updated_at: { type: :string, format: 'date-time', example: '2024-10-09T14:23:45Z' }
+            },
+            required: ['id', 'transitionable_type', 'transitionable_id', 'from_state', 'to_state', 'event', 'user_id']
+          },
+
+          # Transition Success Response
+          TransitionSuccess: {
+            type: :object,
+            properties: {
+              success: { type: :boolean, example: true },
+              article: { '$ref' => '#/components/schemas/Article' }
+            },
+            required: ['success', 'article']
+          },
+
+          # Transition Error Response
+          TransitionError: {
+            type: :object,
+            properties: {
+              success: { type: :boolean, example: false },
+              errors: { 
+                type: :array, 
+                items: { type: :string },
+                example: ['Transition not allowed from current state']
+              }
+            },
+            required: ['success', 'errors']
+          },
+
+          # Generic Error Response
+          Error: {
+            type: :object,
+            properties: {
+              error: { 
+                type: :string, 
+                example: 'Unauthorized',
+                description: 'Error message'
+              },
+              status: { 
+                type: :integer, 
+                example: 401,
+                description: 'HTTP status code'
+              }
+            },
+            required: ['error']
+          }
+        }
+      }
     }
   }
 
-  # Specify the format of the output Swagger file when running 'rswag:specs:swaggerize'.
-  # The openapi_specs configuration option has the filename including format in
-  # the key, this may want to be changed to avoid putting yaml in json files.
-  # Defaults to json. Accepts ':json' and ':yaml'.
   config.openapi_format = :json
 end
