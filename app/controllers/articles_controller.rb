@@ -34,7 +34,13 @@ class ArticlesController < ApplicationController
    def show
     rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
     article_comments = CommentBlueprint.render_as_hash(@article.comments.visible, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'article', locals: { article: rendered_article, article_comments: article_comments })
+    
+    # HAL-style _embedded format
+    rendered_article[:_embedded] = {
+      comments: article_comments
+    }
+    
+    @html_content = render_to_string(partial: 'article', locals: { article: rendered_article })
 
     respond_to do |format|
       format.html { render :show }

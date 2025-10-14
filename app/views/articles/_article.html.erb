@@ -8,9 +8,14 @@
     <div class="mt-3">
       <%= render_links(article[:links]) %>
     </div>
-    <div class="mt-3">
-      <%= render partial: 'comments/list', locals: { comments: article_comments, title: 'Comments' } %>
-    </div>
+    
+    <%# HAL-style _embedded comments %>
+    <% if article[:_embedded] && article[:_embedded][:comments] %>
+      <div class="mt-3">
+        <%= render partial: 'comments/list', locals: { comments: article[:_embedded][:comments], title: 'Comments' } %>
+      </div>
+    <% end %>
+    
     <%= link_to 'Add Comment', new_article_comment_url(article[:id]), class: 'btn btn-primary' %>
   </div>
 </div>

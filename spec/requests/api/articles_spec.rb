@@ -88,15 +88,90 @@ RSpec.describe 'Articles API', type: :request do
   path '/articles/{id}' do
     parameter name: :id, in: :path, type: :integer, description: 'Article ID'
 
-    get 'Retrieves a specific article' do
+    get 'Retrieves a specific article (HAL-style with embedded comments)' do
       tags 'Articles'
       produces 'application/json'
-      description 'Returns a single article with its comments and available actions based on current state and user permissions.'
+      description 'Returns a single article with HAL-style _embedded comments. Demonstrates hypermedia format with nested resources following HAL conventions.'
 
       response '200', 'article found' do
         schema type: :object,
           properties: {
-            article: { type: :string, description: 'Rendered HTML content with hypermedia links' }
+            id: { type: :integer, example: 1 },
+            title: { type: :string, example: 'Introduction to FSM' },
+            content: { type: :string, example: 'This article explains...' },
+            status: { 
+              type: :string, 
+              enum: ['draft', 'review', 'rejected', 'published', 'privated', 'archived'],
+              example: 'published'
+            },
+            links: {
+              type: :array,
+              description: 'HATEOAS links for available actions',
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            },
+            _embedded: {
+              type: :object,
+              description: 'HAL-style embedded resources',
+              properties: {
+                comments: {
+                  type: :array,
+                  description: 'Embedded comments for this article',
+                  items: { '$ref' => '#/components/schemas/Comment' }
+                }
+              }
+            }
+          },
+          example: {
+            id: 1,
+            title: 'Getting Started with FSM',
+            content: 'Finite State Machines simplify complex workflows...',
+            status: 'published',
+            links: [
+              {
+                rel: 'self',
+                title: 'Show',
+                method: 'GET',
+                href: '/articles/1',
+                button_classes: 'btn btn-outline-primary btn-sm mx-1'
+              },
+              {
+                rel: 'transition:archive',
+                title: 'Archive',
+                method: 'POST',
+                href: '/articles/1/archive',
+                button_classes: 'btn btn-outline-secondary btn-sm mx-1'
+              }
+            ],
+            _embedded: {
+              comments: [
+                {
+                  id: 1,
+                  text: 'Great article!',
+                  status: 'approved',
+                  links: [
+                    {
+                      rel: 'self',
+                      title: 'Show',
+                      method: 'GET',
+                      href: '/comments/1'
+                    }
+                  ]
+                },
+                {
+                  id: 2,
+                  text: 'Very informative',
+                  status: 'approved',
+                  links: [
+                    {
+                      rel: 'self',
+                      title: 'Show',
+                      method: 'GET',
+                      href: '/comments/2'
+                    }
+                  ]
+                }
+              ]
+            }
           }
         run_test!
       end
