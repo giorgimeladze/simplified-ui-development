@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController  
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article, only: [:show, :submit, :reject, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
+  before_action :set_article, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
 
   def index
     articles = Article.visible
@@ -93,8 +93,24 @@ class ArticlesController < ApplicationController
     transition_article(:submit)
   end
 
+  def reject_feedback
+    authorize @article, :reject?
+    respond_to do |format|
+      format.html { render :reject_feedback }
+      format.json { render json: { form: render_to_string(partial: 'reject_feedback_dialog', locals: { article: @article }) } }
+    end
+  end
+
   def reject
-    transition_article(:reject)
+    if params[:rejection_feedback].present?
+      @article.update(rejection_feedback: params[:rejection_feedback])
+      transition_article(:reject)
+    else
+      respond_to do |format|
+        format.html { redirect_to article_path(@article), alert: 'Rejection feedback is required.' }
+        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def approve_private
@@ -120,6 +136,10 @@ class ArticlesController < ApplicationController
   def make_invisible
     transition_article(:make_invisible)
   end
+
+  # def trigger_action
+  #   EventSource.send(Article, params[:action])
+  # end
 
   private
 

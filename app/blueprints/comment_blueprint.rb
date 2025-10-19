@@ -1,7 +1,7 @@
 class CommentBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :text, :status
+  fields :text, :status, :rejection_feedback
 
   view :show do
     field :links do |comment, _options|

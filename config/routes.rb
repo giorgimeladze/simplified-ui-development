@@ -14,6 +14,7 @@ Rails.application.routes.draw do
     end
     
     member do
+      get :reject_feedback
       post :submit, :reject, :approve_private, :resubmit
       post :archive, :publish, :make_visible, :make_invisible
     end
@@ -27,7 +28,8 @@ Rails.application.routes.draw do
     end
     
     member do
-      post :approve, :delete, :restore
+      get :reject_feedback
+      post :approve, :reject, :delete, :restore
     end
   end
 

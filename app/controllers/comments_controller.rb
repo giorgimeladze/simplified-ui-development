@@ -1,7 +1,7 @@
 class CommentsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article, only: [:new, :create]
-  before_action :set_comment, only: [:show, :destroy, :approve, :delete, :restore]
+  before_action :set_comment, only: [:show, :destroy, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comments
     comments = Comment.pending
@@ -65,6 +65,26 @@ class CommentsController < ApplicationController
   # FSM Transition Actions
   def approve
     transition_comment(:approve)
+  end
+
+  def reject_feedback
+    authorize @comment, :reject?
+    respond_to do |format|
+      format.html { render :reject_feedback }
+      format.json { render json: { form: render_to_string(partial: 'reject_feedback_dialog', locals: { comment: @comment }) } }
+    end
+  end
+
+  def reject    
+    if params[:rejection_feedback].present?
+      @comment.update(rejection_feedback: params[:rejection_feedback])
+      transition_comment(:reject)
+    else
+      respond_to do |format|
+        format.html { redirect_to article_path(@comment.article), alert: 'Rejection feedback is required.' }
+        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def delete

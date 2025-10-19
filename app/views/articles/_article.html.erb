@@ -5,6 +5,15 @@
       <%= status_badge(article[:status], 'article') %>
     </h2>
     <p class="card-text"><%= article[:content] %></p>
+    
+    <%# Show rejection feedback if available %>
+    <% if article[:rejection_feedback].present? %>
+      <div class="alert alert-warning mt-3">
+        <h6><strong>Rejection Feedback:</strong></h6>
+        <p class="mb-0"><%= article[:rejection_feedback] %></p>
+      </div>
+    <% end %>
+    
     <div class="mt-3">
       <%= render_links(article[:links]) %>
     </div>
@@ -18,4 +27,6 @@
     
     <%= link_to 'Add Comment', new_article_comment_url(article[:id]), class: 'btn btn-primary' %>
   </div>
+
+  <%= article.to_s %>
 </div>

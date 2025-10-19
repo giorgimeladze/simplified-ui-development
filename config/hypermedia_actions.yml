@@ -52,8 +52,8 @@ Article:
   reject:
     rel: 'transition:reject'
     title: 'Reject'
-    method: 'POST'
-    link: '/articles/#ID/reject'
+    method: 'GET'
+    link: '/articles/#ID/reject_feedback'
     button_classes: 'btn btn-outline-danger btn-sm mx-1'
   
   approve_private:
@@ -152,11 +152,18 @@ Comment:
     link: '/comments/#ID/approve'
     button_classes: 'btn btn-outline-success btn-sm mx-1'
   
-  soft_delete:
-    rel: 'transition:soft_delete'
+  reject:
+    rel: 'transition:reject'
+    title: 'Reject'
+    method: 'GET'
+    link: '/comments/#ID/reject_feedback'
+    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+  
+  delete:
+    rel: 'transition:delete'
     title: 'Delete Comment'
     method: 'POST'
-    link: '/comments/#ID/soft_delete'
+    link: '/comments/#ID/delete'
     button_classes: 'btn btn-outline-danger btn-sm mx-1'
     confirm: 'Delete this comment?'
   

@@ -6,6 +6,7 @@ class Article < ApplicationRecord
   belongs_to :user
   validates :user, presence: true
   validates :title, :content, presence: true
+  validates :rejection_feedback, length: { maximum: 1000 }, allow_blank: true
   has_many :comments, dependent: :destroy
 
   aasm column: 'status' do

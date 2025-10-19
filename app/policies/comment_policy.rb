@@ -23,7 +23,11 @@ class CommentPolicy < ApplicationPolicy
     user.present? && user.admin?
   end
 
-  def soft_delete?
+  def reject?
+    user.present? && user.admin?
+  end
+
+  def delete?
     user.present? && (record.user_id == user.id || user.admin? || user.editor?)
   end
 
