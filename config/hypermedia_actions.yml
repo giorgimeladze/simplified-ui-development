@@ -51,10 +51,10 @@ Article:
   
   reject:
     rel: 'transition:reject'
-    title: 'Reject'
-    method: 'GET'
-    link: '/articles/#ID/reject_feedback'
-    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+    title: 'Submit Rejection'
+    method: 'POST'
+    link: '/articles/#ID/reject'
+    button_classes: 'btn btn-danger btn-sm mx-1'
   
   approve_private:
     rel: 'transition:approve_private'
@@ -154,10 +154,10 @@ Comment:
   
   reject:
     rel: 'transition:reject'
-    title: 'Reject'
-    method: 'GET'
-    link: '/comments/#ID/reject_feedback'
-    button_classes: 'btn btn-outline-danger btn-sm mx-1'
+    title: 'Submit Rejection'
+    method: 'POST'
+    link: '/comments/#ID/reject'
+    button_classes: 'btn btn-danger btn-sm mx-1'
   
   delete:
     rel: 'transition:delete'
@@ -195,13 +195,15 @@ Navigation:
     method: 'GET'
     link: '/articles/articles_for_review'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
+    admin_only: true
   
   deleted_articles:
     rel: 'deleted-articles'
     title: 'Deleted Articles'
     method: 'GET'
     link: '/articles/deleted_articles'
-    button_classes: 'btn btn-outline-primary btn-sm mx-1'  
+    button_classes: 'btn btn-outline-primary btn-sm mx-1'
+    admin_only: true
 
   pending_comments:
     rel: 'pending-comments'
@@ -209,6 +211,7 @@ Navigation:
     method: 'GET'
     link: '/comments/pending_comments'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
+    admin_only: true
 
   state_transitions:
     rel: 'state-transitions'
@@ -216,6 +219,7 @@ Navigation:
     method: 'GET'
     link: '/state_transitions'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
+    admin_only: true
   
   sign_in:
     rel: 'sign-in'

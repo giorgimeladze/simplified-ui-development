@@ -1,7 +1,13 @@
 class ArticleBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :title, :content, :status, :rejection_feedback
+  fields :title, :content, :status, :user_id
+
+  field :rejection_feedback,
+        if: ->(_field_name, article, options) do
+          current_user = options[:context][:current_user]
+          current_user&.admin? || current_user&.id == article.user_id
+        end
 
   view :show do
     field :links do |article, _options|

@@ -69,19 +69,20 @@ class CommentsController < ApplicationController
 
   def reject_feedback
     authorize @comment, :reject?
+    @html_content = render_to_string(partial: 'reject_feedback_form')
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { form: render_to_string(partial: 'reject_feedback_dialog', locals: { comment: @comment }) } }
+      format.json { render json: { form: @html_content } }
     end
   end
 
-  def reject    
+  def reject
     if params[:rejection_feedback].present?
       @comment.update(rejection_feedback: params[:rejection_feedback])
       transition_comment(:reject)
     else
       respond_to do |format|
-        format.html { redirect_to article_path(@comment.article), alert: 'Rejection feedback is required.' }
+        format.html { redirect_to reject_feedback_comment_path(@comment), alert: 'Rejection feedback is required.' }
         format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
       end
     end

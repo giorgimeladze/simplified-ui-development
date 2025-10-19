@@ -5,8 +5,8 @@
       <%= status_badge(comment[:status], 'comment') %>
     </div>
     
-    <%# Show rejection feedback if available %>
-    <% if comment[:rejection_feedback].present? %>
+    <%# Show rejection feedback if available and user is admin or comment author %>
+    <% if comment[:rejection_feedback].present?%>
       <div class="alert alert-warning mt-3">
         <h6><strong>Rejection Feedback:</strong></h6>
         <p class="mb-0"><%= comment[:rejection_feedback] %></p>

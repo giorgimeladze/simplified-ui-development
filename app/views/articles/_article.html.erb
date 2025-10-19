@@ -6,8 +6,8 @@
     </h2>
     <p class="card-text"><%= article[:content] %></p>
     
-    <%# Show rejection feedback if available %>
-    <% if article[:rejection_feedback].present? %>
+    <%# Show rejection feedback if available and user is admin or article editor %>
+    <% if article[:rejection_feedback].present?%>
       <div class="alert alert-warning mt-3">
         <h6><strong>Rejection Feedback:</strong></h6>
         <p class="mb-0"><%= article[:rejection_feedback] %></p>

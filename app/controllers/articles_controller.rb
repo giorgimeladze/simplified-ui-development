@@ -95,9 +95,10 @@ class ArticlesController < ApplicationController
 
   def reject_feedback
     authorize @article, :reject?
+    @html_content = render_to_string(partial: 'reject_feedback_form')
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { form: render_to_string(partial: 'reject_feedback_dialog', locals: { article: @article }) } }
+      format.json { render json: { form: @html_content } }
     end
   end
 
@@ -107,7 +108,7 @@ class ArticlesController < ApplicationController
       transition_article(:reject)
     else
       respond_to do |format|
-        format.html { redirect_to article_path(@article), alert: 'Rejection feedback is required.' }
+        format.html { redirect_to reject_feedback_article(@article), alert: 'Rejection feedback is required.' }
         format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
       end
     end

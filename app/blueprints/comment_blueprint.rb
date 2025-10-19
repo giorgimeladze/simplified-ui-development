@@ -1,7 +1,13 @@
 class CommentBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :text, :status, :rejection_feedback
+  fields :text, :status, :user_id
+
+  field :rejection_feedback,
+        if: ->(_field_name, comment, options) do
+          current_user = options[:context][:current_user]
+          current_user&.admin? || current_user&.id == comment.user_id
+        end
 
   view :show do
     field :links do |comment, _options|

@@ -93,6 +93,12 @@ RSpec.configure do |config|
                 description: 'Current FSM state of the article'
               },
               user_id: { type: :integer, example: 1, description: 'ID of the author' },
+              rejection_feedback: { 
+                type: :string, 
+                example: 'Please improve the introduction and add more examples.',
+                description: 'Feedback provided when article was rejected (only visible to admin and author)',
+                nullable: true
+              },
               created_at: { type: :string, format: 'date-time', example: '2024-10-09T12:00:00Z' },
               updated_at: { type: :string, format: 'date-time', example: '2024-10-09T14:30:00Z' },
               links: {
@@ -129,12 +135,18 @@ RSpec.configure do |config|
               text: { type: :string, example: 'Great article! Very informative.' },
               status: { 
                 type: :string, 
-                enum: ['pending', 'approved', 'deleted'],
+                enum: ['pending', 'approved', 'rejected', 'deleted'],
                 example: 'approved',
                 description: 'Current FSM state of the comment'
               },
               article_id: { type: :integer, example: 5, description: 'ID of the parent article' },
               user_id: { type: :integer, example: 3, description: 'ID of the comment author' },
+              rejection_feedback: { 
+                type: :string, 
+                example: 'Please be more constructive in your feedback.',
+                description: 'Feedback provided when comment was rejected (only visible to admin and author)',
+                nullable: true
+              },
               created_at: { type: :string, format: 'date-time', example: '2024-10-09T13:45:00Z' },
               updated_at: { type: :string, format: 'date-time', example: '2024-10-09T13:45:00Z' },
               links: {
@@ -210,6 +222,21 @@ RSpec.configure do |config|
               }
             },
             required: ['success', 'errors']
+          },
+
+          # Reject Action Request
+          RejectRequest: {
+            type: :object,
+            properties: {
+              rejection_feedback: {
+                type: :string,
+                example: 'Please improve the introduction and add more examples.',
+                description: 'Detailed feedback explaining why the content is being rejected',
+                minLength: 1,
+                maxLength: 1000
+              }
+            },
+            required: ['rejection_feedback']
           },
 
           # Generic Error Response

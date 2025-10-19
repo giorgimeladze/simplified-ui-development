@@ -38,11 +38,15 @@ module HypermediaConfig
   
   def navigation_links(current_user)
     is_signed_in = current_user.present?
+    is_admin = current_user&.admin?
     
     navigation_actions.map do |action_name, config|
       next if config[:rel] == 'sign-in' && is_signed_in
       next if config[:rel] == 'sign-out' && !is_signed_in
       next if config[:rel] == 'sign-up' && is_signed_in
+      
+      # Filter admin-only navigation links
+      next if config[:admin_only] && !is_admin
       
       {
         rel: config[:rel],
