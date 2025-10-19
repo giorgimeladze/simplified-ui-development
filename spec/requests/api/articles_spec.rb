@@ -183,29 +183,6 @@ RSpec.describe 'Articles API', type: :request do
     end
   end
 
-  # GET /articles/new
-  path '/articles/new' do
-    get 'Returns form for creating a new article' do
-      tags 'Articles'
-      produces 'application/json'
-      description 'Returns an HTML form for creating a new article.'
-      security [bearer_auth: []]
-
-      response '200', 'form retrieved' do
-        schema type: :object,
-          properties: {
-            form: { type: :string, description: 'Rendered HTML form' }
-          }
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-    end
-  end
-
   # POST /articles
   path '/articles' do
     post 'Creates a new article' do
@@ -352,8 +329,21 @@ RSpec.describe 'Articles API', type: :request do
     post 'Reject article (review → rejected)' do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
-      description 'Transitions article from "review" to "rejected" state. Requires editor or admin role.'
+      consumes 'application/json'
+      description 'Transitions article from "review" to "rejected" state with feedback. Requires admin role.'
       security [bearer_auth: []]
+
+      parameter name: :rejection_feedback, in: :body, schema: {
+        type: :object,
+        properties: {
+          rejection_feedback: {
+            type: :string,
+            example: 'Please improve the introduction and add more examples.',
+            description: 'Detailed feedback explaining why the article is being rejected'
+          }
+        },
+        required: ['rejection_feedback']
+      }
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -367,6 +357,11 @@ RSpec.describe 'Articles API', type: :request do
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '422', 'validation error' do
+        schema '$ref' => '#/components/schemas/TransitionError'
         run_test!
       end
     end

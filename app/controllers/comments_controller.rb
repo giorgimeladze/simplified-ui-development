@@ -7,7 +7,7 @@ class CommentsController < ApplicationController
     comments = Comment.pending
   
     rendered_comments = CommentBlueprint.render_as_hash(comments, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'list', locals: { comments: rendered_comments, title: 'Pending Comments' })
+    @html_content = render_to_string(partial: 'list', locals: { comments: rendered_comments, title: 'Pending Comments' }, formats: [:html])
 
     respond_to do |format|
       format.html { render :index }
@@ -17,7 +17,7 @@ class CommentsController < ApplicationController
 
   def show
     rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'comment', locals: { comment: rendered_comment })
+    @html_content = render_to_string(partial: 'comment', locals: { comment: rendered_comment }, formats: [:html])
 
     respond_to do |format|
       format.html { render :show }
@@ -28,7 +28,7 @@ class CommentsController < ApplicationController
   def new
     @comment = @article.comments.build
     authorize @comment
-    @html_content = render_to_string(partial: 'form', locals: { comment: @comment })
+    @html_content = render_to_string(partial: 'form', locals: { comment: @comment }, formats: [:html])
     respond_to do |format|
       format.html { render :new }
       format.json { render json: {form: @html_content } }
@@ -69,7 +69,7 @@ class CommentsController < ApplicationController
 
   def reject_feedback
     authorize @comment, :reject?
-    @html_content = render_to_string(partial: 'reject_feedback_form')
+    @html_content = render_to_string(partial: 'reject_feedback_form', formats: [:html])
     respond_to do |format|
       format.html { render :reject_feedback }
       format.json { render json: { form: @html_content } }

@@ -59,36 +59,6 @@ RSpec.describe 'Comments API', type: :request do
     end
   end
 
-  # GET /articles/:article_id/comments/new
-  path '/articles/{article_id}/comments/new' do
-    parameter name: :article_id, in: :path, type: :integer, description: 'Article ID'
-
-    get 'Returns form for creating a new comment' do
-      tags 'Comments'
-      produces 'application/json'
-      description 'Returns an HTML form for creating a new comment on the specified article.'
-      security [bearer_auth: []]
-
-      response '200', 'form retrieved' do
-        schema type: :object,
-          properties: {
-            form: { type: :string, description: 'Rendered HTML form' }
-          }
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '404', 'article not found' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-    end
-  end
-
   # POST /articles/:article_id/comments
   path '/articles/{article_id}/comments' do
     parameter name: :article_id, in: :path, type: :integer, description: 'Article ID'
@@ -205,6 +175,59 @@ RSpec.describe 'Comments API', type: :request do
       end
 
       response '422', 'invalid state transition' do
+        schema type: :object,
+          properties: {
+            success: { type: :boolean, example: false },
+            errors: { type: :array, items: { type: :string } }
+          }
+        run_test!
+      end
+    end
+  end
+
+  # POST /comments/:id/reject
+  path '/comments/{id}/reject' do
+    parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
+
+    post 'Reject comment (pending → rejected)' do
+      tags 'Comments - FSM Transitions'
+      produces 'application/json'
+      consumes 'application/json'
+      description 'Transitions comment from "pending" to "rejected" state with feedback. Requires admin role.'
+      security [bearer_auth: []]
+
+      parameter name: :rejection_feedback, in: :body, schema: {
+        type: :object,
+        properties: {
+          rejection_feedback: {
+            type: :string,
+            example: 'Please be more constructive in your feedback.',
+            description: 'Detailed feedback explaining why the comment is being rejected'
+          }
+        },
+        required: ['rejection_feedback']
+      }
+
+      response '200', 'transition successful' do
+        schema type: :object,
+          properties: {
+            success: { type: :boolean, example: true },
+            comment: { '$ref' => '#/components/schemas/Comment' }
+          }
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '403', 'forbidden' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '422', 'validation error' do
         schema type: :object,
           properties: {
             success: { type: :boolean, example: false },

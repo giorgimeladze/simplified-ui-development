@@ -437,50 +437,6 @@
         }
       }
     },
-    "/articles/new": {
-      "get": {
-        "summary": "Returns form for creating a new article",
-        "tags": [
-          "Articles"
-        ],
-        "description": "Returns an HTML form for creating a new article.",
-        "security": [
-          {
-            "bearer_auth": [
-
-            ]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "form retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "form": {
-                      "type": "string",
-                      "description": "Rendered HTML form"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/articles/{id}/submit": {
       "parameters": [
         {
@@ -636,13 +592,16 @@
         "tags": [
           "Articles - FSM Transitions"
         ],
-        "description": "Transitions article from \"review\" to \"rejected\" state. Requires editor or admin role.",
+        "description": "Transitions article from \"review\" to \"rejected\" state with feedback. Requires admin role.",
         "security": [
           {
             "bearer_auth": [
 
             ]
           }
+        ],
+        "parameters": [
+
         ],
         "responses": {
           "200": {
@@ -672,6 +631,35 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rejection_feedback": {
+                    "type": "string",
+                    "example": "Please improve the introduction and add more examples.",
+                    "description": "Detailed feedback explaining why the article is being rejected"
+                  }
+                },
+                "required": [
+                  "rejection_feedback"
+                ]
               }
             }
           }
@@ -1126,71 +1114,6 @@
         }
       }
     },
-    "/articles/{article_id}/comments/new": {
-      "parameters": [
-        {
-          "name": "article_id",
-          "in": "path",
-          "description": "Article ID",
-          "required": true,
-          "schema": {
-            "type": "integer"
-          }
-        }
-      ],
-      "get": {
-        "summary": "Returns form for creating a new comment",
-        "tags": [
-          "Comments"
-        ],
-        "description": "Returns an HTML form for creating a new comment on the specified article.",
-        "security": [
-          {
-            "bearer_auth": [
-
-            ]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "form retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "form": {
-                      "type": "string",
-                      "description": "Rendered HTML form"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "article not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/articles/{article_id}/comments": {
       "parameters": [
         {
@@ -1388,6 +1311,118 @@
                     }
                   }
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/reject": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "post": {
+        "summary": "Reject comment (pending → rejected)",
+        "tags": [
+          "Comments - FSM Transitions"
+        ],
+        "description": "Transitions comment from \"pending\" to \"rejected\" state with feedback. Requires admin role.",
+        "security": [
+          {
+            "bearer_auth": [
+
+            ]
+          }
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "transition successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rejection_feedback": {
+                    "type": "string",
+                    "example": "Please be more constructive in your feedback.",
+                    "description": "Detailed feedback explaining why the comment is being rejected"
+                  }
+                },
+                "required": [
+                  "rejection_feedback"
+                ]
               }
             }
           }
