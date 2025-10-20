@@ -10,7 +10,7 @@
     <div class="form-text">This feedback will be visible to the comment author and help them understand the rejection.</div>
   </div>
   <div class="d-flex justify-content-between">
-    <%= link_to "Cancel", article_path(@comment.article), class: "btn btn-secondary" %>
-    <%= form.submit "Reject Comment", class: "btn btn-danger" %>
+    <% title, button_classes = model_link("Comment", @comment, :reject, current_user) %>
+    <%= form.submit title, class: button_classes %>
   </div>
 <% end %>

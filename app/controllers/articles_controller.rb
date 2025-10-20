@@ -33,7 +33,7 @@ class ArticlesController < ApplicationController
    # GET /articles/:id
    def show
     rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
-    article_comments = CommentBlueprint.render_as_hash(@article.comments.visible, view: :index, context: { current_user: current_user })
+    article_comments = CommentBlueprint.render_as_hash(@article.visible_comments(current_user), view: :index, context: { current_user: current_user })
     
     # HAL-style _embedded format
     rendered_article[:_embedded] = {
@@ -108,7 +108,7 @@ class ArticlesController < ApplicationController
       transition_article(:reject)
     else
       respond_to do |format|
-        format.html { redirect_to reject_feedback_article(@article), alert: 'Rejection feedback is required.' }
+        format.html { redirect_to reject_feedback_article_path(@article), alert: 'Rejection feedback is required.' }
         format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
       end
     end

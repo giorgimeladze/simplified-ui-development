@@ -11,6 +11,7 @@
   </div>
   <div class="d-flex justify-content-between">
     <%= link_to "Cancel", article_path(@article), class: "btn btn-secondary" %>
-    <%= form.submit "Reject Article", class: "btn btn-danger" %>
+    <% title, button_classes = model_link("Article", @article, :reject, current_user) %>
+    <%= form.submit title, class: button_classes %>
   </div>
 <% end %>

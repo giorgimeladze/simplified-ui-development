@@ -35,6 +35,14 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
+  create_table "custom_templates", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.json "template_data", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_custom_templates_on_user_id"
+  end
+
   create_table "state_transitions", force: :cascade do |t|
     t.string "transitionable_type", null: false
     t.integer "transitionable_id", null: false
@@ -65,5 +73,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
   add_foreign_key "articles", "users"
   add_foreign_key "comments", "articles"
   add_foreign_key "comments", "users"
+  add_foreign_key "custom_templates", "users"
   add_foreign_key "state_transitions", "users"
 end

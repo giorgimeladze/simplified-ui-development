@@ -8,7 +8,7 @@ module HasHypermediaLinks
   
   def hypermedia_show_links(current_user)
     links = []
-    links << build_link(hypermedia_model_name, :index)
+    links << build_link(hypermedia_model_name, :index, current_user)
     
     add_fsm_transition_links(links, current_user)
     
@@ -19,15 +19,15 @@ module HasHypermediaLinks
     links = []
     model_policy = policy(current_user)
     
-    links << build_link(hypermedia_model_name, :show, id)
-    links << build_link(hypermedia_model_name, :destroy, id) if model_policy.destroy?
+    links << build_link(hypermedia_model_name, :show, current_user)
+    links << build_link(hypermedia_model_name, :destroy, current_user) if model_policy.destroy?
     
     add_fsm_transition_links(links, current_user)
     links.compact
   end
 
-  def hypermedia_new_links
-    link = build_link(hypermedia_model_name, :index)
+  def hypermedia_new_links(current_user)
+    link = build_link(hypermedia_model_name, :index, current_user)
     link[:title] = 'Back to Articles'
     [link]
   end
@@ -41,7 +41,7 @@ module HasHypermediaLinks
   def self.hypermedia_general_index(current_user)
     temp_instance = Object.new
     temp_instance.extend(HypermediaConfig)
-    [temp_instance.build_link('Article', :new)]
+    [temp_instance.build_link('Article', :new, current_user)]
   end
   
   private
@@ -59,7 +59,7 @@ module HasHypermediaLinks
       next unless model_policy.respond_to?(policy_method)
       next unless model_policy.public_send(policy_method)
       
-      links << build_link(hypermedia_model_name, event.name, id)
+      links << build_link(hypermedia_model_name, event.name, current_user)
     end
   end
   

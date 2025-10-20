@@ -2,5 +2,5 @@
 
 <%= raw @html_content %>
 <p>
-  <%= render_links(@article.hypermedia_new_links) %>
+  <%= render_links(@article.hypermedia_new_links(current_user)) %>
 </p>

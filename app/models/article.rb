@@ -48,4 +48,12 @@ class Article < ApplicationRecord
 
   scope :visible, -> { where(status: 'published') }
   scope :admin_visible, -> { where(status: ['published', 'privated', 'review']) }  
+
+  def visible_comments(current_user)
+    if current_user.admin?
+      comments.where(status: ['approved', 'rejected'])
+    else
+      comments.where(status: 'approved').or(comments.where(user: current_user, status: 'rejected'))
+    end
+  end
 end

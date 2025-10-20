@@ -7,6 +7,9 @@
         <span>
           <strong><%= comment[:text] %></strong>
         </span>
+        <% if comment[:status] == 'rejected' %>
+          <span class="text-danger">Rejected</span>
+        <% end %>
         <span>
           <%= render_links(comment[:links]) %>
         </span>

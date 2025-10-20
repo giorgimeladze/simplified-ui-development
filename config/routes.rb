@@ -34,4 +34,10 @@ Rails.application.routes.draw do
   end
 
   resources :state_transitions, only: [:index]
+  
+  resource :custom_template, only: [:show, :edit, :update] do
+    member do
+      post :reset
+    end
+  end
 end
