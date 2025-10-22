@@ -8,6 +8,8 @@ class User < ApplicationRecord
 
   has_many :articles, dependent: :destroy
   has_many :comments, dependent: :destroy
+  has_many :article2s, dependent: :destroy
+  has_many :comment2s, dependent: :destroy
   has_one :custom_template, dependent: :destroy
 
   after_create :create_custom_template

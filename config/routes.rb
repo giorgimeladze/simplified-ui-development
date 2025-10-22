@@ -40,4 +40,32 @@ Rails.application.routes.draw do
       post :reset
     end
   end
+
+  # Article2 and Comment2 routes (copies of Article and Comment routes)
+  resources :article2s do
+    collection do
+      get :my_article2s
+      get :article2s_for_review
+      get :deleted_article2s
+    end
+    
+    member do
+      get :reject_feedback
+      post :submit, :reject, :approve_private, :resubmit
+      post :archive, :publish, :make_visible, :make_invisible
+    end
+
+    resources :comment2s, only: [:new, :create]
+  end
+
+  resources :comment2s, only: [:show, :destroy] do
+    collection do
+      get :pending_comment2s
+    end
+    
+    member do
+      get :reject_feedback
+      post :approve, :reject, :delete, :restore
+    end
+  end
 end

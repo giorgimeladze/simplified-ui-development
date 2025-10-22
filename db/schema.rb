@@ -11,6 +11,18 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
+  create_table "article2s", force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.string "status", default: "draft"
+    t.integer "user_id", null: false
+    t.text "rejection_feedback"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_article2s_on_status"
+    t.index ["user_id"], name: "index_article2s_on_user_id"
+  end
+
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -20,6 +32,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.datetime "updated_at", null: false
     t.text "rejection_feedback"
     t.index ["user_id"], name: "index_articles_on_user_id"
+  end
+
+  create_table "comment2s", force: :cascade do |t|
+    t.integer "article2_id", null: false
+    t.integer "user_id", null: false
+    t.text "text", null: false
+    t.string "status", default: "pending", null: false
+    t.text "rejection_feedback"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article2_id"], name: "index_comment2s_on_article2_id"
+    t.index ["status"], name: "index_comment2s_on_status"
+    t.index ["user_id"], name: "index_comment2s_on_user_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -70,7 +95,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "article2s", "users"
   add_foreign_key "articles", "users"
+  add_foreign_key "comment2s", "article2s"
+  add_foreign_key "comment2s", "users"
   add_foreign_key "comments", "articles"
   add_foreign_key "comments", "users"
   add_foreign_key "custom_templates", "users"
