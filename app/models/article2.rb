@@ -1,5 +1,4 @@
 class Article2 < ApplicationRecord
-  include AASM
   include HasHypermediaLinks
   include HasStateTransitions
 
@@ -9,41 +8,97 @@ class Article2 < ApplicationRecord
   validates :rejection_feedback, length: { maximum: 1000 }, allow_blank: true
   has_many :comment2s, dependent: :destroy
 
-  aasm column: 'status' do
-    state :draft, initial: true
-    state :review, :privated, :published, :rejected, :archived
-
-    event :submit do
-      transitions from: :draft, to: :review
+  # Event sourcing methods
+  def events
+    @events ||= EventStore.get_events(id, 'Article2')
+  end
+  
+  def load_from_events
+    events.each do |event|
+      case event.event_type
+      when 'Article2Created'
+        self.title = event.event_data['title']
+        self.content = event.event_data['content']
+        self.user_id = event.event_data['user_id']
+        self.status = 'draft'
+      when 'Article2Submitted'
+        self.status = 'review'
+      when 'Article2Rejected'
+        self.status = 'rejected'
+        self.rejection_feedback = event.event_data['rejection_feedback']
+      when 'Article2ApprovedPrivate'
+        self.status = 'privated'
+      when 'Article2Published'
+        self.status = 'published'
+      when 'Article2Archived'
+        self.status = 'archived'
+      when 'Article2Updated'
+        self.title = event.event_data['title']
+        self.content = event.event_data['content']
+      end
     end
+  end
 
-    event :reject do
-      transitions from: :review, to: :rejected
-    end
+  # Status check methods
+  def draft?
+    status == 'draft'
+  end
 
-    event :approve_private do
-      transitions from: :review, to: :privated
-    end
+  def review?
+    status == 'review'
+  end
 
-    event :resubmit do
-      transitions from: :rejected, to: :review
-    end
+  def published?
+    status == 'published'
+  end
 
-    event :archive do
-      transitions from: [:rejected, :published, :privated], to: :archived
-    end
+  def privated?
+    status == 'privated'
+  end
 
-    event :publish do
-      transitions from: :review, to: :published
-    end
+  def rejected?
+    status == 'rejected'
+  end
 
-    event :make_visible do
-      transitions from: :privated, to: :published
-    end
+  def archived?
+    status == 'archived'
+  end
 
-    event :make_invisible do
-      transitions from: :published, to: :privated
-    end
+  # State transition validation methods
+  def can_submit?
+    draft?
+  end
+
+  def can_reject?
+    review?
+  end
+
+  def can_approve_private?
+    review?
+  end
+
+  def can_publish?
+    review?
+  end
+
+  def can_archive?
+    ['rejected', 'published', 'privated'].include?(status)
+  end
+
+  def can_resubmit?
+    rejected?
+  end
+
+  def can_make_visible?
+    privated?
+  end
+
+  def can_make_invisible?
+    published?
+  end
+
+  def can_update?
+    ['draft', 'rejected'].include?(status)
   end
 
   scope :visible, -> { where(status: 'published') }
