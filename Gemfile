@@ -35,6 +35,7 @@ gem 'pundit'
 gem 'aasm'
 gem 'blueprinter'
 gem 'faker'
+gem 'wisper'
 
 gem 'bootstrap', '~> 5.3.2'
 gem 'sassc-rails'
