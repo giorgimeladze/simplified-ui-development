@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_10_000007) do
   create_table "article2s", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -30,7 +30,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "rejection_feedback"
     t.index ["user_id"], name: "index_articles_on_user_id"
   end
 
@@ -54,7 +53,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.string "status", default: "pending", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.text "rejection_feedback"
     t.index ["article_id"], name: "index_comments_on_article_id"
     t.index ["status"], name: "index_comments_on_status"
     t.index ["user_id"], name: "index_comments_on_user_id"
@@ -66,6 +64,18 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_09_204943) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_custom_templates_on_user_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "aggregate_id", null: false
+    t.string "aggregate_type", null: false
+    t.string "event_type", null: false
+    t.json "event_data", null: false
+    t.integer "version", null: false
+    t.datetime "occurred_at", null: false
+    t.index ["aggregate_id", "aggregate_type"], name: "index_events_on_aggregate_id_and_aggregate_type"
+    t.index ["event_type"], name: "index_events_on_event_type"
+    t.index ["occurred_at"], name: "index_events_on_occurred_at"
   end
 
   create_table "state_transitions", force: :cascade do |t|

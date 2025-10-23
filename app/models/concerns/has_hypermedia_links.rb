@@ -52,9 +52,7 @@ module HasHypermediaLinks
     transition_actions = self.class.aasm.events
     model_policy = policy(current_user)
     
-    transition_actions.each do |event|
-      next unless aasm.may_fire_event?(event.name)
-      
+    possible_status_events.each do |event|
       policy_method = "#{event.name}?"
       next unless model_policy.respond_to?(policy_method)
       next unless model_policy.public_send(policy_method)

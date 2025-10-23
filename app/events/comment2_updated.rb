@@ -1,8 +1,8 @@
 class Comment2Updated < BaseEvent
   attr_reader :comment2_id, :text, :user_id
   
-  def initialize(comment2_id, text, user_id, metadata = {})
-    super(metadata)
+  def initialize(comment2_id, text, user_id)
+    super()
     @comment2_id = comment2_id
     @text = text
     @user_id = user_id

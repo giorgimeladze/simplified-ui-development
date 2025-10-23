@@ -1,8 +1,8 @@
 class Article2Created < BaseEvent
   attr_reader :article2_id, :title, :content, :user_id
   
-  def initialize(article2_id, title, content, user_id, metadata = {})
-    super(metadata)
+  def initialize(article2_id, title, content, user_id)
+    super()
     @article2_id = article2_id
     @title = title
     @content = content

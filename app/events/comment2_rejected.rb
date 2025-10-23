@@ -1,8 +1,8 @@
 class Comment2Rejected < BaseEvent
   attr_reader :comment2_id, :rejection_feedback, :user_id
   
-  def initialize(comment2_id, rejection_feedback, user_id, metadata = {})
-    super(metadata)
+  def initialize(comment2_id, rejection_feedback, user_id)
+    super()
     @comment2_id = comment2_id
     @rejection_feedback = rejection_feedback
     @user_id = user_id

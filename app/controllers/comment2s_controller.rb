@@ -1,7 +1,7 @@
 class Comment2sController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article2, only: [:new, :create]
-  before_action :set_comment2, only: [:show, :destroy, :approve, :reject, :reject_feedback, :delete, :restore]
+  before_action :set_comment2, only: [:show, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comment2s
     comment2s = Comment2.pending
@@ -36,11 +36,16 @@ class Comment2sController < ApplicationController
   end
 
   def create
-    @comment2 = @article2.comment2s.build(comment2_params)
-    @comment2.user = current_user
-    authorize @comment2
-
-    if @comment2.save
+    authorize Comment2.new
+    
+    result = Comment2Commands.create_comment(
+      comment2_params[:text],
+      @article2.id,
+      current_user
+    )
+    
+    if result[:success]
+      @comment2 = result[:comment2]
       respond_to do |format|
         format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully created.' }
         format.json { render json: { success: true, comment: @comment2 }, status: :created }
@@ -48,23 +53,19 @@ class Comment2sController < ApplicationController
     else
       respond_to do |format|
         format.html { render 'comments/new', status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: @comment2.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end
 
-  def destroy
-    authorize @comment2
-    @comment2.destroy
-    respond_to do |format|
-      format.html { redirect_to article2_path(@comment2.article2), notice: 'Comment deleted.' }
-      format.json { head :no_content }
-    end
-  end
-
-  # FSM Transition Actions
+  # Event Sourcing Actions
   def approve
-    transition_comment2(:approve)
+    result = Comment2Commands.approve_comment(
+      @comment2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Comment approved.')
   end
 
   def reject_feedback
@@ -77,23 +78,31 @@ class Comment2sController < ApplicationController
   end
 
   def reject
-    if params[:rejection_feedback].present?
-      @comment2.update(rejection_feedback: params[:rejection_feedback])
-      transition_comment2(:reject)
-    else
-      respond_to do |format|
-        format.html { redirect_to reject_feedback_comment2_path(@comment2), alert: 'Rejection feedback is required.' }
-        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
-      end
-    end
+    result = Comment2Commands.reject_comment(
+      @comment2.id,
+      params[:rejection_feedback],
+      current_user
+    )
+    
+    handle_command_result(result, 'Comment rejected.')
   end
 
   def delete
-    transition_comment2(:delete)
+    result = Comment2Commands.delete_comment(
+      @comment2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Comment deleted.')
   end
 
   def restore
-    transition_comment2(:restore)
+    result = Comment2Commands.restore_comment(
+      @comment2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Comment restored.')
   end
 
   private
@@ -110,15 +119,9 @@ class Comment2sController < ApplicationController
     params.require(:comment2).permit(:text)
   end
 
-  def transition_comment2(event)
-    # Event-level authorization
-    policy = Comment2Policy.new(current_user, @comment2)
-    unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
-      raise Pundit::NotAuthorizedError
-    end
-
-    if @comment2.aasm.may_fire_event?(event)
-      @comment2.aasm.fire!(event)
+  def handle_command_result(result, success_message)
+    if result[:success]
+      @comment2 = result[:comment2]
       respond_to do |format|
         format.html { redirect_to article2_path(@comment2.article2), notice: 'Transition applied.' }
         format.json do
@@ -128,8 +131,8 @@ class Comment2sController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to article2_path(@comment2.article2), alert: 'Transition not allowed.' }
-        format.json { render json: { success: false, errors: @comment2.errors.full_messages }, status: :unprocessable_entity }
+        format.html { redirect_to article2_path(@comment2.article2), alert: result[:errors] }
+        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end

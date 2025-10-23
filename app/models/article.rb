@@ -56,4 +56,8 @@ class Article < ApplicationRecord
       comments.where(status: 'approved').or(comments.where(user: current_user, status: 'rejected'))
     end
   end
+
+  def possible_status_events
+    aasm.events.map(&:to_s)
+  end
 end

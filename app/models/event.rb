@@ -8,38 +8,14 @@ class Event < ApplicationRecord
   scope :ordered, -> { order(:version) }
   scope :since, ->(time) { where('occurred_at >= ?', time) }
   
-  def self.create_event!(aggregate_id, aggregate_type, event_type, event_data, version, metadata = {})
+  def self.create_event!(aggregate_id, aggregate_type, event_type, event_data, version)
     create!(
       aggregate_id: aggregate_id,
       aggregate_type: aggregate_type,
       event_type: event_type,
       event_data: event_data,
       version: version,
-      occurred_at: Time.current,
-      correlation_id: metadata[:correlation_id],
-      causation_id: metadata[:causation_id]
+      occurred_at: Time.current
     )
-  end
-  
-  def aggregate
-    @aggregate ||= aggregate_type.constantize.find(aggregate_id)
-  rescue ActiveRecord::RecordNotFound
-    nil
-  end
-  
-  def correlation_id
-    super || metadata['correlation_id']
-  end
-  
-  def causation_id
-    super || metadata['causation_id']
-  end
-  
-  def metadata
-    @metadata ||= event_data['metadata'] || {}
-  end
-  
-  def event_data_without_metadata
-    event_data.except('metadata')
   end
 end

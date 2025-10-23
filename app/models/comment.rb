@@ -38,4 +38,8 @@ class Comment < ApplicationRecord
   scope :visible, -> { where(status: 'approved') }
   scope :awaiting_moderation, -> { where(status: 'pending') }
   scope :not_deleted, -> { where.not(status: 'deleted') }
+
+  def possible_status_events
+    aasm.events.map(&:to_s)
+  end
 end

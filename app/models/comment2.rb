@@ -9,6 +9,11 @@ class Comment2 < ApplicationRecord
   validates :user, :article2, presence: true
   validates :rejection_feedback, length: { maximum: 1000 }, allow_blank: true
 
+  # Scopes
+  scope :visible, -> { where(status: 'approved') }
+  scope :awaiting_moderation, -> { where(status: 'pending') }
+  scope :not_deleted, -> { where.not(status: 'deleted') }
+
   # Event sourcing methods
   def events
     @events ||= EventStore.get_events(id, 'Comment2')
@@ -37,46 +42,12 @@ class Comment2 < ApplicationRecord
     end
   end
 
-  # Status check methods
-  def pending?
-    status == 'pending'
+  def possible_status_events
+    events = []
+    events << 'approve' if status == 'pending'
+    events << 'reject' if status == 'pending'
+    events << 'delete' if ['pending', 'approved', 'rejected'].include?(status)
+    events << 'restore' if status == 'deleted'
+    events
   end
-
-  def approved?
-    status == 'approved'
-  end
-
-  def rejected?
-    status == 'rejected'
-  end
-
-  def deleted?
-    status == 'deleted'
-  end
-
-  # State transition validation methods
-  def can_approve?
-    pending?
-  end
-
-  def can_reject?
-    pending?
-  end
-
-  def can_delete?
-    ['pending', 'approved', 'rejected'].include?(status)
-  end
-
-  def can_restore?
-    deleted?
-  end
-
-  def can_update?
-    ['pending', 'approved', 'rejected'].include?(status)
-  end
-
-  # Scopes
-  scope :visible, -> { where(status: 'approved') }
-  scope :awaiting_moderation, -> { where(status: 'pending') }
-  scope :not_deleted, -> { where.not(status: 'deleted') }
 end

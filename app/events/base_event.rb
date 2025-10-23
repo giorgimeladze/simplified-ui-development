@@ -1,22 +1,19 @@
 class BaseEvent
-  attr_reader :occurred_at, :metadata
+  attr_reader :occurred_at
   
-  def initialize(metadata = {})
+  def initialize()
     @occurred_at = Time.current
-    @metadata = metadata
   end
   
   def to_h
     {
-      occurred_at: @occurred_at,
-      metadata: @metadata
+      occurred_at: @occurred_at
     }.merge(event_specific_data)
   end
   
   private
   
   def event_specific_data
-    # Override in subclasses
     {}
   end
 end

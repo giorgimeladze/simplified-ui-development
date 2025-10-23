@@ -1,6 +1,5 @@
 class Article2 < ApplicationRecord
   include HasHypermediaLinks
-  include HasStateTransitions
 
   belongs_to :user
   validates :user, presence: true
@@ -8,7 +7,9 @@ class Article2 < ApplicationRecord
   validates :rejection_feedback, length: { maximum: 1000 }, allow_blank: true
   has_many :comment2s, dependent: :destroy
 
-  # Event sourcing methods
+  scope :visible, -> { where(status: 'published') }
+  scope :admin_visible, -> { where(status: ['published', 'privated', 'review']) }  
+
   def events
     @events ||= EventStore.get_events(id, 'Article2')
   end
@@ -39,70 +40,18 @@ class Article2 < ApplicationRecord
     end
   end
 
-  # Status check methods
-  def draft?
-    status == 'draft'
+  def possible_status_events
+    events = []
+    events << 'submit' if status == 'draft'
+    events << 'reject' if status == 'review'
+    events << 'approve_private' if status == 'review'
+    events << 'publish' if status == 'review'
+    events << 'archive' if ['rejected', 'published', 'privated'].include?(status)
+    events << 'resubmit' if status == 'rejected'
+    events << 'make_visible' if status == 'privated'
+    events << 'make_invisible' if status == 'published'
+    events
   end
-
-  def review?
-    status == 'review'
-  end
-
-  def published?
-    status == 'published'
-  end
-
-  def privated?
-    status == 'privated'
-  end
-
-  def rejected?
-    status == 'rejected'
-  end
-
-  def archived?
-    status == 'archived'
-  end
-
-  # State transition validation methods
-  def can_submit?
-    draft?
-  end
-
-  def can_reject?
-    review?
-  end
-
-  def can_approve_private?
-    review?
-  end
-
-  def can_publish?
-    review?
-  end
-
-  def can_archive?
-    ['rejected', 'published', 'privated'].include?(status)
-  end
-
-  def can_resubmit?
-    rejected?
-  end
-
-  def can_make_visible?
-    privated?
-  end
-
-  def can_make_invisible?
-    published?
-  end
-
-  def can_update?
-    ['draft', 'rejected'].include?(status)
-  end
-
-  scope :visible, -> { where(status: 'published') }
-  scope :admin_visible, -> { where(status: ['published', 'privated', 'review']) }  
 
   def visible_comments(current_user)
     if current_user.admin?

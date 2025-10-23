@@ -1,6 +1,6 @@
 class Article2sController < ApplicationController  
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article2, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
+  before_action :set_article2, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
 
   def index
     article2s = Article2.visible
@@ -61,11 +61,16 @@ class Article2sController < ApplicationController
 
   # POST /article2s
   def create
-    @article2 = Article2.new(article2_params)
-    @article2.user = current_user
-    authorize @article2
-
-    if @article2.save
+    authorize Article2.new
+    
+    result = Article2Commands.create_article(
+      article2_params[:title],
+      article2_params[:content],
+      current_user
+    )
+    
+    if result[:success]
+      @article2 = result[:article2]
       respond_to do |format|
         format.html { redirect_to article2_path(@article2), notice: 'Article was successfully created.' }
         format.json { render json: { success: true, article: @article2 }, status: :created }
@@ -73,24 +78,19 @@ class Article2sController < ApplicationController
     else
       respond_to do |format|
         format.html { render 'articles/new', status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: @article2.errors.full_messages }, status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end
 
-  # DELETE /article2s/:id
-  def destroy
-    authorize @article2
-    @article2.destroy
-    respond_to do |format|
-      format.html { redirect_to article2s_path, notice: 'Article deleted.' }
-      format.json { head :no_content }
-    end
-  end
-
-  # FSM Event Actions
+  # Event Sourcing Actions
   def submit
-    transition_article2(:submit)
+    result = Article2Commands.submit_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article submitted for review.')
   end
 
   def reject_feedback
@@ -103,39 +103,67 @@ class Article2sController < ApplicationController
   end
 
   def reject
-    if params[:rejection_feedback].present?
-      @article2.update(rejection_feedback: params[:rejection_feedback])
-      transition_article2(:reject)
-    else
-      respond_to do |format|
-        format.html { redirect_to reject_feedback_article2_path(@article2), alert: 'Rejection feedback is required.' }
-        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
-      end
-    end
+    result = Article2Commands.reject_article(
+      @article2.id,
+      params[:rejection_feedback],
+      current_user
+    )
+    
+    handle_command_result(result, 'Article rejected.')
   end
 
   def approve_private
-    transition_article2(:approve_private)
+    result = Article2Commands.approve_private_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article approved as private.')
   end
 
   def resubmit
-    transition_article2(:resubmit)
+    result = Article2Commands.resubmit_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article resubmitted for review.')
   end
 
   def archive
-    transition_article2(:archive)
+    result = Article2Commands.archive_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article archived.')
   end
 
   def publish
-    transition_article2(:publish)
+    result = Article2Commands.publish_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article published.')
   end
 
   def make_visible
-    transition_article2(:make_visible)
+    result = Article2Commands.make_visible_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article made visible.')
   end
 
   def make_invisible
-    transition_article2(:make_invisible)
+    result = Article2Commands.make_invisible_article(
+      @article2.id,
+      current_user
+    )
+    
+    handle_command_result(result, 'Article made private.')
   end
 
   private
@@ -159,15 +187,9 @@ class Article2sController < ApplicationController
     end
   end
 
-  def transition_article2(event)
-    # Event-level authorization
-    policy = Article2Policy.new(current_user, @article2)
-    unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
-      raise Pundit::NotAuthorizedError
-    end
-
-    if @article2.aasm.may_fire_event?(event)
-      @article2.aasm.fire!(event)
+  def handle_command_result(result, success_message)
+    if result[:success]
+      @article2 = result[:article2]
       respond_to do |format|
         format.html { redirect_to article2_path(@article2), notice: 'Transition applied.' }
         format.json do
@@ -177,8 +199,8 @@ class Article2sController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { redirect_to article2_path(@article2), alert: 'Transition not allowed.' }
-        format.json { render json: { success: false, errors: @article2.errors.full_messages }, status: :unprocessable_entity }
+        format.html { redirect_to article2_path(@article2), alert: result[:errors] }
+        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end

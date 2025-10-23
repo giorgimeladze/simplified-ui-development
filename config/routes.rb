@@ -58,7 +58,7 @@ Rails.application.routes.draw do
     resources :comment2s, only: [:new, :create]
   end
 
-  resources :comment2s, only: [:show, :destroy] do
+  resources :comment2s, only: [:show] do
     collection do
       get :pending_comment2s
     end
