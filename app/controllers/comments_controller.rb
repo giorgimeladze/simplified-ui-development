@@ -1,7 +1,7 @@
 class CommentsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article, only: [:new, :create]
-  before_action :set_comment, only: [:show, :destroy, :approve, :reject, :reject_feedback, :delete, :restore]
+  before_action :set_comment, only: [:show, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comments
     comments = Comment.pending
@@ -50,15 +50,6 @@ class CommentsController < ApplicationController
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: { success: false, errors: @comment.errors.full_messages }, status: :unprocessable_entity }
       end
-    end
-  end
-
-  def destroy
-    authorize @comment
-    @comment.destroy
-    respond_to do |format|
-      format.html { redirect_to article_path(@comment.article), notice: 'Comment deleted.' }
-      format.json { head :no_content }
     end
   end
 

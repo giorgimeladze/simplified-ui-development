@@ -1,6 +1,6 @@
 class ArticlesController < ApplicationController  
   skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible, :destroy]
+  before_action :set_article, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
 
   def index
     articles = Article.visible
@@ -78,16 +78,6 @@ class ArticlesController < ApplicationController
     end
   end
 
-  # DELETE /articles/:id
-  def destroy
-    authorize @article
-    @article.destroy
-    respond_to do |format|
-      format.html { redirect_to articles_path, notice: 'Article deleted.' }
-      format.json { head :no_content }
-    end
-  end
-
   # FSM Event Actions
   def submit
     transition_article(:submit)
@@ -137,10 +127,6 @@ class ArticlesController < ApplicationController
   def make_invisible
     transition_article(:make_invisible)
   end
-
-  # def trigger_action
-  #   EventSource.send(Article, params[:action])
-  # end
 
   private
 

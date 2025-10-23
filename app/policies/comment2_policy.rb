@@ -15,10 +15,6 @@ class Comment2Policy < ApplicationPolicy
     user.present? && record.user_id == user.id && record.pending?
   end
 
-  def destroy?
-    user.present? && (record.user_id == user.id || user.admin?)
-  end
-
   def approve?
     user.present? && user.admin?
   end

@@ -52,10 +52,6 @@ class ArticlePolicy < ApplicationPolicy
     user.editor? || user.admin?
   end
 
-  def destroy?
-    user.admin? || user.editor?
-  end
-
   class Scope < Scope
     def resolve
       if user.admin?

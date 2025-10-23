@@ -32,10 +32,6 @@ class ApplicationPolicy
     update?
   end
 
-  def destroy?
-    false
-  end
-
   class Scope
     def initialize(user, scope)
       @user = user
