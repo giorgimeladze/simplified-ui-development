@@ -20,7 +20,6 @@ module HasHypermediaLinks
     model_policy = policy(current_user)
     
     links << build_link(hypermedia_model_name, :show, current_user)
-    links << build_link(hypermedia_model_name, :destroy, current_user) if model_policy.destroy?
     
     add_fsm_transition_links(links, current_user)
     links.compact

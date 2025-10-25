@@ -318,14 +318,6 @@ Article:
     link: '/articles/#ID'
     button_classes: 'btn btn-outline-primary btn-sm mx-1'
   
-  destroy:
-    rel: 'delete'
-    title: 'Delete'
-    method: 'DELETE'
-    link: '/articles/#ID'
-    button_classes: 'btn btn-outline-danger btn-sm mx-1'
-    confirm: 'Are you sure?'
-  
   # FSM State Transition Actions
   submit:
     rel: 'transition:submit'

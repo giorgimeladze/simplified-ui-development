@@ -22,7 +22,7 @@ Rails.application.routes.draw do
     resources :comments, only: [:new, :create]
   end
 
-  resources :comments, only: [:show, :destroy] do
+  resources :comments, only: [:show] do
     collection do
       get :pending_comments
     end

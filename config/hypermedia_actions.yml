@@ -116,6 +116,117 @@ Comment:
     rel: 'transition:restore'
     method: 'POST'
     link: '/comments/#ID/restore'
+
+Article2:
+  # Collection actions
+  index:
+    rel: 'collection'
+    method: 'GET'
+    link: '/article2s'
+  
+  new:
+    rel: 'new'
+    method: 'GET'
+    link: '/article2s/new'
+  
+  create:
+    rel: 'create'
+    method: 'POST'
+    link: '/article2s'
+  
+  # Resource actions
+  show:
+    rel: 'self'
+    method: 'GET'
+    link: '/article2s/#ID'
+  
+  # Event Sourcing State Transitions
+  submit:
+    rel: 'transition:submit'
+    method: 'POST'
+    link: '/article2s/#ID/submit'
+  
+  reject:
+    rel: 'transition:reject'
+    method: 'POST'
+    link: '/article2s/#ID/reject'
+  
+  approve_private:
+    rel: 'transition:approve_private'
+    method: 'POST'
+    link: '/article2s/#ID/approve_private'
+  
+  resubmit:
+    rel: 'transition:resubmit'
+    method: 'POST'
+    link: '/article2s/#ID/resubmit'
+  
+  archive:
+    rel: 'transition:archive'
+    method: 'POST'
+    link: '/article2s/#ID/archive'
+    confirm: 'Are you sure you want to archive this article?'
+  
+  publish:
+    rel: 'transition:publish'
+    method: 'POST'
+    link: '/article2s/#ID/publish'
+  
+  make_visible:
+    rel: 'transition:make_visible'
+    method: 'POST'
+    link: '/article2s/#ID/make_visible'
+  
+  make_invisible:
+    rel: 'transition:make_invisible'
+    method: 'POST'
+    link: '/article2s/#ID/make_invisible'
+
+Comment2:
+  # Collection actions
+  index:
+    rel: 'collection'
+    method: 'GET'
+    link: '/article2s/#ARTICLE2_ID/comment2s'
+  
+  new:
+    rel: 'new'
+    method: 'GET'
+    link: '/article2s/#ARTICLE2_ID/comment2s/new'
+  
+  create:
+    rel: 'create'
+    method: 'POST'
+    link: '/article2s/#ARTICLE2_ID/comment2s'
+  
+  # Resource actions
+  show:
+    rel: 'self'
+    method: 'GET'
+    link: '/comment2s/#ID'
+  
+  # Event Sourcing State Transitions
+  approve:
+    rel: 'transition:approve'
+    method: 'POST'
+    link: '/comment2s/#ID/approve'
+  
+  reject:
+    rel: 'transition:reject'
+    method: 'POST'
+    link: '/comment2s/#ID/reject'
+  
+  delete:
+    rel: 'transition:delete'
+    method: 'POST'
+    link: '/comment2s/#ID/delete'
+    confirm: 'Delete this comment?'
+  
+  restore:
+    rel: 'transition:restore'
+    method: 'POST'
+    link: '/comment2s/#ID/restore'
+
 # Navigation links
 Navigation:
   all_articles:
@@ -138,6 +249,35 @@ Navigation:
     rel: 'deleted-articles'
     method: 'GET'
     link: '/articles/deleted_articles'
+    admin_only: true
+
+  # Article2 Navigation Links
+  all_article2s:
+    rel: 'collection'
+    method: 'GET'
+    link: '/article2s'
+  
+  my_article2s:
+    rel: 'my-article2s'
+    method: 'GET'
+    link: '/article2s/my_article2s'
+  
+  review_article2s:
+    rel: 'review-article2s'
+    method: 'GET'
+    link: '/article2s/article2s_for_review'
+    admin_only: true
+  
+  deleted_article2s:
+    rel: 'deleted-article2s'
+    method: 'GET'
+    link: '/article2s/deleted_article2s'
+    admin_only: true
+
+  pending_comment2s:
+    rel: 'pending-comment2s'
+    method: 'GET'
+    link: '/comment2s/pending_comment2s'
     admin_only: true
 
   pending_comments:
