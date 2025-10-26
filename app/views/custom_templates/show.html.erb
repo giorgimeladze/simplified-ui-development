@@ -2,10 +2,10 @@
   <div class="row">
     <div class="col-md-12">
       <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Custom Template</h1>
+        <h1>Custom Template Dashboard</h1>
         <div>
-          <%= link_to 'Edit Template', edit_custom_template_path, class: 'btn btn-primary' %>
-          <%= link_to 'Reset to Defaults', reset_custom_template_path, method: :post, 
+          <%= link_to 'Edit All', edit_custom_template_path, class: 'btn btn-primary' %>
+          <%= link_to 'Reset All to Defaults', reset_custom_template_path, method: :post, 
                       class: 'btn btn-warning', 
                       data: { confirm: 'Are you sure you want to reset all customizations?' } %>
         </div>
@@ -13,29 +13,28 @@
 
       <div class="card">
         <div class="card-header">
-          <h5>Current Customizations</h5>
+          <h5>Task-Based Customization Sections</h5>
+          <p class="mb-0 text-muted">Click on a section to view or customize its button titles and styles.</p>
         </div>
         <div class="card-body">
-          <p class="text-muted">Your custom button titles and styles are applied throughout the application.</p>
-          
           <div class="row">
-            <% @custom_template.template_data.each do |model_name, actions| %>
+            <% %w[Article Comment Navigation Article2 Comment2].each do |section| %>
               <div class="col-md-4 mb-4">
-                <h6 class="text-primary"><%= model_name %></h6>
-                <ul class="list-group list-group-flush">
-                  <% actions.each do |action_name, customization| %>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      <div>
-                        <strong><%= action_name.humanize %></strong>
-                        <br>
-                        <small class="text-muted">
-                          Title: "<%= customization['title'] %>"<br>
-                          Classes: "<%= customization['button_classes'] %>"
-                        </small>
-                      </div>
-                    </li>
-                  <% end %>
-                </ul>
+                <div class="card h-100">
+                  <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0"><%= section %> Customizations</h6>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <% action_count = @custom_template.template_data[section]&.count || 0 %>
+                      <%= pluralize(action_count, 'action') %> available
+                    </p>
+                  </div>
+                  <div class="card-footer bg-transparent">
+                    <%= link_to 'View', send("show_#{section.downcase}_custom_template_path"), class: 'btn btn-sm btn-outline-primary' %>
+                    <%= link_to 'Edit', send("edit_#{section.downcase}_custom_template_path"), class: 'btn btn-sm btn-primary' %>
+                  </div>
+                </div>
               </div>
             <% end %>
           </div>
