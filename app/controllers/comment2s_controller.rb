@@ -4,34 +4,36 @@ class Comment2sController < ApplicationController
   before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comment2s
-    comment2s = Comment2.pending
+    comment2s = Comment2.awaiting_moderation
   
     rendered_comment2s = CommentBlueprint.render_as_hash(comment2s, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'list', locals: { comments: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
+    @html_content = render_to_string(partial: 'comment2s/list', locals: { comment2s: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment2')
 
     respond_to do |format|
-      format.html { render 'comments/index' }
-      format.json { render json: { comments: rendered_comment2s } }
+      format.html { render :index }
+      format.json { render json: { comments: rendered_comment2s, links: @links } }
     end
   end
 
   def show
     rendered_comment2 = CommentBlueprint.render_as_hash(@comment2, view: :show, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'comment', locals: { comment: rendered_comment2 }, formats: [:html])
-
+    @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: rendered_comment2 }, formats: [:html])
+    @links = @comment2.article2.hypermedia_edit_links(current_user)
     respond_to do |format|
-      format.html { render 'comments/show' }
-      format.json { render json: { comment: @html_content } }
+      format.html { render :show }
+      format.json { render json: { comment: rendered_comment2, links: @links } }
     end
   end
 
   def new
     @comment2 = @article2.comment2s.build
     authorize @comment2
-    @html_content = render_to_string(partial: 'form', locals: { comment: @comment2 }, formats: [:html])
+    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
+    @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
-      format.html { render 'comments/new' }
-      format.json { render json: {form: @html_content } }
+      format.html { render :new }
+      format.json { render json: { comment: @comment2, links: @links } }
     end
   end
 
@@ -52,7 +54,7 @@ class Comment2sController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render 'comments/new', status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_entity }
         format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
@@ -61,10 +63,11 @@ class Comment2sController < ApplicationController
 
   def edit
     authorize @comment2, :update?
-    @html_content = render_to_string(partial: 'form', locals: { comment: @comment2 }, formats: [:html])
+    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
+    @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
     respond_to do |format|
-      format.html { render 'comments/edit' }
-      format.json { render json: { form: @html_content } }
+      format.html { render :edit }
+      format.json { render json: { comment2: @comment2, links: @links } }
     end
   end
 
@@ -85,7 +88,7 @@ class Comment2sController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render 'comments/edit', status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
@@ -103,21 +106,29 @@ class Comment2sController < ApplicationController
 
   def reject_feedback
     authorize @comment2, :reject?
-    @html_content = render_to_string(partial: 'reject_feedback_form', formats: [:html])
+    @html_content = render_to_string(partial: 'comment2s/reject_feedback_form', formats: [:html])
+    @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
     respond_to do |format|
-      format.html { render 'comments/reject_feedback' }
-      format.json { render json: { form: @html_content } }
+      format.html { render :reject_feedback }
+      format.json { render json: { comment2: @comment2, links: @links } }
     end
   end
 
   def reject
-    result = Comment2Commands.reject_comment(
-      @comment2.id,
-      params[:rejection_feedback],
-      current_user
-    )
-    
-    handle_command_result(result, 'Comment rejected.')
+    if params[:rejection_feedback].present?
+      result = Comment2Commands.reject_comment(
+        @comment2.id,
+        params[:rejection_feedback],
+        current_user
+      )
+      
+      handle_command_result(result, 'Comment rejected.')
+    else
+      respond_to do |format|
+        format.html { redirect_to reject_feedback_comment2_path(@comment2), alert: 'Rejection feedback is required.' }
+        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def delete

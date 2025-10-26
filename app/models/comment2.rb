@@ -13,6 +13,7 @@ class Comment2 < ApplicationRecord
   scope :visible, -> { where(status: 'approved') }
   scope :awaiting_moderation, -> { where(status: 'pending') }
   scope :not_deleted, -> { where.not(status: 'deleted') }
+  
 
   # Event sourcing methods
   def events
@@ -50,5 +51,11 @@ class Comment2 < ApplicationRecord
     events << 'delete' if ['pending', 'approved', 'rejected'].include?(status)
     events << 'restore' if status == 'deleted'
     events
+  end
+
+  ['pending', 'approved', 'rejected', 'pending', 'deleted'].each do |status|
+    define_method("#{status}?") do
+      self.status == status
+    end
   end
 end

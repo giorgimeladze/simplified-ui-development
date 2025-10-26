@@ -306,6 +306,12 @@ Navigation:
     method: 'GET'
     link: '/state_transitions'
     admin_only: true
+
+  events:
+    rel: 'events'
+    method: 'GET'
+    link: '/events'
+    admin_only: true
   
   sign_in:
     rel: 'sign-in'

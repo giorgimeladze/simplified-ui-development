@@ -33,18 +33,19 @@ class Article2sController < ApplicationController
    # GET /article2s/:id
    def show
     rendered_article2 = ArticleBlueprint.render_as_hash(@article2, view: :show, context: { current_user: current_user })
-    article2_comments = Comment2Blueprint.render_as_hash(@article2.visible_comments(current_user), view: :index, context: { current_user: current_user })
+    article2_comments = CommentBlueprint.render_as_hash(@article2.visible_comments(current_user), view: :index, context: { current_user: current_user })
     
     # HAL-style _embedded format
     rendered_article2[:_embedded] = {
-      comments: article2_comments
+      comment2s: article2_comments
     }
     
-    @html_content = render_to_string(partial: 'articles/article', locals: { article: rendered_article2 }, formats: [:html])
+    @html_content = render_to_string(partial: 'article2s/article2', locals: { article2: rendered_article2 }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article2')
 
     respond_to do |format|
-      format.html { render 'articles/show' }
-      format.json { render json: { article: @html_content } }
+      format.html { render :show }
+      format.json { render json: { article: @html_content, links: @links } }
     end
   end
 
@@ -52,9 +53,10 @@ class Article2sController < ApplicationController
   def new
     @article2 = Article2.new
     authorize @article2
-    @html_content = render_to_string(partial: 'form', locals: { article: @article2 }, formats: [:html])
+    @html_content = render_to_string(partial: 'article2s/form', locals: { article2: @article2 }, formats: [:html])
+    @links = @article2.hypermedia_new_links(current_user)
     respond_to do |format|
-      format.html { render 'articles/new' }
+      format.html { render :new }
       format.json { render json: {form: @html_content } }
     end
   end
@@ -77,7 +79,7 @@ class Article2sController < ApplicationController
       end
     else
       respond_to do |format|
-        format.html { render 'articles/new', status: :unprocessable_entity }
+        format.html { render :new, status: :unprocessable_entity }
         format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
@@ -95,21 +97,29 @@ class Article2sController < ApplicationController
 
   def reject_feedback
     authorize @article2, :reject?
-    @html_content = render_to_string(partial: 'articles/reject_feedback_form', formats: [:html])
+    @html_content = render_to_string(partial: 'article2s/reject_feedback_form', formats: [:html])
+    @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
-      format.html { render 'articles/reject_feedback' }
-      format.json { render json: { form: @html_content } }
+      format.html { render :reject_feedback }
+      format.json { render json: { article2: @article2, links: @links } }
     end
   end
 
   def reject
-    result = Article2Commands.reject_article(
-      @article2.id,
-      params[:rejection_feedback],
-      current_user
-    )
-    
-    handle_command_result(result, 'Article rejected.')
+    if params[:rejection_feedback].present?
+      result = Article2Commands.reject_article(
+        @article2.id,
+        params[:rejection_feedback],
+        current_user
+      )
+      
+      handle_command_result(result, 'Article rejected.')
+    else  
+      respond_to do |format|
+        format.html { redirect_to reject_feedback_article2_path(@article2), alert: 'Rejection feedback is required.' }
+        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+      end
+    end
   end
 
   def approve_private
@@ -178,11 +188,11 @@ class Article2sController < ApplicationController
 
   def rendering_article2s(article2s, title)
     rendered_article2s = ArticleBlueprint.render_as_hash(article2s, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'articles/list', locals: { articles: rendered_article2s, title: title }, formats: [:html])
-    @links = HasHypermediaLinks.hypermedia_general_index(current_user)
+    @html_content = render_to_string(partial: 'article2s/list', locals: { article2s: rendered_article2s, title: title }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article2')
 
     respond_to do |format|
-      format.html { render "articles/index" }
+      format.html { render :index }
       format.json { render json: { articles: rendered_article2s, links: @links } }
     end
   end

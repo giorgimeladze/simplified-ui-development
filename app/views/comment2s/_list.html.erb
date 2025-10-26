@@ -1,0 +1,19 @@
+<h1 class="mb-4"><%= title %></h1>
+
+<div id="comment2s">
+  <ul class="list-group">
+    <% comment2s.each do |comment2| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <strong><%= comment2[:text] %></strong>
+        </span>
+        <% if comment2[:status] == 'rejected' %>
+          <span class="text-danger">Rejected</span>
+        <% end %>
+        <span>
+          <%= render_links(comment2[:links]) %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+</div>

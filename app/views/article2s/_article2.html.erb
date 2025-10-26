@@ -1,0 +1,33 @@
+<div class="card article2" id="article2-<%= article2[:id]%>">
+  <div class="card-body">
+    <h2 class="card-title">
+      <%= article2[:title] %>
+      <%= status_badge(article2[:status], 'article2') %>
+    </h2>
+    <p class="card-text"><%= article2[:content] %></p>
+    
+    <%# Show rejection feedback if available and user is admin or article editor %>
+    <% if article2[:rejection_feedback].present?%>
+      <div class="alert alert-warning mt-3">
+        <h6><strong>Rejection Feedback:</strong></h6>
+        <p class="mb-0"><%= article2[:rejection_feedback] %></p>
+      </div>
+    <% end %>
+    
+    <div class="mt-3">
+      <%= render_links(article2[:links]) %>
+    </div>
+    
+    <%# HAL-style _embedded comments %>
+    <% if article2[:_embedded] && article2[:_embedded][:comment2s] %>
+      <div class="mt-3">
+        <%= render partial: 'comment2s/list', locals: { comment2s: article2[:_embedded][:comment2s], title: 'Comments' } %>
+      </div>
+    <% end %>
+    
+    <% title, button_classes = model_link("Comment2", :new, current_user) %>
+    <%= link_to title, new_article2_comment2_url(article2[:id]), class: button_classes %>
+  </div>
+
+  <%= article2.to_s %>
+</div>

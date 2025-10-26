@@ -38,6 +38,7 @@ class CustomTemplate < ApplicationRecord
       'deleted_articles' => { 'title' => 'Deleted Articles', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'pending_comments' => { 'title' => 'Pending Comments', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'state_transitions' => { 'title' => 'State Transitions', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'events' => { 'title' => 'Event Sourcing Events', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'sign_in' => { 'title' => 'Sign In', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'sign_up' => { 'title' => 'Sign Up', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'sign_out' => { 'title' => 'Sign Out', 'button_classes' => 'btn btn-outline-danger btn-sm mx-1' },

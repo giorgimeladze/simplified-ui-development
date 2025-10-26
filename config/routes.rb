@@ -34,6 +34,7 @@ Rails.application.routes.draw do
   end
 
   resources :state_transitions, only: [:index]
+  resources :events, only: [:index]
   
   resource :custom_template, only: [:show, :edit, :update] do
     # Section-specific show actions

@@ -41,10 +41,11 @@ class ArticlesController < ApplicationController
     }
     
     @html_content = render_to_string(partial: 'article', locals: { article: rendered_article }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article')
 
     respond_to do |format|
       format.html { render :show }
-      format.json { render json: { article: @html_content } }
+      format.json { render json: { article: @html_content, links: @links } }
     end
   end
 
@@ -53,6 +54,7 @@ class ArticlesController < ApplicationController
     @article = Article.new
     authorize @article
     @html_content = render_to_string(partial: 'form', locals: { article: @article }, formats: [:html])
+    @links = @article.hypermedia_new_links(current_user)
     respond_to do |format|
       format.html { render :new }
       format.json { render json: {form: @html_content } }
@@ -86,9 +88,10 @@ class ArticlesController < ApplicationController
   def reject_feedback
     authorize @article, :reject?
     @html_content = render_to_string(partial: 'reject_feedback_form', formats: [:html])
+    @links = @article.hypermedia_edit_links(current_user)
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { form: @html_content } }
+      format.json { render json: { article: @article, links: @links } }
     end
   end
 
@@ -141,7 +144,7 @@ class ArticlesController < ApplicationController
   def rendering_articles(articles, title)
     rendered_articles = ArticleBlueprint.render_as_hash(articles, view: :index, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles, title: title }, formats: [:html])
-    @links = HasHypermediaLinks.hypermedia_general_index(current_user)
+    @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article')
 
     respond_to do |format|
       format.html { render :index }

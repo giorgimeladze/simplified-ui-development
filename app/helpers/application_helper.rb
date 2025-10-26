@@ -10,9 +10,9 @@ module ApplicationHelper
 
   def status_color_class(status, model_type)
     case model_type
-    when 'article'
+    when 'article', 'article2'
       article_status_color(status)
-    when 'comment'
+    when 'comment', 'comment2'
       comment_status_color(status)
     end
   end

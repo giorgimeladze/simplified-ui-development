@@ -1,0 +1,17 @@
+<h1 class="mb-4"><%= title %></h1>
+
+<div id="article2s">
+  <ul class="list-group">
+    <% article2s.each do |article2| %>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <strong><%= article2[:title] %></strong>
+          <p class="mb-0"><%= article2[:content].truncate(50) %></p>
+        </span>
+        <span>
+          <%= render_links(article2[:links]) %>
+        </span>
+      </li>
+    <% end %>
+  </ul>
+</div>

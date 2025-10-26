@@ -1,0 +1,15 @@
+<%= form_with model: article2, local: true, class: 'needs-validation' do |form| %>
+  <div class="mb-3">
+    <%= form.label :title, class: 'form-label' %>
+    <%= form.text_field :title, class: 'form-control', placeholder: 'Enter title' %>
+  </div>
+
+  <div class="mb-3">
+    <%= form.label :content, class: 'form-label' %>
+    <%= form.text_area :content, class: 'form-control', placeholder: 'Enter content', rows: 5 %>
+  </div>
+
+  <div class="d-flex justify-content-between">
+    <%= form.submit 'Save Article2', class: 'btn btn-primary' %>
+  </div>
+<% end %>

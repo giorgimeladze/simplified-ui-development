@@ -2,7 +2,6 @@ class Article2Commands
   class << self
     def create_article(title, content, user)
       article2 = Article2.new
-      article2.id = SecureRandom.uuid
       article2.title = title
       article2.content = content
       article2.user_id = user.id

@@ -4,24 +4,26 @@ class CommentsController < ApplicationController
   before_action :set_comment, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comments
-    comments = Comment.pending
+    comments = Comment.awaiting_moderation
   
     rendered_comments = CommentBlueprint.render_as_hash(comments, view: :index, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'list', locals: { comments: rendered_comments, title: 'Pending Comments' }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment')
 
     respond_to do |format|
       format.html { render :index }
-      format.json { render json: { comments: rendered_comments } }
+      format.json { render json: { comments: rendered_comments, links: @links } }
     end
   end
 
   def show
     rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'comment', locals: { comment: rendered_comment }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment')
 
     respond_to do |format|
       format.html { render :show }
-      format.json { render json: { comment: @html_content } }
+      format.json { render json: { comment: rendered_comment, links: @links } }
     end
   end
 
@@ -29,9 +31,10 @@ class CommentsController < ApplicationController
     @comment = @article.comments.build
     authorize @comment
     @html_content = render_to_string(partial: 'form', locals: { comment: @comment }, formats: [:html])
+    @links = @comment.hypermedia_new_links(current_user, 'Comment')
     respond_to do |format|
       format.html { render :new }
-      format.json { render json: {form: @html_content } }
+      format.json { render json: { comment: @comment, links: @links } }
     end
   end
 
@@ -56,9 +59,10 @@ class CommentsController < ApplicationController
   def edit
     authorize @comment, :update?
     @html_content = render_to_string(partial: 'form', locals: { comment: @comment }, formats: [:html])
+    @links = @comment.hypermedia_edit_links(current_user, 'Comment')
     respond_to do |format|
       format.html { render :edit }
-      format.json { render json: { form: @html_content } }
+      format.json { render json: { comment: @comment, links: @links } }
     end
   end
 
@@ -91,9 +95,10 @@ class CommentsController < ApplicationController
   def reject_feedback
     authorize @comment, :reject?
     @html_content = render_to_string(partial: 'reject_feedback_form', formats: [:html])
+    @links = @comment.hypermedia_edit_links(current_user, 'Comment')
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { form: @html_content } }
+      format.json { render json: { comment: @comment, links: @links } }
     end
   end
 

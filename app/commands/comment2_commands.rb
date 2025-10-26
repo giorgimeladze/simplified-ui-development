@@ -5,7 +5,6 @@ class Comment2Commands
       return { success: false, errors: 'Article not found' } unless article2
       
       comment2 = Comment2.new
-      comment2.id = SecureRandom.uuid
       comment2.text = text
       comment2.article2_id = article2_id
       comment2.user_id = user.id

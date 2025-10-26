@@ -8,10 +8,9 @@ module HasHypermediaLinks
   
   def hypermedia_show_links(current_user)
     links = []
-    links << build_link(hypermedia_model_name, :index, current_user)
     links << build_link(hypermedia_model_name, :edit, current_user) if policy(current_user).update?
     
-    add_fsm_transition_links(links, current_user)
+    add_transition_links(links, current_user)
     
     links.compact
   end
@@ -20,19 +19,19 @@ module HasHypermediaLinks
     links = []
     links << build_link(hypermedia_model_name, :show, current_user)
     
-    add_fsm_transition_links(links, current_user)
+    add_transition_links(links, current_user)
     links.compact
   end
 
-  def hypermedia_new_links(current_user)
+  def hypermedia_new_links(current_user, model_class_name='Article')
     link = build_link(hypermedia_model_name, :index, current_user)
-    link[:title] = 'Back to Articles'
+    link[:title] = "Back to #{model_class_name.pluralize}"
     [link]
   end
   
-  def hypermedia_edit_links(current_user)
+  def hypermedia_edit_links(current_user, model_class_name='Article')
     link = build_link(hypermedia_model_name, :show, current_user)
-    link[:title] = 'Back to Comment'
+    link[:title] = "Back to #{model_class_name}"
     [link]
   end
   
@@ -42,18 +41,21 @@ module HasHypermediaLinks
     temp_instance.navigation_links(current_user)
   end
 
-  def self.hypermedia_general_index(current_user)
+  def self.hypermedia_general_index(current_user, model_class_name)
     temp_instance = Object.new
     temp_instance.extend(HypermediaConfig)
-    [temp_instance.build_link('Article', :new, current_user)]
+    [temp_instance.build_link(model_class_name, :new, current_user)]
+  end
+
+  def self.hypermedia_general_show(current_user, model_class_name)
+    temp_instance = Object.new
+    temp_instance.extend(HypermediaConfig)
+    [temp_instance.build_link(model_class_name, :index, current_user)]
   end
   
   private
   
-  def add_fsm_transition_links(links, current_user)
-    return unless respond_to?(:aasm)
-    
-    transition_actions = self.class.aasm.events
+  def add_transition_links(links, current_user)
     model_policy = policy(current_user)
     
     possible_status_events.each do |event|
