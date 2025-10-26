@@ -10,11 +10,12 @@ class Comment2Commands
       comment2.user_id = user.id
       comment2.status = 'pending'
 
-      event = Comment2Created.new(comment2.id, text, article2_id, user.id)
-      stored_events = EventStore.append_events(comment2.id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-
       if comment2.save!
+        # I had to do this since Ruby used bigint id which is assigned on db level, not on code level
+        event = Comment2Created.new(comment2.id, text, article2_id, user.id)
+        stored_events = EventStore.append_events(comment2.id, 'Comment2', [event])
+        EventBus.publish_events(stored_events)
+
         { success: true, comment2: comment2 }
       else
         { success: false, errors: comment2.errors.full_messages }

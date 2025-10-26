@@ -7,11 +7,12 @@ class Article2Commands
       article2.user_id = user.id
       article2.status = 'draft'
       
-      event = Article2Created.new(article2.id, title, content, user.id)
-      stored_events = EventStore.append_events(article2.id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
       if article2.save!
+        # I had to do this since Ruby used bigint id which is assigned on db level, not on code level
+        event = Article2Created.new(article2.id, title, content, user.id)
+        stored_events = EventStore.append_events(article2.id, 'Article2', [event])
+        EventBus.publish_events(stored_events)
+
         { success: true, article2: article2 }
       else
         { success: false, errors: article2.errors.full_messages }

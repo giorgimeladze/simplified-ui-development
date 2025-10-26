@@ -404,6 +404,209 @@ Navigation:
 
 ---
 
+## 📡 JSON API Documentation
+
+This application provides comprehensive JSON API responses for all models, following HATEOAS principles with embedded hypermedia links.
+
+### Article JSON Responses
+
+#### Article (AASM-based)
+**Base Fields**: `id`, `title`, `content`, `status`, `user_id`
+**Conditional Fields**: `rejection_feedback` (visible to admin or article author)
+
+#### Article2 (Event Sourcing)
+**Base Fields**: `id`, `title`, `content`, `status`, `user_id`
+**Conditional Fields**: `rejection_feedback` (visible to admin or article author)
+
+#### Example Article JSON Response
+```json
+{
+  "id": "123",
+  "title": "Sample Article",
+  "content": "Article content here...",
+  "status": "published",
+  "user_id": "456",
+  "rejection_feedback": null,
+  "links": {
+    "show": {
+      "rel": "self",
+      "method": "GET",
+      "link": "/articles/123"
+    },
+    "edit": {
+      "rel": "edit",
+      "method": "GET", 
+      "link": "/articles/123/edit"
+    },
+    "archive": {
+      "rel": "transition:archive",
+      "method": "POST",
+      "link": "/articles/123/archive",
+      "confirm": "Are you sure you want to archive this article?"
+    }
+  }
+}
+```
+
+### Comment JSON Responses
+
+#### Comment (AASM-based)
+**Base Fields**: `id`, `text`, `status`, `user_id`
+**Conditional Fields**: `rejection_feedback` (visible to admin or comment author)
+
+#### Comment2 (Event Sourcing)
+**Base Fields**: `id`, `text`, `status`, `user_id`
+**Conditional Fields**: `rejection_feedback` (visible to admin or comment author)
+
+#### Example Comment JSON Response
+```json
+{
+  "id": "789",
+  "text": "Great article!",
+  "status": "approved",
+  "user_id": "456",
+  "rejection_feedback": null,
+  "links": {
+    "show": {
+      "rel": "self",
+      "method": "GET",
+      "link": "/comments/789"
+    },
+    "edit": {
+      "rel": "edit",
+      "method": "GET",
+      "link": "/comments/789/edit"
+    },
+    "delete": {
+      "rel": "transition:delete",
+      "method": "POST",
+      "link": "/comments/789/delete",
+      "confirm": "Delete this comment?"
+    }
+  }
+}
+```
+
+### Collection Responses
+
+#### Articles Index
+```json
+{
+  "articles": [
+    {
+      "id": "123",
+      "title": "Article 1",
+      "content": "Content...",
+      "status": "published",
+      "user_id": "456",
+      "links": { /* hypermedia links */ }
+    }
+  ],
+  "links": {
+    "all_articles": {
+      "rel": "collection",
+      "method": "GET",
+      "link": "/articles"
+    },
+    "my_articles": {
+      "rel": "my-articles",
+      "method": "GET",
+      "link": "/articles/my_articles"
+    },
+    "new_article": {
+      "rel": "new",
+      "method": "GET",
+      "link": "/articles/new"
+    }
+  }
+}
+```
+
+### State Transition Responses
+
+#### Success Response
+```json
+{
+  "success": true,
+  "article": {
+    "id": "123",
+    "title": "Sample Article",
+    "content": "Content...",
+    "status": "review",
+    "user_id": "456",
+    "links": { /* updated hypermedia links */ }
+  }
+}
+```
+
+#### Error Response
+```json
+{
+  "success": false,
+  "errors": ["Transition not allowed from current state"]
+}
+```
+
+### Event Sourcing Responses
+
+#### Article2 with Embedded Comments
+```json
+{
+  "article": {
+    "id": "123",
+    "title": "Event-Sourced Article",
+    "content": "Content...",
+    "status": "published",
+    "user_id": "456",
+    "links": { /* hypermedia links */ },
+    "_embedded": {
+      "comment2s": [
+        {
+          "id": "789",
+          "text": "Comment on event-sourced article",
+          "status": "approved",
+          "user_id": "456",
+          "links": { /* comment hypermedia links */ }
+        }
+      ]
+    }
+  }
+}
+```
+
+### Hypermedia Link Structure
+
+All JSON responses include hypermedia links following HATEOAS principles:
+
+```json
+{
+  "rel": "transition:submit",
+  "method": "POST",
+  "link": "/articles/123/submit",
+  "confirm": "Are you sure you want to submit this article?"
+}
+```
+
+**Link Properties**:
+- `rel`: Relationship type (e.g., `self`, `edit`, `transition:submit`)
+- `method`: HTTP method (`GET`, `POST`, `PATCH`, `DELETE`)
+- `link`: URL endpoint
+- `confirm`: Optional confirmation message for destructive actions
+
+### Status Codes
+
+- `200 OK`: Successful GET requests
+- `201 Created`: Successful POST requests (create)
+- `422 Unprocessable Entity`: Validation errors or invalid state transitions
+- `401 Unauthorized`: Authentication required
+- `403 Forbidden`: Insufficient permissions
+
+### Authentication
+
+All API endpoints require authentication via Devise. Include authentication headers or use session-based authentication.
+
+---
+
 ## 📖 Theoretical Foundation
 
 **Thesis Focus**: Simplifying UI development in Ruby on Rails by leveraging FSMs in ActiveRecord to encode UI states/transitions, combined with HATEOAS-driven hypermedia controls to adapt actions based on resource state.

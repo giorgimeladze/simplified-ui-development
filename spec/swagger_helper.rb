@@ -127,19 +127,60 @@ RSpec.configure do |config|
             required: ['articles', 'links']
           },
 
-          # Comment Schema
-          Comment: {
+          # Article2 Schema (Event Sourcing)
+          Article2: {
             type: :object,
             properties: {
-              id: { type: :integer, example: 1 },
-              text: { type: :string, example: 'Great article! Very informative.' },
+              id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440000', description: 'UUID identifier' },
+              title: { type: :string, example: 'Event-Sourced Article' },
+              content: { type: :string, example: 'This article uses event sourcing for state management...' },
+              status: { 
+                type: :string, 
+                enum: ['draft', 'review', 'rejected', 'published', 'privated', 'archived'],
+                example: 'published',
+                description: 'Current state reconstructed from events'
+              },
+              user_id: { type: :integer, example: 1, description: 'ID of the author' },
+              rejection_feedback: { 
+                type: :string, 
+                example: 'Please improve the introduction and add more examples.',
+                description: 'Feedback provided when article was rejected (only visible to admin and author)',
+                nullable: true
+              },
+              created_at: { type: :string, format: 'date-time', example: '2024-10-09T12:00:00Z' },
+              updated_at: { type: :string, format: 'date-time', example: '2024-10-09T14:30:00Z' },
+              links: {
+                type: :array,
+                description: 'HATEOAS hypermedia controls - available actions based on current state',
+                items: { '$ref' => '#/components/schemas/HypermediaLink' }
+              },
+              _embedded: {
+                type: :object,
+                description: 'HAL-style embedded resources',
+                properties: {
+                  comment2s: {
+                    type: :array,
+                    items: { '$ref' => '#/components/schemas/Comment2' }
+                  }
+                }
+              }
+            },
+            required: ['id', 'title', 'content', 'status', 'links']
+          },
+
+          # Comment2 Schema (Event Sourcing)
+          Comment2: {
+            type: :object,
+            properties: {
+              id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440001', description: 'UUID identifier' },
+              text: { type: :string, example: 'Great event-sourced article! Very informative.' },
               status: { 
                 type: :string, 
                 enum: ['pending', 'approved', 'rejected', 'deleted'],
                 example: 'approved',
-                description: 'Current FSM state of the comment'
+                description: 'Current state reconstructed from events'
               },
-              article_id: { type: :integer, example: 5, description: 'ID of the parent article' },
+              article2_id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440000', description: 'UUID of the parent article' },
               user_id: { type: :integer, example: 3, description: 'ID of the comment author' },
               rejection_feedback: { 
                 type: :string, 
@@ -156,6 +197,39 @@ RSpec.configure do |config|
               }
             },
             required: ['id', 'text', 'status', 'links']
+          },
+
+          # Event Schema (Event Sourcing)
+          Event: {
+            type: :object,
+            properties: {
+              id: { type: :integer, example: 1, description: 'Event log entry ID' },
+              aggregate_id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440000', description: 'UUID of the aggregate' },
+              aggregate_type: { 
+                type: :string, 
+                enum: ['Article2', 'Comment2'],
+                example: 'Article2',
+                description: 'Type of aggregate that generated the event'
+              },
+              event_type: { 
+                type: :string, 
+                example: 'Article2Created',
+                description: 'Type of domain event'
+              },
+              event_data: { 
+                type: :object, 
+                example: { 'title' => 'New Article', 'content' => 'Article content', 'user_id' => 1 },
+                description: 'Event payload data'
+              },
+              version: { type: :integer, example: 1, description: 'Event version for optimistic concurrency' },
+              occurred_at: { type: :string, format: 'date-time', example: '2024-10-09T14:23:45Z', description: 'When the event occurred' },
+              correlation_id: { type: :string, example: 'req-123', description: 'Correlation ID for tracing', nullable: true },
+              causation_id: { type: :string, example: 'cmd-456', description: 'Causation ID for command tracking', nullable: true },
+              metadata: { type: :object, example: { 'user_id' => 1 }, description: 'Additional event metadata', nullable: true },
+              created_at: { type: :string, format: 'date-time', example: '2024-10-09T14:23:45Z' },
+              updated_at: { type: :string, format: 'date-time', example: '2024-10-09T14:23:45Z' }
+            },
+            required: ['id', 'aggregate_id', 'aggregate_type', 'event_type', 'event_data', 'version', 'occurred_at']
           },
 
           # State Transition Schema
