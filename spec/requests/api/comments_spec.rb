@@ -10,7 +10,7 @@ RSpec.describe 'Comments API', type: :request do
       tags 'Comments'
       produces 'application/json'
       description 'Returns all comments in "pending" state awaiting moderation. Requires moderator or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'pending comments found' do
         schema type: :object,
@@ -59,6 +59,85 @@ RSpec.describe 'Comments API', type: :request do
     end
   end
 
+  # GET /comments/:id/edit
+  path '/comments/{id}/edit' do
+    parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
+
+    get 'Get comment edit form' do
+      tags 'Comments'
+      produces 'application/json'
+      description 'Returns HTML form for editing comment. Only available for rejected comments.'
+      security [session_auth: []]
+
+      response '200', 'edit form retrieved' do
+        schema type: :object,
+          properties: {
+            form: { type: :string, description: 'HTML form for editing comment' }
+          }
+        run_test!
+      end
+
+      response '403', 'forbidden - not editable' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+    end
+  end
+
+  # PATCH /comments/:id
+  path '/comments/{id}' do
+    parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
+
+    patch 'Update comment' do
+      tags 'Comments'
+      consumes 'application/json'
+      produces 'application/json'
+      description 'Update comment text. Only allowed for rejected comments. Automatically moves to pending state.'
+      security [session_auth: []]
+
+      parameter name: :comment, in: :body, schema: {
+        type: :object,
+        properties: {
+          text: { type: :string, example: 'Updated comment text' }
+        },
+        required: ['text']
+      }
+
+      response '200', 'comment updated' do
+        schema type: :object,
+          properties: {
+            success: { type: :boolean, example: true },
+            comment: { '$ref' => '#/components/schemas/Comment' }
+          }
+        run_test!
+      end
+
+      response '422', 'validation error' do
+        schema type: :object,
+          properties: {
+            success: { type: :boolean, example: false },
+            errors: { type: :array, items: { type: :string } }
+          }
+        run_test!
+      end
+
+      response '403', 'forbidden - not editable' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+    end
+  end
+
   # POST /articles/:article_id/comments
   path '/articles/{article_id}/comments' do
     parameter name: :article_id, in: :path, type: :integer, description: 'Article ID'
@@ -68,7 +147,7 @@ RSpec.describe 'Comments API', type: :request do
       consumes 'application/json'
       produces 'application/json'
       description 'Creates a new comment in "pending" state. Requires authentication.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       parameter name: :comment, in: :body, schema: {
         type: :object,
@@ -121,7 +200,7 @@ RSpec.describe 'Comments API', type: :request do
       tags 'Comments'
       produces 'application/json'
       description 'Permanently deletes a comment. Requires ownership or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '204', 'comment deleted' do
         run_test!
@@ -153,7 +232,7 @@ RSpec.describe 'Comments API', type: :request do
       tags 'Comments - FSM Transitions'
       produces 'application/json'
       description 'Transitions comment from "pending" to "approved" state, making it publicly visible. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema type: :object,
@@ -194,7 +273,7 @@ RSpec.describe 'Comments API', type: :request do
       produces 'application/json'
       consumes 'application/json'
       description 'Transitions comment from "pending" to "rejected" state with feedback. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       parameter name: :rejection_feedback, in: :body, schema: {
         type: :object,
@@ -246,7 +325,7 @@ RSpec.describe 'Comments API', type: :request do
       tags 'Comments - FSM Transitions'
       produces 'application/json'
       description 'Transitions comment to "deleted" state. Can be restored later. Requires comment ownership, admin, or editor role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema type: :object,
@@ -286,7 +365,7 @@ RSpec.describe 'Comments API', type: :request do
       tags 'Comments - FSM Transitions'
       produces 'application/json'
       description 'Transitions comment from "deleted" back to "pending" state. Requires admin or editor role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema type: :object,

@@ -25,7 +25,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Returns all articles created by the authenticated user, regardless of state.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'my articles found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
@@ -45,7 +45,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Returns all articles in "review" state. Requires editor or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'articles for review found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
@@ -70,7 +70,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Returns archived articles. Admins see all archived articles, regular users see only their own.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'archived articles found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
@@ -190,7 +190,7 @@ RSpec.describe 'Articles API', type: :request do
       consumes 'application/json'
       produces 'application/json'
       description 'Creates a new article in "draft" state. Requires authentication.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       parameter name: :article, in: :body, schema: {
         type: :object,
@@ -234,7 +234,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Permanently deletes an article. Requires ownership or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '204', 'article deleted' do
         run_test!
@@ -266,7 +266,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "draft" to "review" state. Requires article ownership.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -298,7 +298,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "review" to "published" state. Requires editor or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -331,7 +331,7 @@ RSpec.describe 'Articles API', type: :request do
       produces 'application/json'
       consumes 'application/json'
       description 'Transitions article from "review" to "rejected" state with feedback. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       parameter name: :rejection_feedback, in: :body, schema: {
         type: :object,
@@ -375,7 +375,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "review" to "privated" state. Requires editor or admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -402,7 +402,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "rejected" back to "review" state. Requires article ownership.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -429,7 +429,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article to "archived" state from rejected, published, or privated. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -456,7 +456,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "privated" to "published" state. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'
@@ -483,7 +483,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles - FSM Transitions'
       produces 'application/json'
       description 'Transitions article from "published" to "privated" state. Requires admin role.'
-      security [bearer_auth: []]
+      security [session_auth: []]
 
       response '200', 'transition successful' do
         schema '$ref' => '#/components/schemas/TransitionSuccess'

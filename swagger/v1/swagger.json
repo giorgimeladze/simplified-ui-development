@@ -38,7 +38,7 @@
         "description": "Creates a new article in \"draft\" state. Requires authentication.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -133,7 +133,7 @@
         "description": "Returns all articles created by the authenticated user, regardless of state.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -171,7 +171,7 @@
         "description": "Returns all articles in \"review\" state. Requires editor or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -219,7 +219,7 @@
         "description": "Returns archived articles. Admins see all archived articles, regular users see only their own.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -395,7 +395,7 @@
         "description": "Permanently deletes an article. Requires ownership or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -457,7 +457,7 @@
         "description": "Transitions article from \"draft\" to \"review\" state. Requires article ownership.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -526,7 +526,7 @@
         "description": "Transitions article from \"review\" to \"published\" state. Requires editor or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -595,7 +595,7 @@
         "description": "Transitions article from \"review\" to \"rejected\" state with feedback. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -686,7 +686,7 @@
         "description": "Transitions article from \"review\" to \"privated\" state. Requires editor or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -745,7 +745,7 @@
         "description": "Transitions article from \"rejected\" back to \"review\" state. Requires article ownership.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -804,7 +804,7 @@
         "description": "Transitions article to \"archived\" state from rejected, published, or privated. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -863,7 +863,7 @@
         "description": "Transitions article from \"privated\" to \"published\" state. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -922,7 +922,7 @@
         "description": "Transitions article from \"published\" to \"privated\" state. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -970,7 +970,7 @@
         "description": "Returns all comments in \"pending\" state awaiting moderation. Requires moderator or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1064,6 +1064,104 @@
           }
         }
       },
+      "patch": {
+        "summary": "Update comment",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Update comment text. Only allowed for rejected comments. Automatically moves to pending state.",
+        "security": [
+          {
+            "session_auth": [
+
+            ]
+          }
+        ],
+        "parameters": [
+
+        ],
+        "responses": {
+          "200": {
+            "description": "comment updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "comment": {
+                      "$ref": "#/components/schemas/Comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - not editable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "Updated comment text"
+                  }
+                },
+                "required": [
+                  "text"
+                ]
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "summary": "Deletes a comment",
         "tags": [
@@ -1072,7 +1170,7 @@
         "description": "Permanently deletes a comment. Requires ownership or admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1114,6 +1212,71 @@
         }
       }
     },
+    "/comments/{id}/edit": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get comment edit form",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Returns HTML form for editing comment. Only available for rejected comments.",
+        "security": [
+          {
+            "session_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "edit form retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "form": {
+                      "type": "string",
+                      "description": "HTML form for editing comment"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - not editable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/articles/{article_id}/comments": {
       "parameters": [
         {
@@ -1134,7 +1297,7 @@
         "description": "Creates a new comment in \"pending\" state. Requires authentication.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1247,7 +1410,7 @@
         "description": "Transitions comment from \"pending\" to \"approved\" state, making it publicly visible. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1337,7 +1500,7 @@
         "description": "Transitions comment from \"pending\" to \"rejected\" state with feedback. Requires admin role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1449,7 +1612,7 @@
         "description": "Transitions comment to \"deleted\" state. Can be restored later. Requires comment ownership, admin, or editor role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1539,7 +1702,7 @@
         "description": "Transitions comment from \"deleted\" back to \"pending\" state. Requires admin or editor role.",
         "security": [
           {
-            "bearer_auth": [
+            "session_auth": [
 
             ]
           }
@@ -1715,11 +1878,11 @@
   ],
   "components": {
     "securitySchemes": {
-      "bearer_auth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "Authentication token required for protected endpoints"
+      "session_auth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "_simplified_ui_development_session",
+        "description": "Session-based authentication via Devise. Include session cookie in requests."
       }
     },
     "schemas": {
@@ -1860,16 +2023,95 @@
           "links"
         ]
       },
-      "Comment": {
+      "Article2": {
         "type": "object",
         "properties": {
           "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "description": "UUID identifier"
+          },
+          "title": {
+            "type": "string",
+            "example": "Event-Sourced Article"
+          },
+          "content": {
+            "type": "string",
+            "example": "This article uses event sourcing for state management..."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "review",
+              "rejected",
+              "published",
+              "privated",
+              "archived"
+            ],
+            "example": "published",
+            "description": "Current state reconstructed from events"
+          },
+          "user_id": {
             "type": "integer",
-            "example": 1
+            "example": 1,
+            "description": "ID of the author"
+          },
+          "rejection_feedback": {
+            "type": "string",
+            "example": "Please improve the introduction and add more examples.",
+            "description": "Feedback provided when article was rejected (only visible to admin and author)",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T12:00:00Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:30:00Z"
+          },
+          "links": {
+            "type": "array",
+            "description": "HATEOAS hypermedia controls - available actions based on current state",
+            "items": {
+              "$ref": "#/components/schemas/HypermediaLink"
+            }
+          },
+          "_embedded": {
+            "type": "object",
+            "description": "HAL-style embedded resources",
+            "properties": {
+              "comment2s": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Comment2"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "content",
+          "status",
+          "links"
+        ]
+      },
+      "Comment2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440001",
+            "description": "UUID identifier"
           },
           "text": {
             "type": "string",
-            "example": "Great article! Very informative."
+            "example": "Great event-sourced article! Very informative."
           },
           "status": {
             "type": "string",
@@ -1880,12 +2122,12 @@
               "deleted"
             ],
             "example": "approved",
-            "description": "Current FSM state of the comment"
+            "description": "Current state reconstructed from events"
           },
-          "article_id": {
-            "type": "integer",
-            "example": 5,
-            "description": "ID of the parent article"
+          "article2_id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "description": "UUID of the parent article"
           },
           "user_id": {
             "type": "integer",
@@ -1921,6 +2163,94 @@
           "text",
           "status",
           "links"
+        ]
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1,
+            "description": "Event log entry ID"
+          },
+          "aggregate_id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "description": "UUID of the aggregate"
+          },
+          "aggregate_type": {
+            "type": "string",
+            "enum": [
+              "Article2",
+              "Comment2"
+            ],
+            "example": "Article2",
+            "description": "Type of aggregate that generated the event"
+          },
+          "event_type": {
+            "type": "string",
+            "example": "Article2Created",
+            "description": "Type of domain event"
+          },
+          "event_data": {
+            "type": "object",
+            "example": {
+              "title": "New Article",
+              "content": "Article content",
+              "user_id": 1
+            },
+            "description": "Event payload data"
+          },
+          "version": {
+            "type": "integer",
+            "example": 1,
+            "description": "Event version for optimistic concurrency"
+          },
+          "occurred_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:23:45Z",
+            "description": "When the event occurred"
+          },
+          "correlation_id": {
+            "type": "string",
+            "example": "req-123",
+            "description": "Correlation ID for tracing",
+            "nullable": true
+          },
+          "causation_id": {
+            "type": "string",
+            "example": "cmd-456",
+            "description": "Causation ID for command tracking",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "example": {
+              "user_id": 1
+            },
+            "description": "Additional event metadata",
+            "nullable": true
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:23:45Z"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-10-09T14:23:45Z"
+          }
+        },
+        "required": [
+          "id",
+          "aggregate_id",
+          "aggregate_type",
+          "event_type",
+          "event_data",
+          "version",
+          "occurred_at"
         ]
       },
       "StateTransition": {

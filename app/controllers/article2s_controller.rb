@@ -45,7 +45,7 @@ class Article2sController < ApplicationController
 
     respond_to do |format|
       format.html { render :show }
-      format.json { render json: { article: @html_content, links: @links } }
+      format.json { render json: { article2: rendered_article2, links: @links } }
     end
   end
 
@@ -57,7 +57,7 @@ class Article2sController < ApplicationController
     @links = @article2.hypermedia_new_links(current_user)
     respond_to do |format|
       format.html { render :new }
-      format.json { render json: {form: @html_content } }
+      format.json { render json: { article2: @article2, links: @links } }
     end
   end
 
@@ -75,12 +75,12 @@ class Article2sController < ApplicationController
       @article2 = result[:article2]
       respond_to do |format|
         format.html { redirect_to article2_path(@article2), notice: 'Article was successfully created.' }
-        format.json { render json: { success: true, article: @article2 }, status: :created }
+        format.json { render json: { article2: @article2.slice(:id, :title, :content, :status, :user_id) }, status: :created }
       end
     else
       respond_to do |format|
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+        format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end
@@ -101,7 +101,7 @@ class Article2sController < ApplicationController
     @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { article2: @article2, links: @links } }
+      format.json { render json: { article2: @article2.slice(:id, :title, :content, :status, :user_id), links: @links } }
     end
   end
 
@@ -117,7 +117,7 @@ class Article2sController < ApplicationController
     else  
       respond_to do |format|
         format.html { redirect_to reject_feedback_article2_path(@article2), alert: 'Rejection feedback is required.' }
-        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+        format.json { render json: { errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
       end
     end
   end
@@ -204,13 +204,13 @@ class Article2sController < ApplicationController
         format.html { redirect_to article2_path(@article2), notice: 'Transition applied.' }
         format.json do
           rendered_article2 = ArticleBlueprint.render_as_hash(@article2, view: :show, context: { current_user: current_user })
-          render json: { success: true, article: rendered_article2 }, status: :ok
+          render json: { article2: rendered_article2 }, status: :ok
         end
       end
     else
       respond_to do |format|
         format.html { redirect_to article2_path(@article2), alert: result[:errors] }
-        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+        format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end

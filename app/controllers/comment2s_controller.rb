@@ -50,12 +50,12 @@ class Comment2sController < ApplicationController
       @comment2 = result[:comment2]
       respond_to do |format|
         format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully created.' }
-        format.json { render json: { success: true, comment: @comment2 }, status: :created }
+        format.json { render json: { comment: @comment2 }, status: :created }
       end
     else
       respond_to do |format|
         format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+        format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end
@@ -67,7 +67,7 @@ class Comment2sController < ApplicationController
     @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :edit }
-      format.json { render json: { comment2: @comment2, links: @links } }
+      format.json { render json: { comment2: @comment2.slice(:id, :text, :status, :user_id), links: @links } }
     end
   end
 
@@ -84,12 +84,12 @@ class Comment2sController < ApplicationController
       @comment2 = result[:comment2]
       respond_to do |format|
         format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully updated.' }
-        format.json { render json: { success: true, comment: @comment2 }, status: :ok }
+        format.json { render json: { comment: @comment2.slice(:id, :text, :status, :user_id) }, status: :ok }
       end
     else
       respond_to do |format|
         format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+        format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end
@@ -110,7 +110,7 @@ class Comment2sController < ApplicationController
     @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { comment2: @comment2, links: @links } }
+      format.json { render json: { comment2: @comment2.slice(:id, :text, :status, :user_id), links: @links } }
     end
   end
 
@@ -126,7 +126,7 @@ class Comment2sController < ApplicationController
     else
       respond_to do |format|
         format.html { redirect_to reject_feedback_comment2_path(@comment2), alert: 'Rejection feedback is required.' }
-        format.json { render json: { success: false, errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
+        format.json { render json: { errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
       end
     end
   end
@@ -170,13 +170,13 @@ class Comment2sController < ApplicationController
         format.html { redirect_to article2_path(@comment2.article2), notice: 'Transition applied.' }
         format.json do
           rendered_comment2 = CommentBlueprint.render_as_hash(@comment2, view: :show, context: { current_user: current_user })
-          render json: { success: true, comment: rendered_comment2 }, status: :ok
+          render json: { comment: rendered_comment2 }, status: :ok
         end
       end
     else
       respond_to do |format|
         format.html { redirect_to article2_path(@comment2.article2), alert: result[:errors] }
-        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+        format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
   end

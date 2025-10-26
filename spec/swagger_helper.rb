@@ -30,11 +30,11 @@ RSpec.configure do |config|
       ],
       components: {
         securitySchemes: {
-          bearer_auth: {
-            type: :http,
-            scheme: :bearer,
-            bearerFormat: 'JWT',
-            description: 'Authentication token required for protected endpoints'
+          session_auth: {
+            type: :apiKey,
+            in: :cookie,
+            name: '_simplified_ui_development_session',
+            description: 'Session-based authentication via Devise. Include session cookie in requests.'
           }
         },
         schemas: {
