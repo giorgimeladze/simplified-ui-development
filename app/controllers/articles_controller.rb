@@ -65,7 +65,7 @@ class ArticlesController < ApplicationController
     @article.user = current_user
     authorize @article
 
-    if @article.save
+    if @article.save!
       respond_to do |format|
         format.html { redirect_to article_path(@article), notice: 'Article was successfully created.' }
         format.json { render json: { success: true, article: @article }, status: :created }

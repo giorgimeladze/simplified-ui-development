@@ -36,7 +36,7 @@ module ApplicationHelper
     }[status] || 'bg-secondary'
   end
 
-  def model_link(class_name, model, action, current_user=nil)
-    class_name.constantize.find(model[:id]).build_link(class_name, action, current_user).values_at(:title, :button_classes)
+  def model_link(class_name, action, current_user=nil)
+    class_name.constantize.new.build_link(class_name, action, current_user).values_at(:title, :button_classes)
   end
 end

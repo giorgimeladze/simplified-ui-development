@@ -65,7 +65,7 @@ module HypermediaConfig
   end
 
   def action_config(model_name, action_name)
-    actions_for(model_name)[action_name]
+    actions_for(model_name)[action_name.to_sym]
   end
     
   def actions_for(model_name)

@@ -74,12 +74,13 @@ class Comment2Commands
     def update_comment(comment2_id, text, user)
       comment2 = Comment2.find(comment2_id)
       return { success: false, errors: 'Comment not found' } unless comment2
+      return { success: false, errors: 'Comment can only be updated when rejected' } unless comment2.status == 'rejected'
 
       event = Comment2Updated.new(comment2_id, text, user.id)
       stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
       EventBus.publish_events(stored_events)
       
-      update_aggregate(comment2, { text: text })
+      update_aggregate(comment2, { text: text, status: 'pending' })
     end
 
     private

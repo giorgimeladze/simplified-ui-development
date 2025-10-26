@@ -25,7 +25,7 @@
       </div>
     <% end %>
     
-    <% title, button_classes = model_link("Article", article, :new, current_user) %>
+    <% title, button_classes = model_link("Comment", :new, current_user) %>
     <%= link_to title, new_article_comment_url(article[:id]), class: button_classes %>
   </div>
 

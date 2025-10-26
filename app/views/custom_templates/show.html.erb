@@ -5,9 +5,11 @@
         <h1>Custom Template Dashboard</h1>
         <div>
           <%= link_to 'Edit All', edit_custom_template_path, class: 'btn btn-primary' %>
-          <%= link_to 'Reset All to Defaults', reset_custom_template_path, method: :post, 
-                      class: 'btn btn-warning', 
-                      data: { confirm: 'Are you sure you want to reset all customizations?' } %>
+          <%= button_to 'Reset All to Defaults',
+              reset_custom_template_path,
+              method: :post,
+              class: 'btn btn-warning',
+              data: { confirm: 'Are you sure you want to reset all customizations?' } %>
         </div>
       </div>
 

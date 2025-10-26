@@ -32,6 +32,10 @@ class Comment < ApplicationRecord
     event :restore do
       transitions from: :deleted, to: :pending
     end
+
+    event :resubmit do
+      transitions from: :rejected, to: :pending
+    end
   end
 
   # Scopes

@@ -1,7 +1,7 @@
 class Comment2sController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article2, only: [:new, :create]
-  before_action :set_comment2, only: [:show, :approve, :reject, :reject_feedback, :delete, :restore]
+  before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comment2s
     comment2s = Comment2.pending
@@ -53,6 +53,39 @@ class Comment2sController < ApplicationController
     else
       respond_to do |format|
         format.html { render 'comments/new', status: :unprocessable_entity }
+        format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+
+  def edit
+    authorize @comment2, :update?
+    @html_content = render_to_string(partial: 'form', locals: { comment: @comment2 }, formats: [:html])
+    respond_to do |format|
+      format.html { render 'comments/edit' }
+      format.json { render json: { form: @html_content } }
+    end
+  end
+
+  def update
+    authorize @comment2, :update?
+    
+    result = Comment2Commands.update_comment(
+      @comment2.id,
+      comment2_params[:text],
+      current_user
+    )
+    
+    if result[:success]
+      @comment2 = result[:comment2]
+      respond_to do |format|
+        format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully updated.' }
+        format.json { render json: { success: true, comment: @comment2 }, status: :ok }
+      end
+    else
+      respond_to do |format|
+        format.html { render 'comments/edit', status: :unprocessable_entity }
         format.json { render json: { success: false, errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end

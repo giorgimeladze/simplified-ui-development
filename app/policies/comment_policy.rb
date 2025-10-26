@@ -12,7 +12,7 @@ class CommentPolicy < ApplicationPolicy
   end
 
   def update?
-    user.present? && record.user_id == user.id && record.pending?
+    user.present? && record.user_id == user.id && (record.pending? || record.rejected?)
   end
 
   def approve?

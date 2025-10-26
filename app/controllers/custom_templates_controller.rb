@@ -1,9 +1,8 @@
 class CustomTemplatesController < ApplicationController
+  before_action :set_custom_template
 
   # Main show page - displays all sections
   def show
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     respond_to do |format|
       format.html { render :show }
       format.json { render json: { template: @custom_template } }
@@ -14,7 +13,6 @@ class CustomTemplatesController < ApplicationController
 
   # Section-specific show actions
   def show_article
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Article'
     @section_data = @custom_template.get_section('Article')
     
@@ -25,7 +23,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def show_comment
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Comment'
     @section_data = @custom_template.get_section('Comment')
     
@@ -36,7 +33,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def show_navigation
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Navigation'
     @section_data = @custom_template.get_section('Navigation')
     
@@ -47,7 +43,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def show_article2
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Article2'
     @section_data = @custom_template.get_section('Article2')
     
@@ -58,7 +53,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def show_comment2
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Comment2'
     @section_data = @custom_template.get_section('Comment2')
     
@@ -70,7 +64,6 @@ class CustomTemplatesController < ApplicationController
 
   # Main edit page - allows editing all sections
   def edit
-    @custom_template = CustomTemplate.for_user(current_user)
     
     respond_to do |format|
       format.html { render :edit }
@@ -80,7 +73,6 @@ class CustomTemplatesController < ApplicationController
 
   # Section-specific edit actions
   def edit_article
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Article'
     @section_data = @custom_template.get_section('Article')
     
@@ -93,7 +85,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def edit_comment
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Comment'
     @section_data = @custom_template.get_section('Comment')
     
@@ -104,7 +95,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def edit_navigation
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Navigation'
     @section_data = @custom_template.get_section('Navigation')
     
@@ -115,7 +105,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def edit_article2
-    @custom_template = CustomTemplate.for_user(current_user)
     @section_name = 'Article2'
     @section_data = @custom_template.get_section('Article2')
     
@@ -138,8 +127,6 @@ class CustomTemplatesController < ApplicationController
 
   # Update all sections
   def update
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update(template_params)
       respond_to do |format|
         format.html { redirect_to custom_template_path, notice: 'Template updated successfully.' } 
@@ -155,8 +142,6 @@ class CustomTemplatesController < ApplicationController
 
   # Section-specific update actions
   def update_article
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update_section('Article', article_template_params[:Article])
       respond_to do |format|
         format.html { redirect_to show_article_custom_template_path, notice: 'Article customization updated successfully.' }
@@ -173,8 +158,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def update_comment
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update_section('Comment', comment_template_params[:Comment])
       respond_to do |format|
         format.html { redirect_to show_comment_custom_template_path, notice: 'Comment customization updated successfully.' }
@@ -191,8 +174,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def update_navigation
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update_section('Navigation', navigation_template_params[:Navigation])
       respond_to do |format|
         format.html { redirect_to show_navigation_custom_template_path, notice: 'Navigation customization updated successfully.' }
@@ -209,8 +190,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def update_article2
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update_section('Article2', article2_template_params[:Article2])
       respond_to do |format|
         format.html { redirect_to show_article2_custom_template_path, notice: 'Article2 customization updated successfully.' }
@@ -227,8 +206,6 @@ class CustomTemplatesController < ApplicationController
   end
 
   def update_comment2
-    @custom_template = CustomTemplate.for_user(current_user)
-    
     if @custom_template.update_section('Comment2', comment2_template_params[:Comment2])
       respond_to do |format|
         format.html { redirect_to show_comment2_custom_template_path, notice: 'Comment2 customization updated successfully.' }

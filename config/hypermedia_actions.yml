@@ -89,12 +89,17 @@ Comment:
     rel: 'self'
     method: 'GET'
     link: '/comments/#ID'
-  
+
   edit:
     rel: 'edit'
     method: 'GET'
     link: '/comments/#ID/edit'
-  
+
+  update:
+    rel: 'update'
+    method: 'PATCH'
+    link: '/comments/#ID'
+
   # FSM State Transitions
   approve:
     rel: 'transition:approve'
@@ -203,6 +208,16 @@ Comment2:
   show:
     rel: 'self'
     method: 'GET'
+    link: '/comment2s/#ID'
+
+  edit:
+    rel: 'edit'
+    method: 'GET'
+    link: '/comment2s/#ID/edit'
+
+  update:
+    rel: 'update'
+    method: 'PATCH'
     link: '/comment2s/#ID'
   
   # Event Sourcing State Transitions

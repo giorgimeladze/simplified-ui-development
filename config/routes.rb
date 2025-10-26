@@ -22,7 +22,7 @@ Rails.application.routes.draw do
     resources :comments, only: [:new, :create]
   end
 
-  resources :comments, only: [:show] do
+  resources :comments, only: [:show, :edit, :update] do
     collection do
       get :pending_comments
     end
@@ -85,7 +85,7 @@ Rails.application.routes.draw do
     resources :comment2s, only: [:new, :create]
   end
 
-  resources :comment2s, only: [:show] do
+  resources :comment2s, only: [:show, :edit, :update] do
     collection do
       get :pending_comment2s
     end

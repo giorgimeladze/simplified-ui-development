@@ -38,6 +38,7 @@ class Comment2 < ApplicationRecord
         self.status = 'pending'
       when 'Comment2Updated'
         self.text = event.event_data['text']
+        self.status = event.event_data['status']
       end
     end
   end

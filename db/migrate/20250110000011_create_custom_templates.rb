@@ -6,7 +6,6 @@ class CreateCustomTemplates < ActiveRecord::Migration[7.1]
       t.timestamps
     end
 
-    add_index :custom_templates, :user_id, unique: true
     User.all.each do |user|
       CustomTemplate.for_user(user)
     end
