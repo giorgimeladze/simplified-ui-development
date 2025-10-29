@@ -10,19 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_01_10_000011) do
-  create_table "article2s", force: :cascade do |t|
-    t.string "title"
-    t.text "content"
-    t.string "status", default: "draft"
-    t.integer "user_id", null: false
-    t.text "rejection_feedback"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["status"], name: "index_article2s_on_status"
-    t.index ["user_id"], name: "index_article2s_on_user_id"
-  end
-
+ActiveRecord::Schema[7.1].define(version: 2025_10_29_214232) do
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -32,19 +20,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_10_000011) do
     t.datetime "updated_at", null: false
     t.text "rejection_feedback"
     t.index ["user_id"], name: "index_articles_on_user_id"
-  end
-
-  create_table "comment2s", force: :cascade do |t|
-    t.integer "article2_id", null: false
-    t.integer "user_id", null: false
-    t.text "text", null: false
-    t.string "status", default: "pending", null: false
-    t.text "rejection_feedback"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["article2_id"], name: "index_comment2s_on_article2_id"
-    t.index ["status"], name: "index_comment2s_on_status"
-    t.index ["user_id"], name: "index_comment2s_on_user_id"
   end
 
   create_table "comments", force: :cascade do |t|
@@ -68,16 +43,25 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_10_000011) do
     t.index ["user_id"], name: "index_custom_templates_on_user_id"
   end
 
-  create_table "events", force: :cascade do |t|
-    t.string "aggregate_id", null: false
-    t.string "aggregate_type", null: false
+  create_table "event_store_events", force: :cascade do |t|
+    t.string "event_id", limit: 36, null: false
     t.string "event_type", null: false
-    t.json "event_data", null: false
-    t.integer "version", null: false
-    t.datetime "occurred_at", null: false
-    t.index ["aggregate_id", "aggregate_type"], name: "index_events_on_aggregate_id_and_aggregate_type"
-    t.index ["event_type"], name: "index_events_on_event_type"
-    t.index ["occurred_at"], name: "index_events_on_occurred_at"
+    t.binary "data", null: false
+    t.datetime "created_at", null: false
+    t.index ["created_at"], name: "index_event_store_events_on_created_at"
+    t.index ["event_id"], name: "index_event_store_events_on_event_id", unique: true
+    t.index ["event_type"], name: "index_event_store_events_on_event_type"
+  end
+
+  create_table "event_store_events_in_streams", force: :cascade do |t|
+    t.string "stream", null: false
+    t.integer "position"
+    t.string "event_id", limit: 36, null: false
+    t.datetime "created_at", null: false
+    t.index ["created_at"], name: "index_event_store_events_in_streams_on_created_at"
+    t.index ["event_id"], name: "index_event_store_events_in_streams_on_event_id"
+    t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
+    t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
   end
 
   create_table "state_transitions", force: :cascade do |t|
@@ -107,12 +91,10 @@ ActiveRecord::Schema[7.1].define(version: 2025_01_10_000011) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "article2s", "users"
   add_foreign_key "articles", "users"
-  add_foreign_key "comment2s", "article2s"
-  add_foreign_key "comment2s", "users"
   add_foreign_key "comments", "articles"
   add_foreign_key "comments", "users"
   add_foreign_key "custom_templates", "users"
+  add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
   add_foreign_key "state_transitions", "users"
 end

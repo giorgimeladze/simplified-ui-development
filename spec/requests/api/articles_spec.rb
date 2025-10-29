@@ -25,7 +25,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Returns all articles created by the authenticated user, regardless of state.'
-      security [session_auth: []]
+      security [bearer_auth: []]
 
       response '200', 'my articles found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
@@ -45,7 +45,7 @@ RSpec.describe 'Articles API', type: :request do
       tags 'Articles'
       produces 'application/json'
       description 'Returns all articles in "review" state. Requires editor or admin role.'
-      security [session_auth: []]
+      security [bearer_auth: []]
 
       response '200', 'articles for review found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
