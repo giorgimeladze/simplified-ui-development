@@ -1,96 +1,58 @@
+require 'securerandom'
 class Comment2Commands
   class << self
     def create_comment(text, article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      
-      comment2 = Comment2.new
-      comment2.text = text
-      comment2.article2_id = article2_id
-      comment2.user_id = user.id
-      comment2.status = 'pending'
-
-      if comment2.save!
-        # I had to do this since Ruby used bigint id which is assigned on db level, not on code level
-        event = Comment2Created.new(comment2.id, text, article2_id, user.id)
-        stored_events = EventStore.append_events(comment2.id, 'Comment2', [event])
-        EventBus.publish_events(stored_events)
-
-        { success: true, comment2: comment2 }
-      else
-        { success: false, errors: comment2.errors.full_messages }
-      end
+      comment2_id = SecureRandom.uuid
+      aggregate = Comment2Aggregate.new(comment2_id)
+      aggregate.create(text: text, article2_id: article2_id, author_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
     
     def approve_comment(comment2_id, user)
-      comment2 = Comment2.find(comment2_id)
-      return { success: false, errors: 'Comment not found' } unless comment2
-      return { success: false, errors: 'Comment is not in pending status' } unless comment2.status == 'pending'
-
-      event = Comment2Approved.new(comment2_id, user.id )
-      stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(comment2, { status: 'approved' })
+      aggregate = repository.load(Comment2Aggregate, comment2_id)
+      aggregate.approve(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
     
     def reject_comment(comment2_id, rejection_feedback, user)
-      comment2 = Comment2.find(comment2_id)
-      return { success: false, errors: 'Comment not found' } unless comment2
       return { success: false, errors: 'Rejection feedback is required' } unless rejection_feedback.present?
-      return { success: false, errors: 'Comment is not in pending status' } unless comment2.status == 'pending'
-
-      event = Comment2Rejected.new(comment2_id, rejection_feedback, user.id)
-      stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(comment2, { status: 'rejected', rejection_feedback: rejection_feedback })
+      aggregate = repository.load(Comment2Aggregate, comment2_id)
+      aggregate.reject(rejection_feedback: rejection_feedback, actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
     
     def delete_comment(comment2_id, user)
-      comment2 = Comment2.find(comment2_id)
-      return { success: false, errors: 'Comment not found' } unless comment2
-      return { success: false, errors: 'Comment cannot be deleted from current status' } unless ['pending', 'approved', 'rejected'].include?(comment2.status)
-
-      event = Comment2Deleted.new(comment2_id, user.id)
-      stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(comment2, { status: 'deleted' })
+      aggregate = repository.load(Comment2Aggregate, comment2_id)
+      aggregate.delete(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
     
     def restore_comment(comment2_id, user)
-      comment2 = Comment2.find(comment2_id)
-      return { success: false, errors: 'Comment not found' } unless comment2
-      return { success: false, errors: 'Comment is not in deleted status' } unless comment2.status == 'deleted'
-      
-      event = Comment2Restored.new(comment2_id, user.id)
-      stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-
-      update_aggregate(comment2, { status: 'pending' })
+      aggregate = repository.load(Comment2Aggregate, comment2_id)
+      aggregate.restore(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
     
     def update_comment(comment2_id, text, user)
-      comment2 = Comment2.find(comment2_id)
-      return { success: false, errors: 'Comment not found' } unless comment2
-      return { success: false, errors: 'Comment can only be updated when rejected' } unless comment2.status == 'rejected'
-
-      event = Comment2Updated.new(comment2_id, text, user.id)
-      stored_events = EventStore.append_events(comment2_id, 'Comment2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(comment2, { text: text, status: 'pending' })
+      aggregate = repository.load(Comment2Aggregate, comment2_id)
+      aggregate.update(text: text, actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, comment2_id: comment2_id }
     end
 
     private
 
-    def update_aggregate(comment2, params)
-      if comment2.update!(params)
-        { success: true, comment2: comment2 }
-      else
-        { success: false, errors: comment2.errors.full_messages }
-      end
+    def repository
+      @repository ||= EventRepository.new
+    end
+
+    def default_metadata(user)
+      { actor_id: user.id }
     end
   end
 end

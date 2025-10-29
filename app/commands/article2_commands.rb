@@ -1,140 +1,85 @@
+require 'securerandom'
 class Article2Commands
   class << self
     def create_article(title, content, user)
-      article2 = Article2.new
-      article2.title = title
-      article2.content = content
-      article2.user_id = user.id
-      article2.status = 'draft'
-      
-      if article2.save!
-        # I had to do this since Ruby used bigint id which is assigned on db level, not on code level
-        event = Article2Created.new(article2.id, title, content, user.id)
-        stored_events = EventStore.append_events(article2.id, 'Article2', [event])
-        EventBus.publish_events(stored_events)
-
-        { success: true, article2: article2 }
-      else
-        { success: false, errors: article2.errors.full_messages }
-      end
+      aggregate_id = SecureRandom.uuid
+      aggregate = Article2Aggregate.new(aggregate_id)
+      aggregate.create(title: title, content: content, author_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: aggregate_id }
     end
     
     def submit_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in draft status' } unless article2.status == 'draft'
-
-      event = Article2Submitted.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'review' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.submit(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def reject_article(article2_id, rejection_feedback, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in review status' } unless article2.status == 'review'
-
-      event = Article2Rejected.new(article2_id, rejection_feedback, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'rejected', rejection_feedback: rejection_feedback })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.reject(rejection_feedback: rejection_feedback, actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def approve_private_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in review status' } unless article2.status == 'review'
-
-      event = Article2ApprovedPrivate.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'privated' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.approve_private(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def publish_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in review status' } unless article2.status == 'review'
-
-      event = Article2Published.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'published' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.publish(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def archive_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article cannot be archived from current status' } unless ['rejected', 'published', 'privated'].include?(article2.status)
-
-      event = Article2Archived.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'archived' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.archive(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def update_article(article2_id, title, content, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article cannot be updated from current status' } unless ['draft', 'rejected'].include?(article2.status)
-
-      event = Article2Updated.new(article2_id, title, content, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { title: title, content: content })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.update(title: title, content: content, actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def resubmit_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in rejected status' } unless article2.status == 'rejected'
-
-      event = Article2Submitted.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'review' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.submit(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def make_visible_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in privated status' } unless article2.status == 'privated'
-
-      event = Article2Published.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'published' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.publish(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
     
     def make_invisible_article(article2_id, user)
-      article2 = Article2.find_by(id: article2_id)
-      return { success: false, errors: 'Article not found' } unless article2
-      return { success: false, errors: 'Article is not in published status' } unless article2.status == 'published'
-
-      event = Article2ApprovedPrivate.new(article2_id, user.id)
-      stored_events = EventStore.append_events(article2_id, 'Article2', [event])
-      EventBus.publish_events(stored_events)
-      
-      update_aggregate(article2, { status: 'privated' })
+      aggregate = repository.load(Article2Aggregate, article2_id)
+      aggregate.approve_private(actor_id: user.id)
+      repository.store(aggregate, metadata: default_metadata(user))
+      { success: true, article2_id: article2_id }
     end
 
     private
 
-    def update_aggregate(article2, params)
-      if article2.update!(params)
-        { success: true, article2: article2 }
-      else
-        { success: false, errors: article2.errors.full_messages }
-      end
+    def repository
+      @repository ||= EventRepository.new
+    end
+
+    def default_metadata(user)
+      { actor_id: user.id }
     end
   end
 end
