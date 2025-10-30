@@ -335,6 +335,7 @@ PLATFORMS
 
 DEPENDENCIES
   aasm
+  aggregate_root
   blueprinter
   bootsnap
   bootstrap (~> 5.3.2)

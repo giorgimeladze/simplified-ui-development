@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_29_214232) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_30_204447) do
+  create_table "article2_read_models", id: :string, force: :cascade do |t|
+    t.text "title"
+    t.text "content"
+    t.integer "author_id"
+    t.string "state", default: "draft"
+    t.text "rejection_feedback"
+    t.index ["author_id"], name: "index_article2_read_models_on_author_id"
+    t.index ["state"], name: "index_article2_read_models_on_state"
+  end
+
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.text "content"
@@ -20,6 +30,17 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_29_214232) do
     t.datetime "updated_at", null: false
     t.text "rejection_feedback"
     t.index ["user_id"], name: "index_articles_on_user_id"
+  end
+
+  create_table "comment2_read_models", id: :string, force: :cascade do |t|
+    t.text "text"
+    t.string "article2_id"
+    t.integer "author_id"
+    t.string "state", default: "pending"
+    t.text "rejection_feedback"
+    t.index ["article2_id"], name: "index_comment2_read_models_on_article2_id"
+    t.index ["author_id"], name: "index_comment2_read_models_on_author_id"
+    t.index ["state"], name: "index_comment2_read_models_on_state"
   end
 
   create_table "comments", force: :cascade do |t|

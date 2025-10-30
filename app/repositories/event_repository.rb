@@ -9,7 +9,14 @@ class EventRepository
   end
 
   def store(aggregate, expected_version: :auto, metadata: {})
-    @repository.store(aggregate, stream_name(aggregate.class, aggregate.id), expected_version: expected_version, metadata: metadata)
+    stream = stream_name(aggregate.class, aggregate.id)
+    if metadata && !metadata.empty?
+      @client.with_metadata(metadata) do
+        @repository.store(aggregate, stream, expected_version: expected_version)
+      end
+    else
+      @repository.store(aggregate, stream, expected_version: expected_version)
+    end
   end
 
   def stream_name(aggregate_class, aggregate_id)

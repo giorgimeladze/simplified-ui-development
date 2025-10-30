@@ -25,11 +25,10 @@ class Comment2Projection
     id = event.data[:comment2_id]
     Comment2ReadModel.upsert({
       id: id,
-      text_latest: event.data[:text],
+      text: event.data[:text],
       article2_id: event.data[:article2_id],
       author_id: event.data[:user_id],
-      state: 'pending',
-      updated_at: Time.current
+      state: 'pending'
     }, unique_by: :id)
   end
 
@@ -37,9 +36,8 @@ class Comment2Projection
     id = event.data[:comment2_id]
     Comment2ReadModel.upsert({
       id: id,
-      text_latest: event.data[:text],
-      state: 'pending',
-      updated_at: Time.current
+      text: event.data[:text],
+      state: 'pending'
     }, unique_by: :id)
   end
 
@@ -48,14 +46,13 @@ class Comment2Projection
     Comment2ReadModel.upsert({
       id: id,
       state: 'rejected',
-      rejection_feedback: event.data[:rejection_feedback],
-      updated_at: Time.current
+      rejection_feedback: event.data[:rejection_feedback]
     }, unique_by: :id)
   end
 
   def self.upsert_state(event, state)
     id = event.data[:comment2_id]
-    Comment2ReadModel.upsert({ id: id, state: state, updated_at: Time.current }, unique_by: :id)
+    Comment2ReadModel.upsert({ id: id, state: state }, unique_by: :id)
   end
 end
 

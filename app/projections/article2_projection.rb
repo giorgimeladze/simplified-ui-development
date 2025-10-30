@@ -28,10 +28,9 @@ class Article2Projection
     Article2ReadModel.upsert({
       id: id,
       title: event.data[:title],
-      content_latest: event.data[:content],
+      content: event.data[:content],
       author_id: event.data[:user_id],
-      state: 'draft',
-      updated_at: Time.current
+      state: 'draft'
     }, unique_by: :id)
   end
 
@@ -40,8 +39,7 @@ class Article2Projection
     Article2ReadModel.upsert({
       id: id,
       title: event.data[:title],
-      content_latest: event.data[:content],
-      updated_at: Time.current
+      content: event.data[:content]
     }, unique_by: :id)
   end
 
@@ -50,14 +48,13 @@ class Article2Projection
     Article2ReadModel.upsert({
       id: id,
       state: 'rejected',
-      rejection_feedback: event.data[:rejection_feedback],
-      updated_at: Time.current
+      rejection_feedback: event.data[:rejection_feedback]
     }, unique_by: :id)
   end
 
   def self.upsert_state(event, state)
     id = event.data[:article2_id]
-    Article2ReadModel.upsert({ id: id, state: state, updated_at: Time.current }, unique_by: :id)
+    Article2ReadModel.upsert({ id: id, state: state }, unique_by: :id)
   end
 end
 

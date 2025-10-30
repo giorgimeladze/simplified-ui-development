@@ -3,7 +3,7 @@ class Article2sController < ApplicationController
   before_action :set_article2, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
 
   def index
-    article2s = Article2ReadModel.all
+    article2s = Article2ReadModel.where(state: 'published')
     render_article2s_list(article2s, 'All Articles')
   end
   
@@ -20,8 +20,7 @@ class Article2sController < ApplicationController
   
   def deleted_article2s
     authorize :article2, :deleted_article2s?
-    base = current_user.admin? ? Article2ReadModel.all : Article2ReadModel.by_author(current_user.id)
-    article2s = base.where(state: 'archived')
+    article2s = Article2ReadModel.where(state: 'archived')
     render_article2s_list(article2s, 'Archived Articles')
   end
 
@@ -31,11 +30,11 @@ class Article2sController < ApplicationController
     payload = {
       id: @article2.id,
       title: @article2.title,
-      content: @article2.content_latest,
+      content: @article2.content,
       author_id: @article2.author_id,
       state: @article2.state,
       _embedded: {
-        comment2s: comments.map { |c| { id: c.id, text: c.text_latest, author_id: c.author_id, state: c.state } }
+        comment2s: comments.map { |c| { id: c.id, text: c.text, author_id: c.author_id, state: c.state } }
       }
     }
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article2')
@@ -47,7 +46,7 @@ class Article2sController < ApplicationController
 
   # GET /article2s/new
   def new
-    @article2 = Article2.new
+    @article2 = Article2ReadModel.new
     authorize :article2, :new?
     @html_content = render_to_string(partial: 'article2s/form', locals: { article2: @article2 }, formats: [:html])
     @links = @article2.hypermedia_new_links(current_user)
@@ -179,7 +178,7 @@ class Article2sController < ApplicationController
   end
 
   def article2_params
-    params.require(:article2).permit(:title, :content)
+    params.require(:article2_read_model).permit(:title, :content)
   end
 
   def render_article2s_list(article2s, title)

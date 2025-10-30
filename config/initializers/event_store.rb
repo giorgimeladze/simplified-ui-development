@@ -1,7 +1,24 @@
+require 'aggregate_root'
 require_dependency Rails.root.join('app/subscribers/article2_projection_subscriber').to_s
 require_dependency Rails.root.join('app/subscribers/comment2_projection_subscriber').to_s
 require_dependency Rails.root.join('app/projections/article2_projection').to_s
 require_dependency Rails.root.join('app/projections/comment2_projection').to_s
+require_dependency Rails.root.join('app/subscribers/article2_projection_subscriber').to_s
+require_dependency Rails.root.join('app/subscribers/comment2_projection_subscriber').to_s
+require_dependency Rails.root.join('app/events/base_event').to_s
+require_dependency Rails.root.join('app/events/article2_created').to_s
+require_dependency Rails.root.join('app/events/article2_updated').to_s
+require_dependency Rails.root.join('app/events/article2_submitted').to_s
+require_dependency Rails.root.join('app/events/article2_rejected').to_s
+require_dependency Rails.root.join('app/events/article2_approved_private').to_s
+require_dependency Rails.root.join('app/events/article2_published').to_s
+require_dependency Rails.root.join('app/events/article2_archived').to_s
+require_dependency Rails.root.join('app/events/comment2_created').to_s
+require_dependency Rails.root.join('app/events/comment2_approved').to_s
+require_dependency Rails.root.join('app/events/comment2_rejected').to_s
+require_dependency Rails.root.join('app/events/comment2_deleted').to_s
+require_dependency Rails.root.join('app/events/comment2_restored').to_s
+require_dependency Rails.root.join('app/events/comment2_updated').to_s
 
 Rails.application.config.x.event_store ||= RubyEventStore::Client.new
 

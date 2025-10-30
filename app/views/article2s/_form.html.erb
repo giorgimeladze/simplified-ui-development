@@ -1,4 +1,4 @@
-<%= form_with model: article2, local: true, class: 'needs-validation' do |form| %>
+<%= form_with model: article2, url: article2s_path, local: true, class: 'needs-validation' do |form| %>
   <div class="mb-3">
     <%= form.label :title, class: 'form-label' %>
     <%= form.text_field :title, class: 'form-control', placeholder: 'Enter title' %>
