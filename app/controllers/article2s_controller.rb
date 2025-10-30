@@ -3,56 +3,52 @@ class Article2sController < ApplicationController
   before_action :set_article2, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
 
   def index
-    article2s = Article2.visible
-  
-    rendering_article2s(article2s, 'All Articles')
+    article2s = Article2ReadModel.all
+    render_article2s_list(article2s, 'All Articles')
   end
   
   def my_article2s
-    article2s = current_user.article2s
-  
-    rendering_article2s(article2s, 'My Articles')
+    article2s = Article2ReadModel.by_author(current_user.id)
+    render_article2s_list(article2s, 'My Articles')
   end
   
   def article2s_for_review
-    authorize Article2, :article2s_for_review?
-  
-    article2s = Article2.where(status: 'review')
-  
-    rendering_article2s(article2s, 'Articles for Review')
+    authorize :article2, :article2s_for_review?
+    article2s = Article2ReadModel.where(state: 'review')
+    render_article2s_list(article2s, 'Articles for Review')
   end
   
   def deleted_article2s
-    authorize Article2, :deleted_article2s?
-  
-    article2s = current_user.admin? ? Article2.where(status: 'archived') : current_user.article2s.where(status: 'archived')
-  
-    rendering_article2s(article2s, 'Archived Articles')
+    authorize :article2, :deleted_article2s?
+    base = current_user.admin? ? Article2ReadModel.all : Article2ReadModel.by_author(current_user.id)
+    article2s = base.where(state: 'archived')
+    render_article2s_list(article2s, 'Archived Articles')
   end
 
    # GET /article2s/:id
    def show
-    rendered_article2 = ArticleBlueprint.render_as_hash(@article2, view: :show, context: { current_user: current_user })
-    article2_comments = CommentBlueprint.render_as_hash(@article2.visible_comments(current_user), view: :index, context: { current_user: current_user })
-    
-    # HAL-style _embedded format
-    rendered_article2[:_embedded] = {
-      comment2s: article2_comments
+    comments = Comment2ReadModel.for_article(@article2.id)
+    payload = {
+      id: @article2.id,
+      title: @article2.title,
+      content: @article2.content_latest,
+      author_id: @article2.author_id,
+      state: @article2.state,
+      _embedded: {
+        comment2s: comments.map { |c| { id: c.id, text: c.text_latest, author_id: c.author_id, state: c.state } }
+      }
     }
-    
-    @html_content = render_to_string(partial: 'article2s/article2', locals: { article2: rendered_article2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article2')
-
     respond_to do |format|
-      format.html { render :show }
-      format.json { render json: { article2: rendered_article2, links: @links } }
+      format.html { render :show, locals: { article2: payload } }
+      format.json { render json: { article2: payload, links: @links } }
     end
   end
 
   # GET /article2s/new
   def new
     @article2 = Article2.new
-    authorize @article2
+    authorize :article2, :new?
     @html_content = render_to_string(partial: 'article2s/form', locals: { article2: @article2 }, formats: [:html])
     @links = @article2.hypermedia_new_links(current_user)
     respond_to do |format|
@@ -63,7 +59,7 @@ class Article2sController < ApplicationController
 
   # POST /article2s
   def create
-    authorize Article2.new
+    authorize :article2, :create?
     
     result = Article2Commands.create_article(
       article2_params[:title],
@@ -72,10 +68,10 @@ class Article2sController < ApplicationController
     )
     
     if result[:success]
-      @article2 = result[:article2]
+      @article2 = Article2ReadModel.find(result[:article2_id]) rescue nil
       respond_to do |format|
-        format.html { redirect_to article2_path(@article2), notice: 'Article was successfully created.' }
-        format.json { render json: { article2: @article2.slice(:id, :title, :content, :status, :user_id) }, status: :created }
+        format.html { redirect_to article2_path(result[:article2_id]), notice: 'Article was successfully created.' }
+        format.json { render json: { article2_id: result[:article2_id] }, status: :created }
       end
     else
       respond_to do |format|
@@ -96,7 +92,7 @@ class Article2sController < ApplicationController
   end
 
   def reject_feedback
-    authorize @article2, :reject?
+    authorize :article2, :reject?
     @html_content = render_to_string(partial: 'article2s/reject_feedback_form', formats: [:html])
     @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
@@ -179,37 +175,34 @@ class Article2sController < ApplicationController
   private
 
   def set_article2
-    @article2 = Article2.find(params[:id])
+    @article2 = Article2ReadModel.find(params[:id])
   end
 
   def article2_params
     params.require(:article2).permit(:title, :content)
   end
 
-  def rendering_article2s(article2s, title)
-    rendered_article2s = ArticleBlueprint.render_as_hash(article2s, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'article2s/list', locals: { article2s: rendered_article2s, title: title }, formats: [:html])
+  def render_article2s_list(article2s, title)
+    list = article2s.map { |a| { id: a.id, title: a.title, state: a.state, author_id: a.author_id } }
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article2')
-
     respond_to do |format|
-      format.html { render :index }
-      format.json { render json: { articles: rendered_article2s, links: @links } }
+      format.html { render :index, locals: { article2s: list, title: title } }
+      format.json { render json: { articles: list, links: @links } }
     end
   end
 
   def handle_command_result(result, success_message)
     if result[:success]
-      @article2 = result[:article2]
+      id = result[:article2_id] || params[:id]
       respond_to do |format|
-        format.html { redirect_to article2_path(@article2), notice: 'Transition applied.' }
+        format.html { redirect_to article2_path(id), notice: 'Transition applied.' }
         format.json do
-          rendered_article2 = ArticleBlueprint.render_as_hash(@article2, view: :show, context: { current_user: current_user })
-          render json: { article2: rendered_article2 }, status: :ok
+          render json: { article2_id: id, message: success_message }, status: :ok
         end
       end
     else
       respond_to do |format|
-        format.html { redirect_to article2_path(@article2), alert: result[:errors] }
+        format.html { redirect_to article2_path(params[:id]), alert: result[:errors] }
         format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end

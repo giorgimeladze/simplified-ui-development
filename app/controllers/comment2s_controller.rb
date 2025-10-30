@@ -4,9 +4,9 @@ class Comment2sController < ApplicationController
   before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comment2s
-    comment2s = Comment2.awaiting_moderation
+    comment2s = Comment2ReadModel.where(state: 'pending')
   
-    rendered_comment2s = CommentBlueprint.render_as_hash(comment2s, view: :index, context: { current_user: current_user })
+    rendered_comment2s = comment2s.map { |c| { id: c.id, text: c.text_latest, author_id: c.author_id, article2_id: c.article2_id, state: c.state } }
     @html_content = render_to_string(partial: 'comment2s/list', locals: { comment2s: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment2')
 
@@ -17,40 +17,39 @@ class Comment2sController < ApplicationController
   end
 
   def show
-    rendered_comment2 = CommentBlueprint.render_as_hash(@comment2, view: :show, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: rendered_comment2 }, formats: [:html])
-    @links = @comment2.article2.hypermedia_edit_links(current_user)
+    payload = { id: @comment2.id, text: @comment2.text_latest, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id }
+    @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: payload }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :show }
-      format.json { render json: { comment: rendered_comment2, links: @links } }
+      format.json { render json: { comment: payload, links: @links } }
     end
   end
 
   def new
-    @comment2 = @article2.comment2s.build
-    authorize @comment2
-    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
-    @links = @article2.hypermedia_edit_links(current_user)
+    authorize Comment2, :new?
+    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: nil }, formats: [:html])
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :new }
-      format.json { render json: { comment: @comment2, links: @links } }
+      format.json { render json: { links: @links } }
     end
   end
 
   def create
-    authorize Comment2.new
+    authorize Comment2, :create?
     
     result = Comment2Commands.create_comment(
       comment2_params[:text],
-      @article2.id,
+      params[:article2_id],
       current_user
     )
     
     if result[:success]
-      @comment2 = result[:comment2]
+      @comment2 = Comment2ReadModel.find(result[:comment2_id]) rescue nil
       respond_to do |format|
-        format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully created.' }
-        format.json { render json: { comment: @comment2 }, status: :created }
+        format.html { redirect_to comment2_path(result[:comment2_id]), notice: 'Comment was successfully created.' }
+        format.json { render json: { comment2_id: result[:comment2_id] }, status: :created }
       end
     else
       respond_to do |format|
@@ -62,9 +61,9 @@ class Comment2sController < ApplicationController
 
 
   def edit
-    authorize @comment2, :update?
+    authorize Comment2.new, :update?
     @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
-    @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :edit }
       format.json { render json: { comment2: @comment2.slice(:id, :text, :status, :user_id), links: @links } }
@@ -72,19 +71,19 @@ class Comment2sController < ApplicationController
   end
 
   def update
-    authorize @comment2, :update?
+    authorize Comment2.new, :update?
     
     result = Comment2Commands.update_comment(
-      @comment2.id,
+      params[:id],
       comment2_params[:text],
       current_user
     )
     
     if result[:success]
-      @comment2 = result[:comment2]
+      id = result[:comment2_id]
       respond_to do |format|
-        format.html { redirect_to comment2_path(@comment2), notice: 'Comment was successfully updated.' }
-        format.json { render json: { comment: @comment2.slice(:id, :text, :status, :user_id) }, status: :ok }
+        format.html { redirect_to comment2_path(id), notice: 'Comment was successfully updated.' }
+        format.json { render json: { comment2_id: id }, status: :ok }
       end
     else
       respond_to do |format|
@@ -97,7 +96,7 @@ class Comment2sController < ApplicationController
   # Event Sourcing Actions
   def approve
     result = Comment2Commands.approve_comment(
-      @comment2.id,
+      params[:id],
       current_user
     )
     
@@ -105,9 +104,9 @@ class Comment2sController < ApplicationController
   end
 
   def reject_feedback
-    authorize @comment2, :reject?
+    authorize :comment2, :reject?
     @html_content = render_to_string(partial: 'comment2s/reject_feedback_form', formats: [:html])
-    @links = @comment2.hypermedia_edit_links(current_user, 'Comment2')
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :reject_feedback }
       format.json { render json: { comment2: @comment2.slice(:id, :text, :status, :user_id), links: @links } }
@@ -117,7 +116,7 @@ class Comment2sController < ApplicationController
   def reject
     if params[:rejection_feedback].present?
       result = Comment2Commands.reject_comment(
-        @comment2.id,
+        params[:id],
         params[:rejection_feedback],
         current_user
       )
@@ -133,7 +132,7 @@ class Comment2sController < ApplicationController
 
   def delete
     result = Comment2Commands.delete_comment(
-      @comment2.id,
+      params[:id],
       current_user
     )
     
@@ -142,7 +141,7 @@ class Comment2sController < ApplicationController
 
   def restore
     result = Comment2Commands.restore_comment(
-      @comment2.id,
+      params[:id],
       current_user
     )
     
@@ -152,11 +151,11 @@ class Comment2sController < ApplicationController
   private
 
   def set_article2
-    @article2 = Article2.find(params[:article2_id])
+    @article2 = Article2ReadModel.find(params[:article2_id])
   end
 
   def set_comment2
-    @comment2 = Comment2.find(params[:id])
+    @comment2 = Comment2ReadModel.find(params[:id])
   end
 
   def comment2_params
@@ -165,17 +164,16 @@ class Comment2sController < ApplicationController
 
   def handle_command_result(result, success_message)
     if result[:success]
-      @comment2 = result[:comment2]
+      id = result[:comment2_id] || params[:id]
       respond_to do |format|
-        format.html { redirect_to article2_path(@comment2.article2), notice: 'Transition applied.' }
+        format.html { redirect_to comment2_path(id), notice: 'Transition applied.' }
         format.json do
-          rendered_comment2 = CommentBlueprint.render_as_hash(@comment2, view: :show, context: { current_user: current_user })
-          render json: { comment: rendered_comment2 }, status: :ok
+          render json: { comment2_id: id, message: success_message }, status: :ok
         end
       end
     else
       respond_to do |format|
-        format.html { redirect_to article2_path(@comment2.article2), alert: result[:errors] }
+        format.html { redirect_to comment2_path(params[:id]), alert: result[:errors] }
         format.json { render json: { errors: [result[:errors]] }, status: :unprocessable_entity }
       end
     end
