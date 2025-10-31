@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_30_204447) do
+ActiveRecord::Schema[7.1].define(version: 2025_10_30_235135) do
   create_table "article2_read_models", id: :string, force: :cascade do |t|
     t.text "title"
     t.text "content"
@@ -69,6 +69,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_30_204447) do
     t.string "event_type", null: false
     t.binary "data", null: false
     t.datetime "created_at", null: false
+    t.binary "metadata"
+    t.datetime "valid_at"
     t.index ["created_at"], name: "index_event_store_events_on_created_at"
     t.index ["event_id"], name: "index_event_store_events_on_event_id", unique: true
     t.index ["event_type"], name: "index_event_store_events_on_event_type"

@@ -5,18 +5,18 @@ class EventRepository
   end
 
   def load(aggregate_class, aggregate_id)
-    @repository.load(aggregate_class.new(aggregate_id), stream_name(aggregate_class, aggregate_id))
+    aggregate = aggregate_class.new(aggregate_id)
+    @repository.load(aggregate, stream_name(aggregate_class, aggregate_id))
   end
 
-  def store(aggregate, expected_version: :auto, metadata: {})
+  def store(aggregate, expected_version: :any)
     stream = stream_name(aggregate.class, aggregate.id)
-    if metadata && !metadata.empty?
-      @client.with_metadata(metadata) do
-        @repository.store(aggregate, stream, expected_version: expected_version)
-      end
-    else
-      @repository.store(aggregate, stream, expected_version: expected_version)
-    end
+    puts("[RES] Storing to stream=#{stream} unpublished_events=#{aggregate.unpublished_events.map(&:class).join(', ')}")
+
+    # Store without metadata; API expects only (aggregate, expected_version:)
+    @repository.store(aggregate, expected_version: expected_version)
+
+    puts("[RES] Stored events to #{stream}")
   end
 
   def stream_name(aggregate_class, aggregate_id)

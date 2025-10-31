@@ -67,10 +67,10 @@ class Article2sController < ApplicationController
     )
     
     if result[:success]
-      @article2 = Article2ReadModel.find(result[:article2_id]) rescue nil
+      #@article2 = Article2ReadModel.find(result[:article2_id]) rescue nil
       respond_to do |format|
-        format.html { redirect_to article2_path(result[:article2_id]), notice: 'Article was successfully created.' }
-        format.json { render json: { article2_id: result[:article2_id] }, status: :created }
+        format.html { redirect_to article2s_path, notice: 'Article was successfully created.' }
+        format.json { render json: { success: true }, status: :created }
       end
     else
       respond_to do |format|

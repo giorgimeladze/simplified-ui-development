@@ -35,7 +35,6 @@ gem 'pundit'
 gem 'aasm'
 gem 'blueprinter'
 gem 'faker'
-gem 'wisper'
 gem 'rails_event_store'
 gem 'aggregate_root'
 

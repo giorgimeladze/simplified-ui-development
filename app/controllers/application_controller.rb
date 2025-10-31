@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   # Skip CSRF protection for JSON API requests
   protect_from_forgery with: :exception, unless: -> { request.format.json? }
 
-  before_action :authenticate_user!
+  before_action :authenticate_user!, unless: -> { devise_controller? }
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_header_links
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
