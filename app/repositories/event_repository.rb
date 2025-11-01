@@ -16,26 +16,25 @@ class EventRepository
     aggregate
   end
 
-  def store(aggregate, expected_version: :any)
+  def store(aggregate, event_class, expected_version: :any)
     stream = stream_name(aggregate.class, aggregate.id)
-    unpublished_events = aggregate.unpublished_events
     
-    puts("[RES] Storing to stream=#{stream} unpublished_events=#{unpublished_events.map(&:class).join(', ')}")
+    puts("[RES] Storing to stream=#{stream} unpublished_events=#{aggregate.unpublished_events.map(&:class).join(', ')}")
 
     # Publish each unpublished event directly to the event store
-    unpublished_events.each_with_index do |event, index|
-      ev = (index == 0) ? expected_version : :auto  # Use :auto for subsequent events
-      
-      puts("[RES] Publishing event #{event.class.name} with expected_version=#{ev}")
-      @client.publish(
-        event,
-        stream_name: stream,
-        expected_version: ev
-      )
-      puts("[RES] Published event #{event.class.name}")
-    end
+    event = aggregate.unpublished_events.to_a.last
+    return unless event.is_a?(event_class)
 
-    puts("[RES] Stored #{unpublished_events.count} events to #{stream}")
+    puts("[RES] Publishing event #{event.class.name} with expected_version=#{expected_version}")
+    @client.publish(
+      event,
+      stream_name: stream,
+      expected_version: expected_version
+    )
+    puts("[RES] Publishing event #{event.class.name} with expected_version=#{expected_version}")
+
+    aggregate.instance_variable_get(:@unpublished_events).clear
+    puts("[RES] Stored #{aggregate.unpublished_events.count} events to #{stream}")
   end
 
   private

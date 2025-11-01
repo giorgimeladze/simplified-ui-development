@@ -7,7 +7,7 @@
     <p class="card-text"><%= article2[:content] %></p>
     
     <%# Show rejection feedback if available and user is admin or article editor %>
-    <% if article2[:rejection_feedback].present?%>
+    <% if article2[:rejection_feedback].present? && ['rejected'].include?(article2[:state])%>
       <div class="alert alert-warning mt-3">
         <h6><strong>Rejection Feedback:</strong></h6>
         <p class="mb-0"><%= article2[:rejection_feedback] %></p>

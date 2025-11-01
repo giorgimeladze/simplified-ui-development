@@ -1,27 +1,24 @@
-<h1>Event Sourcing Events</h1>
+<h1>Event Store Events</h1>
 
 <table class="table table-striped">
   <thead class="table-dark">
     <tr>
-      <th>Aggregate ID</th>
-      <th>Aggregate Type</th>
       <th>Event Type</th>
-      <th>Version</th>
-      <th>Occurred At</th>
+      <th>Created At</th>
+      <th>Changes</th>
     </tr>
   </thead>
   <tbody>
     <% @events.each do |event| %>
       <tr>
-        <td><%= event.aggregate_id %></td>
-        <td><%= event.aggregate_type %></td>
-        <td><%= event.event_type %></td>
-        <td><%= event.version %></td>
-        <td><%= event.occurred_at.strftime("%Y-%m-%d %H:%M:%S") %></td>
-      </tr>
-      <tr>
-        <td colspan="8">
-          <%= JSON.pretty_generate(event.event_data) %>
+        <td><%= event[:event_type] %></td>
+        <td>
+          <% if event[:created_at] %>
+            <%= Time.parse(event[:created_at]).strftime("%Y-%m-%d %H:%M:%S") %>
+          <% end %>
+        </td>
+        <td>
+          <pre class="mb-0"><%= JSON.pretty_generate(event[:data]) %></pre>
         </td>
       </tr>
     <% end %>

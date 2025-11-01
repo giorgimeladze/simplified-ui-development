@@ -18,7 +18,7 @@ class Comment2sController < ApplicationController
   end
 
   def show
-    payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user) }
+    payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user), rejection_feedback: @comment2.rejection_feedback }
     @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: payload }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -63,7 +63,7 @@ class Comment2sController < ApplicationController
 
 
   def edit
-    authorize :comment2, :update?
+    Comment2Policy.new(current_user, @comment2).update?
     @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -73,7 +73,7 @@ class Comment2sController < ApplicationController
   end
 
   def update
-    authorize :comment2, :update?
+    Comment2Policy.new(current_user, @comment2).update?
     
     result = Comment2Commands.update_comment(
       params[:id],
@@ -135,7 +135,7 @@ class Comment2sController < ApplicationController
   end
 
   def delete
-    authorize :comment2, :delete?
+    Comment2Policy.new(current_user, @comment2).delete?
     result = Comment2Commands.delete_comment(
       params[:id],
       current_user

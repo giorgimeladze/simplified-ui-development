@@ -32,6 +32,7 @@ class Article2sController < ApplicationController
       content: @article2.content,
       author_id: @article2.author_id,
       state: @article2.state,
+      rejection_feedback: @article2.rejection_feedback,
       links: @article2.hypermedia_show_links(current_user),
       _embedded: {
         comment2s: @article2.comments.map { |c| { id: c.id, text: c.text, author_id: c.author_id, state: c.state, links: c.hypermedia_index_links(current_user) } }
@@ -179,7 +180,7 @@ class Article2sController < ApplicationController
   end
 
   def article2_params
-    params.require(:article2_read_model).permit(:title, :content)
+    params.require(:article2).permit(:title, :content)
   end
 
   def render_article2s_list(article2s, title)

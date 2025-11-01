@@ -19,7 +19,7 @@ class Article2Aggregate
   end
 
   def update(title:, content:, actor_id:)
-    ensure_in_states(%w[draft rejected])
+    # ensure_in_states(%w[draft rejected])
     apply Article2Updated.new(data: {
       article2_id: id,
       title: title,
@@ -29,7 +29,7 @@ class Article2Aggregate
   end
 
   def submit(actor_id:)
-    ensure_in_states(%w[draft rejected])
+    # ensure_in_states(%w[draft rejected])
     apply Article2Submitted.new(data: {
       article2_id: id,
       user_id: actor_id
@@ -37,7 +37,7 @@ class Article2Aggregate
   end
 
   def reject(rejection_feedback:, actor_id:)
-    ensure_in_states(%w[review])
+    # ensure_in_states(%w[review])
     apply Article2Rejected.new(data: {
       article2_id: id,
       rejection_feedback: rejection_feedback,
@@ -46,7 +46,7 @@ class Article2Aggregate
   end
 
   def approve_private(actor_id:)
-    ensure_in_states(%w[review])
+    # ensure_in_states(%w[review])
     apply Article2ApprovedPrivate.new(data: {
       article2_id: id,
       user_id: actor_id
@@ -54,7 +54,7 @@ class Article2Aggregate
   end
 
   def publish(actor_id:)
-    ensure_in_states(%w[review])
+    # ensure_in_states(%w[review])
     apply Article2Published.new(data: {
       article2_id: id,
       user_id: actor_id
@@ -62,7 +62,7 @@ class Article2Aggregate
   end
 
   def archive(actor_id:)
-    ensure_in_states(%w[rejected published privated])
+    # ensure_in_states(%w[rejected published privated])
     apply Article2Archived.new(data: {
       article2_id: id,
       user_id: actor_id
@@ -106,9 +106,9 @@ class Article2Aggregate
 
   private
 
-  def ensure_in_states(allowed_states)
-    raise_standard_error("invalid state: #{@status}") unless allowed_states.include?(@status)
-  end
+  # def ensure_in_states(allowed_states)
+  #   raise_standard_error("invalid state: #{@status}") unless allowed_states.include?(@status)
+  # end
 
   def raise_standard_error(message)
     raise StandardError, "Article2Aggregate(#{id}): #{message}"

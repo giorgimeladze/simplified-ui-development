@@ -1,11 +1,28 @@
 class EventsController < ApplicationController
   def index
-    authorize Event, :index?
-    @events = Event.all.order(occurred_at: :desc)
+    authorize :event, :index?
+    
+    # Read all events from Rails Event Store
+    # event_store = Rails.application.config.x.event_store
+    @events = ActiveRecord::Base.connection.execute("SELECT *  FROM event_store_events")
+    @events = @events.map { |event| format_event(event) }
     
     respond_to do |format|
       format.html { render :index }
       format.json { render json: { events: @events } }
     end
+  end
+
+  private
+
+  def format_event(event)
+    event = event.deep_symbolize_keys
+    {
+      event_id: event[:event_id],
+      event_type: event[:event_type],
+      data: event[:data],
+      metadata: event[:metadata],
+      created_at: event[:created_at]
+    }
   end
 end
