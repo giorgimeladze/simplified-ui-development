@@ -1,4 +1,10 @@
-<%= form_with model: [@article2, comment2], local: true, class: 'needs-validation' do |form| %>
+<%= form_with(
+      model: comment2,
+      url: comment2.persisted? ? comment2_path(comment2) : article2_comment2s_path(@article2),
+      method: comment2.persisted? ? :patch : :post,
+      local: true,
+      class: 'needs-validation'
+    ) do |form| %>
   <div class="mb-3">
     <%= form.label :text, class: 'form-label' %>
     <%= form.text_field :text, class: 'form-control', placeholder: 'Enter comment text' %>

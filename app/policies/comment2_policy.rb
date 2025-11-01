@@ -7,12 +7,16 @@ class Comment2Policy < ApplicationPolicy
     true
   end
 
+  def pending_comment2s?
+    user.admin?
+  end
+
   def create?
     user.present?
   end
 
   def update?
-    user.present? && record.user_id == user.id && (record.pending? || record.rejected?)
+    user.present? && record.author_id == user.id && (record.state == 'pending' || record.state == 'rejected')
   end
 
   def approve?
@@ -24,7 +28,7 @@ class Comment2Policy < ApplicationPolicy
   end
 
   def delete?
-    user.present? && (record.user_id == user.id || user.admin? || user.editor?)
+    user.present? && (record.author_id == user.id || user.admin? || user.editor?)
   end
 
   def restore?

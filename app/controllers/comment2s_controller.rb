@@ -4,9 +4,10 @@ class Comment2sController < ApplicationController
   before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
 
   def pending_comment2s
+    authorize :comment2, :pending_comment2s?
     comment2s = Comment2ReadModel.where(state: 'pending')
   
-    rendered_comment2s = comment2s.map { |c| { id: c.id, text: c.text_latest, author_id: c.author_id, article2_id: c.article2_id, state: c.state } }
+    rendered_comment2s = comment2s.map { |c| { id: c.id, text: c.text, author_id: c.author_id, article2_id: c.article2_id, state: c.state, links: c.hypermedia_index_links(current_user) } }
     @html_content = render_to_string(partial: 'comment2s/list', locals: { comment2s: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment2')
 
@@ -17,7 +18,7 @@ class Comment2sController < ApplicationController
   end
 
   def show
-    payload = { id: @comment2.id, text: @comment2.text_latest, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id }
+    payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user) }
     @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: payload }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -27,8 +28,9 @@ class Comment2sController < ApplicationController
   end
 
   def new
-    authorize Comment2, :new?
-    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: nil }, formats: [:html])
+    authorize :comment2, :create?
+    @comment2 = Comment2ReadModel.new # or a plain struct if not ActiveRecord
+    @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :new }
@@ -37,7 +39,7 @@ class Comment2sController < ApplicationController
   end
 
   def create
-    authorize Comment2, :create?
+    authorize :comment2, :create?
     
     result = Comment2Commands.create_comment(
       comment2_params[:text],
@@ -61,7 +63,7 @@ class Comment2sController < ApplicationController
 
 
   def edit
-    authorize Comment2.new, :update?
+    authorize :comment2, :update?
     @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -71,7 +73,7 @@ class Comment2sController < ApplicationController
   end
 
   def update
-    authorize Comment2.new, :update?
+    authorize :comment2, :update?
     
     result = Comment2Commands.update_comment(
       params[:id],
@@ -95,6 +97,7 @@ class Comment2sController < ApplicationController
 
   # Event Sourcing Actions
   def approve
+    authorize :comment2, :approve?
     result = Comment2Commands.approve_comment(
       params[:id],
       current_user
@@ -114,6 +117,7 @@ class Comment2sController < ApplicationController
   end
 
   def reject
+    authorize :comment2, :reject?
     if params[:rejection_feedback].present?
       result = Comment2Commands.reject_comment(
         params[:id],
@@ -131,6 +135,7 @@ class Comment2sController < ApplicationController
   end
 
   def delete
+    authorize :comment2, :delete?
     result = Comment2Commands.delete_comment(
       params[:id],
       current_user
@@ -140,6 +145,7 @@ class Comment2sController < ApplicationController
   end
 
   def restore
+    
     result = Comment2Commands.restore_comment(
       params[:id],
       current_user
@@ -159,7 +165,7 @@ class Comment2sController < ApplicationController
   end
 
   def comment2_params
-    params.require(:comment2).permit(:text)
+    params.require(:comment2_read_model).permit(:text)
   end
 
   def handle_command_result(result, success_message)

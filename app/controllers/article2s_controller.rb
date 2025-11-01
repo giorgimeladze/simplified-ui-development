@@ -14,7 +14,7 @@ class Article2sController < ApplicationController
   
   def article2s_for_review
     authorize :article2, :article2s_for_review?
-    article2s = Article2ReadModel.where(state: 'review')
+    article2s = Article2ReadModel.where(state: ['review', 'draft'])
     render_article2s_list(article2s, 'Articles for Review')
   end
   
@@ -25,19 +25,20 @@ class Article2sController < ApplicationController
   end
 
    # GET /article2s/:id
-   def show
-    comments = Comment2ReadModel.for_article(@article2.id)
+  def show
     payload = {
       id: @article2.id,
       title: @article2.title,
       content: @article2.content,
       author_id: @article2.author_id,
       state: @article2.state,
+      links: @article2.hypermedia_show_links(current_user),
       _embedded: {
-        comment2s: comments.map { |c| { id: c.id, text: c.text, author_id: c.author_id, state: c.state } }
+        comment2s: @article2.comments.map { |c| { id: c.id, text: c.text, author_id: c.author_id, state: c.state, links: c.hypermedia_index_links(current_user) } }
       }
     }
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article2')
+    @html_content = render_to_string(partial: 'article2s/article2', locals: { article2: payload }, formats: [:html])
     respond_to do |format|
       format.html { render :show, locals: { article2: payload } }
       format.json { render json: { article2: payload, links: @links } }
@@ -182,11 +183,12 @@ class Article2sController < ApplicationController
   end
 
   def render_article2s_list(article2s, title)
-    list = article2s.map { |a| { id: a.id, title: a.title, state: a.state, author_id: a.author_id } }
+    list = article2s.map { |a| { id: a.id, title: a.title, state: a.state, author_id: a.author_id, content: a.content, links: a.hypermedia_index_links(current_user) } }
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article2')
+    @html_content = render_to_string(partial: 'article2s/list', locals: { article2s: list, title: title }, formats: [:html])
     respond_to do |format|
       format.html { render :index, locals: { article2s: list, title: title } }
-      format.json { render json: { articles: list, links: @links } }
+      format.json { render json: { article2s: list, links: @links } }
     end
   end
 

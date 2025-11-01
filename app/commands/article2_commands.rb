@@ -5,7 +5,7 @@ class Article2Commands
       aggregate_id = SecureRandom.uuid
       aggregate = Article2Aggregate.new(aggregate_id)
       aggregate.create(title: title, content: content, author_id: user.id)
-      repository.store(aggregate)
+      repository.store(aggregate, expected_version: :none)
       { success: true, article2_id: aggregate_id }
     end
     
@@ -15,7 +15,7 @@ class Article2Commands
       repository.store(aggregate)
       { success: true, article2_id: article2_id }
     end
-    
+
     def reject_article(article2_id, rejection_feedback, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.reject(rejection_feedback: rejection_feedback, actor_id: user.id)

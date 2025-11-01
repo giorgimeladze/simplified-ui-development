@@ -6,6 +6,11 @@ module ApplicationHelper
     content_tag(:span, status.titleize, class: "badge #{color_class} ms-2")
   end
 
+  def state_badge(state, model_type = 'article')
+    color_class = status_color_class(state, model_type)
+    content_tag(:span, state.titleize, class: "badge #{color_class} ms-2")
+  end
+
   private
 
   def status_color_class(status, model_type)
@@ -37,6 +42,8 @@ module ApplicationHelper
   end
 
   def model_link(class_name, action, current_user=nil)
-    class_name.constantize.new.build_link(class_name, action, current_user).values_at(:title, :button_classes)
+    class_name = "#{class_name.camelize}ReadModel"
+    class_object = class_name.constantize.new
+    class_object.build_link(class_object.hypermedia_model_name, action, current_user).values_at(:title, :button_classes)
   end
 end

@@ -3,6 +3,13 @@ class Article2ReadModel < ApplicationRecord
 
   self.table_name = 'article2_read_models'
   self.primary_key = 'id'
+  
+  # Override model name for URL generation
+  class << self
+    def model_name
+      ActiveModel::Name.new(self, nil, "Article2")
+    end
+  end
 
   scope :by_author, ->(user_id) { where(author_id: user_id) }
 
@@ -40,6 +47,10 @@ class Article2ReadModel < ApplicationRecord
   # Use Article2Policy for authorization
   def policy(current_user)
     Article2Policy.new(current_user, self)
+  end
+
+  def comments
+    Comment2ReadModel.for_article(id)
   end
 end
 
