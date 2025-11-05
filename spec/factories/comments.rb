@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :comment do
-    article { nil }
-    user { nil }
-    text { "MyText" }
-    status { "MyString" }
+    article { create(:article) }
+    user { create(:user) }
+    text { Faker::Lorem.sentence }
+    status { "pending" }
   end
 end
