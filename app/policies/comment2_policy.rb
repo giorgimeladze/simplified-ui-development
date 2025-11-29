@@ -12,26 +12,26 @@ class Comment2Policy < ApplicationPolicy
   end
 
   def create?
-    user.present?
+    user.id.present?
   end
 
   def update?
-    user.present? && record.author_id == user.id && (record.state == 'pending' || record.state == 'rejected')
+    user.id.present? && record.author_id == user.id && (record.state == 'pending' || record.state == 'rejected')
   end
 
   def approve?
-    user.present? && user.admin?
+    user.id.present? && user.admin?
   end
 
   def reject?
-    user.present? && user.admin?
+    user.id.present? && user.admin?
   end
 
   def delete?
-    user.present? && (record.author_id == user.id || user.admin? || user.editor?)
+    user.id.present? && (record.author_id == user.id || user.admin? || user.editor?)
   end
 
   def restore?
-    user.present? && (user.admin? || user.editor?)
+    user.id.present? && (user.admin? || user.editor?)
   end
 end

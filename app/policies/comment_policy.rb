@@ -8,26 +8,26 @@ class CommentPolicy < ApplicationPolicy
   end
 
   def create?
-    user.present?
+    user.id.present?
   end
 
   def update?
-    user.present? && record.user_id == user.id && (record.pending? || record.rejected?)
+    user.id.present? && record.user_id == user.id && (record.pending? || record.rejected?)
   end
 
   def approve?
-    user.present? && user.admin?
+    user.id.present? && user.admin?
   end
 
   def reject?
-    user.present? && user.admin?
+    user.id.present? && user.admin?
   end
 
   def delete?
-    user.present? && (record.user_id == user.id || user.admin? || user.editor?)
+    user.id.present? && (record.user_id == user.id || user.admin? || user.editor?)
   end
 
   def restore?
-    user.present? && (user.admin? || user.editor?)
+    user.id.present? && (user.admin? || user.editor?)
   end
 end
