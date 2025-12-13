@@ -47,9 +47,10 @@ module HasHypermediaLinks
     [temp_instance.build_link(model_class_name, :new, current_user)]
   end
 
-  def self.hypermedia_general_show(current_user, model_class_name)
+  def self.hypermedia_general_show(current_user, model_class_name, additional_params = {})
     temp_instance = Object.new
     temp_instance.extend(HypermediaConfig)
+    temp_instance.define_singleton_method(:id) { additional_params[:id] } if additional_params[:id]
     [temp_instance.build_link(model_class_name, :index, current_user)]
   end
   

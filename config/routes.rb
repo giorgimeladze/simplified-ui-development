@@ -96,4 +96,7 @@ Rails.application.routes.draw do
       post :approve, :reject, :delete, :restore
     end
   end
+
+  get 'comments/:id/article', to: 'comments#index', as: :comment_article
+  get 'comment2s/:id/article2', to: 'comment2s#index', as: :comment2_article2
 end

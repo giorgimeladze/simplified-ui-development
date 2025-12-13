@@ -21,7 +21,7 @@ class CustomTemplate < ApplicationRecord
       'make_invisible' => { 'title' => 'Make Invisible', 'button_classes' => 'btn btn-outline-warning btn-sm mx-1' }
     },
     'Comment' => {
-      'index' => { 'title' => 'All Comments', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'index' => { 'title' => 'Back to Article', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'new' => { 'title' => 'New Comment', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'create' => { 'title' => 'Add Comment', 'button_classes' => 'btn btn-outline-success btn-sm mx-1' },
       'show' => { 'title' => 'View', 'button_classes' => 'btn btn-outline-info btn-sm mx-1' },
@@ -59,7 +59,7 @@ class CustomTemplate < ApplicationRecord
       'make_invisible' => { 'title' => 'Make Invisible (Event)', 'button_classes' => 'btn btn-outline-warning btn-sm mx-1' }
     },
     'Comment2' => {
-      'index' => { 'title' => 'All Comments (Event)', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'index' => { 'title' => 'Back to Article2', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'new' => { 'title' => 'New Comment (Event)', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'create' => { 'title' => 'Add Comment (Event)', 'button_classes' => 'btn btn-outline-success btn-sm mx-1' },
       'show' => { 'title' => 'View (Event)', 'button_classes' => 'btn btn-outline-info btn-sm mx-1' },

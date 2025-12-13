@@ -1,7 +1,11 @@
 class CommentsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article, only: [:new, :create]
-  before_action :set_comment, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
+  before_action :set_comment, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore, :index]
+
+  def index
+    redirect_to article_path(@comment.article_id)
+  end
 
   def pending_comments
     comments = Comment.awaiting_moderation
@@ -19,7 +23,7 @@ class CommentsController < ApplicationController
   def show
     rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show, context: { current_user: current_user })
     @html_content = render_to_string(partial: 'comment', locals: { comment: rendered_comment }, formats: [:html])
-    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment')
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment', { id: @comment.id })
 
     respond_to do |format|
       format.html { render :show }
@@ -45,7 +49,7 @@ class CommentsController < ApplicationController
 
     if @comment.save
       respond_to do |format|
-        format.html { redirect_to comment_path(@comment), notice: 'Comment was successfully created.' }
+        format.html { redirect_to article_path(@article), notice: 'Comment was successfully created.' }
         format.json { render json: { comment: @comment.slice(:id, :text, :status, :user_id) }, status: :created }
       end
     else
@@ -76,7 +80,7 @@ class CommentsController < ApplicationController
       end
       
       respond_to do |format|
-        format.html { redirect_to comment_path(@comment), notice: 'Comment was successfully updated.' }
+        format.html { redirect_to article_path(@comment.article), notice: 'Comment was successfully updated.' }
         format.json { render json: { comment: @comment.slice(:id, :text, :status, :user_id) }, status: :ok }
       end
     else

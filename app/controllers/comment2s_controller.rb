@@ -1,7 +1,11 @@
 class Comment2sController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
   before_action :set_article2, only: [:new, :create]
-  before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore]
+  before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore, :index]
+
+  def index
+    redirect_to article2_path(@comment2.article2_id)
+  end
 
   def pending_comment2s
     authorize :comment2, :pending_comment2s?
@@ -20,7 +24,7 @@ class Comment2sController < ApplicationController
   def show
     payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user), rejection_feedback: @comment2.rejection_feedback }
     @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: payload }, formats: [:html])
-    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
+    @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2', { id: @comment2.id })
     respond_to do |format|
       format.html { render :show }
       format.json { render json: { comment: payload, links: @links } }

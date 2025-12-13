@@ -70,9 +70,9 @@ Article:
 Comment:
   # Collection actions
   index:
-    rel: 'collection'
+    rel: 'article_comments'
     method: 'GET'
-    link: '/articles/#ARTICLE_ID/comments'
+    link: '/comments/#ID/article'
   
   new:
     rel: 'new'
@@ -190,9 +190,9 @@ Article2:
 Comment2:
   # Collection actions
   index:
-    rel: 'collection'
+    rel: 'article_comments'
     method: 'GET'
-    link: '/article2s/#ARTICLE2_ID/comment2s'
+    link: '/comment2s/#ID/article2'
   
   new:
     rel: 'new'
