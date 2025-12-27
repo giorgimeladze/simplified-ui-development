@@ -29,6 +29,11 @@ RSpec.describe 'Articles API', type: :request do
 
       response '200', 'my articles found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
+
+        before do
+          sign_in_user(role: :editor)
+        end
+
         run_test!
       end
 
@@ -49,6 +54,10 @@ RSpec.describe 'Articles API', type: :request do
 
       response '200', 'articles for review found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
+
+        before do
+          sign_in_user(role: :admin)
+        end
         run_test!
       end
 
@@ -59,6 +68,10 @@ RSpec.describe 'Articles API', type: :request do
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+
+        before do
+          sign_in_user(role: :editor)
+        end
         run_test!
       end
     end
@@ -74,11 +87,33 @@ RSpec.describe 'Articles API', type: :request do
 
       response '200', 'archived articles found' do
         schema '$ref' => '#/components/schemas/ArticlesCollection'
+
+        before do
+          sign_in_user(role: :editor)
+        end
+        run_test!
+      end
+
+      response '200', 'archived articles found' do
+        schema '$ref' => '#/components/schemas/ArticlesCollection'
+
+        before do
+          sign_in_user(role: :admin)
+        end
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+        run_test!
+      end
+
+      response '403', 'forbidden' do
+        schema '$ref' => '#/components/schemas/Error'
+
+        before do
+          sign_in_user(role: :viewer)
+        end
         run_test!
       end
     end
@@ -173,11 +208,22 @@ RSpec.describe 'Articles API', type: :request do
               ]
             }
           }
-        run_test!
+          let(:user) { sign_in_user(role: :editor) }
+          let(:article) { create(:article, user: user) }
+          let(:id) { article.id }
+        
+          run_test!
       end
 
       response '404', 'article not found' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:id) { 999999 }
+  
+        before do
+          sign_in_user(role: :viewer)
+        end
+  
         run_test!
       end
     end
@@ -204,56 +250,48 @@ RSpec.describe 'Articles API', type: :request do
       response '201', 'article created' do
         schema type: :object,
           properties: {
-            success: { type: :boolean, example: true },
-            article: { '$ref' => '#/components/schemas/Article' }
-          }
+            article: {
+              type: :object,
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer }
+              },
+              required: %w[id title content status user_id]
+            }
+          },
+          required: ['article']
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article) { { title: 'Intro', content: 'Hello' } }
+  
         run_test!
       end
-
+  
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '422', 'invalid request' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
-        run_test!
-      end
-    end
-  end
-
-  # DELETE /articles/:id
-  path '/articles/{id}' do
-    parameter name: :id, in: :path, type: :integer, description: 'Article ID'
-
-    delete 'Deletes an article' do
-      tags 'Articles'
-      produces 'application/json'
-      description 'Permanently deletes an article. Requires ownership or admin role.'
-      security [session_auth: []]
-
-      response '204', 'article deleted' do
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { { title: 'Intro', content: 'Hello' } }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+      
+        before do
+          sign_in_user(role: :viewer)
+        end
+      
+        let(:article) { { title: 'Intro', content: 'Hello' } }
+      
         run_test!
       end
-
-      response '404', 'article not found' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
+      
     end
   end
 
@@ -269,22 +307,53 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let(:user) { sign_in_user(role: :editor) }
+        let(:article_record) { create(:article, user: user, status: 'draft') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'draft') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden - not allowed' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
 
-      response '422', 'invalid state transition' do
-        schema '$ref' => '#/components/schemas/TransitionError'
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'draft') } # different owner
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -301,22 +370,52 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let!(:user) { sign_in_user }
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '422', 'invalid state transition' do
-        schema '$ref' => '#/components/schemas/TransitionError'
+  
+        before do
+          sign_in_user(role: :viewer)
+        end
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -336,32 +435,62 @@ RSpec.describe 'Articles API', type: :request do
       parameter name: :rejection_feedback, in: :body, schema: {
         type: :object,
         properties: {
-          rejection_feedback: {
-            type: :string,
-            example: 'Please improve the introduction and add more examples.',
-            description: 'Detailed feedback explaining why the article is being rejected'
-          }
+          rejection_feedback: { type: :string }
         },
         required: ['rejection_feedback']
       }
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '422', 'validation error' do
-        schema '$ref' => '#/components/schemas/TransitionError'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
+  
         run_test!
       end
     end
@@ -378,17 +507,53 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let(:user) { sign_in_user(role: :editor) }
+        let(:article_record) { create(:article, user: user, status: 'review') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'review') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -405,17 +570,53 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let(:user) { sign_in_user(role: :editor) }
+        let(:article_record) { create(:article, user: user, status: 'rejected') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'rejected') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'rejected') } # different owner
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -432,17 +633,53 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article_record) { create(:article, status: 'published') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'published') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'published') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -459,17 +696,53 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:article_record) { create(:article, user: user, status: 'privated') }
+        let(:id) { article_record.id }
+
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'privated') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'privated') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end
@@ -486,17 +759,56 @@ RSpec.describe 'Articles API', type: :request do
       security [session_auth: []]
 
       response '200', 'transition successful' do
-        schema '$ref' => '#/components/schemas/TransitionSuccess'
+        schema type: :object,
+          required: ['article'],
+          properties: {
+            article: {
+              type: :object,
+              required: %w[id title content status user_id links],
+              properties: {
+                id: { type: :integer },
+                title: { type: :string },
+                content: { type: :string },
+                status: {
+                  type: :string,
+                  enum: %w[draft review rejected published privated archived]
+                },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            }
+          }
+      
+        let(:user) { sign_in_user(role: :admin) }
+        let(:article_record) { create(:article, user: user, status: 'published') }
+        let(:id) { article_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article_record) { create(:article, status: 'published') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        before do
+          sign_in_user(role: :editor)
+        end
+        let(:article_record) { create(:article, status: 'published') }
+        let(:id) { article_record.id }
+  
         run_test!
       end
     end

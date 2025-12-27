@@ -21,11 +21,11 @@ class Article2Policy < ApplicationPolicy
   end
 
   def submit?
-    user.editor? || user.admin?
+    (user.editor? && record.user_id == user.id) || user.admin?
   end
 
   def approve_private?
-    user.admin? || user.editor?
+    user.admin? || (user.editor? && record.user_id == user.id)
   end
 
   def reject?
@@ -33,11 +33,11 @@ class Article2Policy < ApplicationPolicy
   end
 
   def resubmit?
-    user.editor? || user.admin?
+    (user.editor? && record.user_id == user.id) || user.admin?
   end
 
   def archive?
-    user.editor? || user.admin?
+    (user.editor? && record.user_id == user.id) || user.admin?
   end
 
   def publish?
@@ -45,11 +45,11 @@ class Article2Policy < ApplicationPolicy
   end
 
   def make_visible?
-    user.editor? || user.admin?
+    (user.editor? && record.user_id == user.id) || user.admin?
   end
 
   def make_invisible?
-    user.editor? || user.admin?
+    (user.editor? && record.user_id == user.id) || user.admin?
   end
 
   class Scope < Scope

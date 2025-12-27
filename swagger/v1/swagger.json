@@ -54,14 +54,37 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "article": {
-                      "$ref": "#/components/schemas/Article"
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id"
+                      ]
                     }
-                  }
+                  },
+                  "required": [
+                    "article"
+                  ]
                 }
               }
             }
@@ -76,24 +99,12 @@
               }
             }
           },
-          "422": {
-            "description": "invalid request",
+          "403": {
+            "description": "forbidden",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -133,7 +144,7 @@
         "description": "Returns all articles created by the authenticated user, regardless of state.",
         "security": [
           {
-            "session_auth": [
+            "bearer_auth": [
 
             ]
           }
@@ -171,7 +182,7 @@
         "description": "Returns all articles in \"review\" state. Requires editor or admin role.",
         "security": [
           {
-            "session_auth": [
+            "bearer_auth": [
 
             ]
           }
@@ -237,6 +248,16 @@
           },
           "401": {
             "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
             "content": {
               "application/json": {
                 "schema": {
@@ -386,55 +407,6 @@
             }
           }
         }
-      },
-      "delete": {
-        "summary": "Deletes an article",
-        "tags": [
-          "Articles"
-        ],
-        "description": "Permanently deletes an article. Requires ownership or admin role.",
-        "security": [
-          {
-            "session_auth": [
-
-            ]
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "article deleted"
-          },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "article not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/articles/{id}/submit": {
@@ -468,7 +440,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -489,16 +504,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransitionError"
                 }
               }
             }
@@ -537,7 +542,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -558,16 +606,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransitionError"
                 }
               }
             }
@@ -609,7 +647,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -633,16 +714,6 @@
                 }
               }
             }
-          },
-          "422": {
-            "description": "validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TransitionError"
-                }
-              }
-            }
           }
         },
         "requestBody": {
@@ -652,9 +723,7 @@
                 "type": "object",
                 "properties": {
                   "rejection_feedback": {
-                    "type": "string",
-                    "example": "Please improve the introduction and add more examples.",
-                    "description": "Detailed feedback explaining why the article is being rejected"
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -697,7 +766,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -756,7 +868,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -815,7 +970,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -874,7 +1072,50 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -933,7 +1174,58 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TransitionSuccess"
+                  "type": "object",
+                  "required": [
+                    "article"
+                  ],
+                  "properties": {
+                    "article": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "title",
+                        "content",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "content": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "draft",
+                            "review",
+                            "rejected",
+                            "published",
+                            "privated",
+                            "archived"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }

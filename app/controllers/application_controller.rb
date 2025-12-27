@@ -9,6 +9,7 @@ class ApplicationController < ActionController::Base
   before_action :configure_permitted_parameters, if: :devise_controller?
   before_action :set_header_links
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+  rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
   protected
 
@@ -25,7 +26,19 @@ class ApplicationController < ActionController::Base
   end
 
   def user_not_authorized
-    flash[:alert] = "You are not authorized to perform this action."
-    redirect_to(request.referrer || root_path)
+    respond_to do |format|
+      format.json { render json: { error: "forbidden" }, status: :forbidden }
+      format.html do
+        flash[:alert] = "You are not authorized to perform this action."
+        redirect_to(request.referrer || root_path)
+      end
+    end
+  end
+
+  def record_not_found
+    respond_to do |format|
+      format.json { render json: { error: 'not_found' }, status: :not_found }
+      format.html { raise ActiveRecord::RecordNotFound }
+    end
   end
 end
