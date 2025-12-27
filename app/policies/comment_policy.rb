@@ -30,4 +30,8 @@ class CommentPolicy < ApplicationPolicy
   def restore?
     user.id.present? && (user.admin? || user.editor?)
   end
+
+  def pending_comments?
+    user.admin?
+  end
 end

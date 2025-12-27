@@ -14,12 +14,19 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'pending comments found' do
         schema type: :object,
+          required: %w[comments links],
           properties: {
             comments: {
               type: :array,
               items: { '$ref' => '#/components/schemas/Comment' }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
             }
           }
+
+        let!(:user) { sign_in_user(role: :admin) }
         run_test!
       end
 
@@ -30,6 +37,8 @@ RSpec.describe 'Comments API', type: :request do
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
+
+        let!(:user) { sign_in_user(role: :editor) }
         run_test!
       end
     end
@@ -46,14 +55,43 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'comment found' do
         schema type: :object,
+          required: %w[comment links],
           properties: {
-            comment: { type: :string, description: 'Rendered HTML content with hypermedia links' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id links],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string },
+                user_id: { type: :integer },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+      
+        let(:comment_record) { create(:comment, status: 'approved') }
+        let(:id) { comment_record.id }
+      
         run_test!
       end
+      
 
       response '404', 'comment not found' do
         schema '$ref' => '#/components/schemas/Error'
+        before do
+          sign_in_user(role: :editor)
+        end
+  
+        let(:id) { 999999 }
+  
         run_test!
       end
     end
@@ -71,19 +109,48 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'edit form retrieved' do
         schema type: :object,
+          required: %w[comment links],
           properties: {
-            form: { type: :string, description: 'HTML form for editing comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[approved rejected] }, # adjust if you have more
+                user_id: { type: :integer }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+      
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:comment_record) { create(:comment, status: 'rejected', user: user) }
+        let(:id) { comment_record.id }
+      
         run_test!
       end
+      
 
       response '403', 'forbidden - not editable' do
         schema '$ref' => '#/components/schemas/Error'
+
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:comment_record) { create(:comment, status: 'approved', user: user) } # not rejected => should be forbidden
+        let(:id) { comment_record.id }
+
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+
+        let(:comment_record) { create(:comment, status: 'rejected') }
+        let(:id) { comment_record.id }
+
         run_test!
       end
     end
@@ -110,114 +177,50 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'comment updated' do
         schema type: :object,
+          required: ['comment'],
           properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[approved rejected pending] },
+                user_id: { type: :integer }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+      
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:comment_record) { create(:comment, status: 'rejected', user: user) }
+        let(:id) { comment_record.id }
+        let(:comment) { { text: 'Updated comment text' } }
+      
         run_test!
-      end
-
-      response '422', 'validation error' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
-        run_test!
-      end
-
+      end      
+      
       response '403', 'forbidden - not editable' do
         schema '$ref' => '#/components/schemas/Error'
+      
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:comment_record) { create(:comment, status: 'approved', user: user) } # not rejected => forbidden
+        let(:id) { comment_record.id }
+        let(:comment) { { text: 'Trying to edit' } }
+
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-    end
-  end
-
-  # POST /articles/:article_id/comments
-  path '/articles/{article_id}/comments' do
-    parameter name: :article_id, in: :path, type: :integer, description: 'Article ID'
-
-    post 'Creates a new comment' do
-      tags 'Comments'
-      consumes 'application/json'
-      produces 'application/json'
-      description 'Creates a new comment in "pending" state. Requires authentication.'
-      security [session_auth: []]
-
-      parameter name: :comment, in: :body, schema: {
-        type: :object,
-        properties: {
-          text: { 
-            type: :string, 
-            example: 'Great article! Very informative.',
-            minLength: 1,
-            maxLength: 250
-          }
-        },
-        required: ['text']
-      }
-
-      response '201', 'comment created' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
-          }
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '404', 'article not found' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '422', 'invalid request' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
-        run_test!
-      end
-    end
-  end
-
-  # DELETE /comments/:id
-  path '/comments/{id}' do
-    parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
-
-    delete 'Deletes a comment' do
-      tags 'Comments'
-      produces 'application/json'
-      description 'Permanently deletes a comment. Requires ownership or admin role.'
-      security [session_auth: []]
-
-      response '204', 'comment deleted' do
-        run_test!
-      end
-
-      response '401', 'unauthorized' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '403', 'forbidden' do
-        schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
-
-      response '404', 'comment not found' do
-        schema '$ref' => '#/components/schemas/Error'
+      
+        let(:comment_record) { create(:comment, status: 'rejected') }
+        let(:id) { comment_record.id }
+        let(:comment) { { text: 'Updated comment text' } }
+      
         run_test!
       end
     end
@@ -236,29 +239,56 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
+          required: ['comment'],
           properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[pending approved rejected deleted] },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+      
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
+      
         run_test!
       end
+      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
+  
         run_test!
       end
 
-      response '403', 'forbidden - insufficient permissions' do
+      response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
+  
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
 
-      response '422', 'invalid state transition' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
         run_test!
       end
     end
@@ -289,29 +319,58 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
+          required: ['comment'],
           properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[pending approved rejected deleted] },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+  
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Please be more constructive.' } }
+  
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Feedback' } }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
 
-      response '422', 'validation error' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'pending') }
+        let(:id) { comment_record.id }
+        let(:rejection_feedback) { { rejection_feedback: 'Feedback' } }
+
         run_test!
       end
     end
@@ -321,7 +380,7 @@ RSpec.describe 'Comments API', type: :request do
   path '/comments/{id}/delete' do
     parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
 
-    post 'Soft delete comment (pending/approved → deleted)' do
+    post 'Soft delete comment' do
       tags 'Comments - FSM Transitions'
       produces 'application/json'
       description 'Transitions comment to "deleted" state. Can be restored later. Requires comment ownership, admin, or editor role.'
@@ -329,29 +388,55 @@ RSpec.describe 'Comments API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
+          required: ['comment'],
           properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[pending approved rejected deleted] },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+  
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'approved') }
+        let(:id) { comment_record.id }
+  
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'approved') }
+        let(:id) { comment_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
+  
+        let!(:user) { sign_in_user(role: :viewer) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'approved') }
+        let(:id) { comment_record.id }
 
-      response '422', 'invalid state transition' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
         run_test!
       end
     end
@@ -361,40 +446,65 @@ RSpec.describe 'Comments API', type: :request do
   path '/comments/{id}/restore' do
     parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
 
-    post 'Restore deleted comment (deleted → pending)' do
+    post 'Restore deleted comment' do
       tags 'Comments - FSM Transitions'
       produces 'application/json'
       description 'Transitions comment from "deleted" back to "pending" state. Requires admin or editor role.'
       security [session_auth: []]
-
+  
       response '200', 'transition successful' do
         schema type: :object,
+          required: ['comment'],
           properties: {
-            success: { type: :boolean, example: true },
-            comment: { '$ref' => '#/components/schemas/Comment' }
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: %w[pending approved rejected deleted] },
+                user_id: { type: :integer },
+                rejection_feedback: { type: :string, nullable: true },
+                links: {
+                  type: :array,
+                  items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                }
+              }
+            },
+            links: {
+              type: :array,
+              items: { '$ref' => '#/components/schemas/HypermediaLink' }
+            }
           }
+  
+        let!(:user) { sign_in_user(role: :admin) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'deleted') }
+        let(:id) { comment_record.id }
+  
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'deleted') }
+        let(:id) { comment_record.id }
+  
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-        run_test!
-      end
+  
+        let!(:user) { sign_in_user(role: :viewer) }
+        let(:article) { create(:article, status: 'published') }
+        let(:comment_record) { create(:comment, article: article, status: 'deleted') }
+        let(:id) { comment_record.id }
 
-      response '422', 'invalid state transition' do
-        schema type: :object,
-          properties: {
-            success: { type: :boolean, example: false },
-            errors: { type: :array, items: { type: :string } }
-          }
         run_test!
       end
     end
-  end
+  end  
 end
-

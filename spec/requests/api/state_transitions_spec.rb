@@ -57,6 +57,8 @@ RSpec.describe 'State Transitions API', type: :request do
               }
             ]
           }
+
+        let!(:user) { sign_in_user(role: :admin) }
         run_test!
       end
 
@@ -67,6 +69,8 @@ RSpec.describe 'State Transitions API', type: :request do
 
       response '403', 'forbidden - requires admin role' do
         schema '$ref' => '#/components/schemas/Error'
+
+        let!(:user) { sign_in_user(role: :viewer) }
         run_test!
       end
     end

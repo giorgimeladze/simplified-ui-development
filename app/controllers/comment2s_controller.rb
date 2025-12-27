@@ -67,17 +67,17 @@ class Comment2sController < ApplicationController
 
 
   def edit
-    Comment2Policy.new(current_user, @comment2).update?
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).update?
     @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
       format.html { render :edit }
-      format.json { render json: { comment2: @comment2.slice(:id, :text, :status, :user_id), links: @links } }
+      format.json { render json: { comment2: @comment2.slice(:id, :text, :state, :author_id), links: @links } }
     end
   end
 
   def update
-    Comment2Policy.new(current_user, @comment2).update?
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).update?
     
     result = Comment2Commands.update_comment(
       params[:id],
@@ -101,7 +101,7 @@ class Comment2sController < ApplicationController
 
   # Event Sourcing Actions
   def approve
-    authorize :comment2, :approve?
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).approve?
     result = Comment2Commands.approve_comment(
       params[:id],
       current_user
@@ -111,7 +111,7 @@ class Comment2sController < ApplicationController
   end
 
   def reject_feedback
-    authorize :comment2, :reject?
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).reject?
     @html_content = render_to_string(partial: 'comment2s/reject_feedback_form', formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -121,8 +121,8 @@ class Comment2sController < ApplicationController
   end
 
   def reject
-    authorize :comment2, :reject?
     if params[:rejection_feedback].present?
+      raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).reject?
       result = Comment2Commands.reject_comment(
         params[:id],
         params[:rejection_feedback],
@@ -139,7 +139,7 @@ class Comment2sController < ApplicationController
   end
 
   def delete
-    Comment2Policy.new(current_user, @comment2).delete?
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).delete?
     result = Comment2Commands.delete_comment(
       params[:id],
       current_user
@@ -149,7 +149,7 @@ class Comment2sController < ApplicationController
   end
 
   def restore
-    
+    raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).restore?
     result = Comment2Commands.restore_comment(
       params[:id],
       current_user

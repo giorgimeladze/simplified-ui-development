@@ -8,6 +8,7 @@ class CommentsController < ApplicationController
   end
 
   def pending_comments
+    authorize :comment, :pending_comments?
     comments = Comment.awaiting_moderation
   
     rendered_comments = CommentBlueprint.render_as_hash(comments, view: :index, context: { current_user: current_user })

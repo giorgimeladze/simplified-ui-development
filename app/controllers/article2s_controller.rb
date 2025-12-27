@@ -49,7 +49,7 @@ class Article2sController < ApplicationController
   # GET /article2s/new
   def new
     @article2 = Article2ReadModel.new
-    authorize :article2, :new?
+    authorize @article2, :new?
     @html_content = render_to_string(partial: 'article2s/form', locals: { article2: @article2 }, formats: [:html])
     @links = @article2.hypermedia_new_links(current_user)
     respond_to do |format|
@@ -60,7 +60,7 @@ class Article2sController < ApplicationController
 
   # POST /article2s
   def create
-    authorize :article2, :create?
+    raise Pundit::NotAuthorizedError unless Article2Policy.new(current_user, @article2).create?
     
     result = Article2Commands.create_article(
       article2_params[:title],
@@ -84,6 +84,7 @@ class Article2sController < ApplicationController
 
   # Event Sourcing Actions
   def submit
+    authorize @article2, :submit?
     result = Article2Commands.submit_article(
       @article2.id,
       current_user
@@ -93,7 +94,7 @@ class Article2sController < ApplicationController
   end
 
   def reject_feedback
-    authorize :article2, :reject?
+    authorize @article2, :reject?
     @html_content = render_to_string(partial: 'article2s/reject_feedback_form', formats: [:html])
     @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
@@ -104,6 +105,7 @@ class Article2sController < ApplicationController
 
   def reject
     if params[:rejection_feedback].present?
+      authorize @article2, :reject?
       result = Article2Commands.reject_article(
         @article2.id,
         params[:rejection_feedback],
@@ -120,6 +122,7 @@ class Article2sController < ApplicationController
   end
 
   def approve_private
+    authorize @article2, :approve_private?
     result = Article2Commands.approve_private_article(
       @article2.id,
       current_user
@@ -129,6 +132,7 @@ class Article2sController < ApplicationController
   end
 
   def resubmit
+    authorize @article2, :resubmit?
     result = Article2Commands.resubmit_article(
       @article2.id,
       current_user
@@ -138,6 +142,7 @@ class Article2sController < ApplicationController
   end
 
   def archive
+    authorize @article2, :archive?
     result = Article2Commands.archive_article(
       @article2.id,
       current_user
@@ -147,6 +152,7 @@ class Article2sController < ApplicationController
   end
 
   def publish
+    authorize @article2, :publish?
     result = Article2Commands.publish_article(
       @article2.id,
       current_user
@@ -156,6 +162,7 @@ class Article2sController < ApplicationController
   end
 
   def make_visible
+    authorize @article2, :make_visible?
     result = Article2Commands.make_visible_article(
       @article2.id,
       current_user
@@ -165,6 +172,7 @@ class Article2sController < ApplicationController
   end
 
   def make_invisible
+    authorize @article2, :make_invisible?
     result = Article2Commands.make_invisible_article(
       @article2.id,
       current_user
