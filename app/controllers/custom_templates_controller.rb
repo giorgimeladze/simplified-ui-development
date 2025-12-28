@@ -79,8 +79,6 @@ class CustomTemplatesController < ApplicationController
     respond_to do |format|
       format.html { render :edit_section, layout: 'application' }
       format.json { render json: { template: { 'Article' => @section_data } } }
-      # format.js { redirect_to custom_template_path }
-      # format.any { redirect_to custom_template_path }
     end
   end
 

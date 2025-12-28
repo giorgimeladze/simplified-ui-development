@@ -19,7 +19,7 @@ Navigate to `localhost:3000`
 - **Admin**: `giorgi@mail.example` / `123456`
 - **Editor**: `editor@example.com` / `qwerty12`
 
-run tests: bundle exec rspec spec/policies spec/models spec/aggregates spec/blueprints spec/commands spec/events spec/projections spec/repositories spec/subscribers spec/subscribers
+run tests: bundle exec rspec spec/*
 ---
 
 ## 📐 Architecture Overview

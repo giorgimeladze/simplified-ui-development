@@ -195,7 +195,7 @@ RSpec.describe 'Comment2s API', type: :request do
       description 'Update comment text. Only allowed for rejected comments. Automatically moves to pending state via event sourcing.'
       security [session_auth: []]
 
-      parameter name: :comment2, in: :body, schema: {
+      parameter name: :comment2_read_model, in: :body, schema: {
         type: :object,
         properties: {
           text: { type: :string, example: 'Updated comment text' }
@@ -212,17 +212,17 @@ RSpec.describe 'Comment2s API', type: :request do
       
         let!(:user) { sign_in_user(role: :editor) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: user.id, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: user.id,
-            state: 'rejected'
-          )
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
+          Comment2Commands.reject_comment(@comment2_id, 'Feedback', user)
         end
-        let(:id) { comment_record.id }
-        let(:comment2) { { comment2: { text: 'Updated comment text' } } }
+        let(:id) { @comment2_id }
+        let(:comment2_read_model) { { text: 'Updated comment text' } }
       
         run_test!
       end
@@ -243,7 +243,7 @@ RSpec.describe 'Comment2s API', type: :request do
           )
         end
         let(:id) { comment_record.id }
-        let(:comment2) { { text: 'Trying to edit' } }
+        let(:comment2_read_model) { { text: 'Trying to edit comment' } }
 
         run_test!
       end
@@ -262,7 +262,7 @@ RSpec.describe 'Comment2s API', type: :request do
           )
         end
         let(:id) { comment_record.id }
-        let(:comment2) { { text: 'Updated comment text' } }
+        let(:comment2_read_model) { { text: 'Updated comment text' } }
       
         run_test!
       end
@@ -280,7 +280,7 @@ RSpec.describe 'Comment2s API', type: :request do
       description 'Creates a new comment in "pending" state via event sourcing. Requires authentication.'
       security [session_auth: []]
 
-      parameter name: :comment2, in: :body, schema: {
+      parameter name: :comment2_read_model, in: :body, schema: {
         type: :object,
         properties: {
           text: { 
@@ -300,10 +300,10 @@ RSpec.describe 'Comment2s API', type: :request do
             comment2_id: { type: :string, format: :uuid }
           }
 
-        let!(:user) { sign_in_user(role: :viewer) }
+        let!(:user) { sign_in_user(role: :editor) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
         let(:article2_id) { article.id }
-        let(:comment2) { { text: 'Great article!' } }
+        let(:comment2_read_model) { { text: 'Great comment!' } }
         
         run_test!
       end
@@ -313,7 +313,7 @@ RSpec.describe 'Comment2s API', type: :request do
   
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
         let(:article2_id) { article.id }
-        let(:comment2) { { text: 'Great article!' } }
+        let(:comment2_read_model) { { text: 'Great comment!' } }
   
         run_test!
       end
@@ -323,7 +323,7 @@ RSpec.describe 'Comment2s API', type: :request do
   
         let!(:user) { sign_in_user(role: :viewer) }
         let(:article2_id) { 'nonexistent-id' }
-        let(:comment2) { { text: 'Great article!' } }
+        let(:comment2_read_model) { { text: 'Great comment!' } }
   
         run_test!
       end
@@ -351,16 +351,16 @@ RSpec.describe 'Comment2s API', type: :request do
 
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: 1,
-            state: 'pending'
-          )
+        let(:comment2_id) { SecureRandom.uuid }
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
         end
-        let(:id) { comment_record.id }
+        let(:id) { @comment2_id }
         
         run_test!
       end
@@ -438,16 +438,16 @@ RSpec.describe 'Comment2s API', type: :request do
 
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: 1,
-            state: 'pending'
-          )
+        let(:comment2_id) { SecureRandom.uuid }
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
         end
-        let(:id) { comment_record.id }
+        let(:id) { @comment2_id }
         let(:rejection_feedback) { { rejection_feedback: 'Please be more constructive.' } }
         
         run_test!
@@ -514,16 +514,17 @@ RSpec.describe 'Comment2s API', type: :request do
 
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: 1,
-            state: 'approved'
-          )
+        let(:comment2_id) { SecureRandom.uuid }
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
+          Comment2Commands.approve_comment(@comment2_id, user)
         end
-        let(:id) { comment_record.id }
+        let(:id) { @comment2_id }
         
         run_test!
       end
@@ -551,16 +552,18 @@ RSpec.describe 'Comment2s API', type: :request do
   
         let!(:user) { sign_in_user(role: :viewer) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: 1,
-            state: 'approved'
-          )
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
+
+          Comment2Commands.approve_comment(@comment2_id, user)
         end
-        let(:id) { comment_record.id }
+
+        let(:id) { @comment2_id }
   
         run_test!
       end
@@ -587,16 +590,19 @@ RSpec.describe 'Comment2s API', type: :request do
 
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
-        let(:comment_record) do
-          Comment2ReadModel.create!(
-            id: SecureRandom.uuid,
-            text: 'Comment',
-            article2_id: article.id,
-            author_id: 1,
-            state: 'deleted'
-          )
+        let(:comment2_id) { SecureRandom.uuid }
+
+        before do
+          @comment2_id = Comment2Commands.create_comment(
+            'Comment',
+            article.id,
+            user
+          )[:comment2_id]
+
+          Comment2Commands.approve_comment(@comment2_id, user)
+          Comment2Commands.delete_comment(@comment2_id, user)
         end
-        let(:id) { comment_record.id }
+        let(:id) { @comment2_id }
         
         run_test!
       end

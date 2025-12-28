@@ -23,7 +23,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesCollection"
+                  "type": "object",
+                  "required": [
+                    "article2s",
+                    "links"
+                  ],
+                  "properties": {
+                    "article2s": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -132,7 +150,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesCollection"
+                  "type": "object",
+                  "required": [
+                    "article2s",
+                    "links"
+                  ],
+                  "properties": {
+                    "article2s": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -170,7 +206,25 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesCollection"
+                  "type": "object",
+                  "required": [
+                    "article2s",
+                    "links"
+                  ],
+                  "properties": {
+                    "article2s": {
+                      "type": "array",
+                      "items": {
+                        "type": "object"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -218,7 +272,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ArticlesCollection"
+                  "type": "object",
+                  "required": [
+                    "article2s",
+                    "links"
+                  ],
+                  "properties": {
+                    "article2s": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "$ref": "#/components/schemas/Article2"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -406,12 +479,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -474,12 +547,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -545,12 +618,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -630,12 +703,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -698,12 +771,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -766,12 +839,12 @@
                 "schema": {
                   "type": "object",
                   "required": [
-                    "success"
+                    "article2_id"
                   ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "article2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -2201,11 +2274,21 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comments",
+                    "links"
+                  ],
                   "properties": {
                     "comments": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Comment"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
                       }
                     }
                   }
@@ -2261,10 +2344,56 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment",
+                    "links"
+                  ],
                   "properties": {
                     "comment": {
-                      "type": "string",
-                      "description": "Rendered HTML content with hypermedia links"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "state",
+                        "author_id",
+                        "article2_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "author_id": {
+                          "type": "integer"
+                        },
+                        "article2_id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -2306,35 +2435,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -2414,10 +2521,46 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2",
+                    "links"
+                  ],
                   "properties": {
-                    "form": {
-                      "type": "string",
-                      "description": "HTML form for editing comment"
+                    "comment2": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "state",
+                        "author_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string",
+                          "enum": [
+                            "approved",
+                            "rejected",
+                            "pending",
+                            "deleted"
+                          ]
+                        },
+                        "author_id": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -2482,13 +2625,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     }
                   }
                 }
@@ -2511,28 +2654,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2592,13 +2713,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2621,28 +2745,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2685,13 +2787,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2714,28 +2819,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2775,7 +2858,7 @@
         }
       ],
       "post": {
-        "summary": "Soft delete comment (pending/approved → deleted)",
+        "summary": "Soft delete comment",
         "tags": [
           "Comment2s - FSM Transitions"
         ],
@@ -2794,13 +2877,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2823,28 +2909,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2865,7 +2929,7 @@
         }
       ],
       "post": {
-        "summary": "Restore deleted comment (deleted → pending)",
+        "summary": "Restore deleted comment",
         "tags": [
           "Comment2s - FSM Transitions"
         ],
@@ -2884,13 +2948,16 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment2_id"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
+                    "comment2_id": {
+                      "type": "string",
+                      "format": "uuid"
                     },
-                    "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                    "message": {
+                      "type": "string"
                     }
                   }
                 }
@@ -2913,28 +2980,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -2963,11 +3008,21 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comments",
+                    "links"
+                  ],
                   "properties": {
                     "comments": {
                       "type": "array",
                       "items": {
                         "$ref": "#/components/schemas/Comment"
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
                       }
                     }
                   }
@@ -3023,10 +3078,46 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment",
+                    "links"
+                  ],
                   "properties": {
                     "comment": {
-                      "type": "string",
-                      "description": "Rendered HTML content with hypermedia links"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id",
+                        "links"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -3068,34 +3159,42 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "approved",
+                            "rejected",
+                            "pending"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        }
+                      }
                     },
-                    "errors": {
+                    "links": {
                       "type": "array",
                       "items": {
-                        "type": "string"
+                        "$ref": "#/components/schemas/HypermediaLink"
                       }
                     }
                   }
@@ -3122,6 +3221,24 @@
                 }
               }
             }
+          },
+          "422": {
+            "description": "validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -3138,120 +3255,6 @@
                 "required": [
                   "text"
                 ]
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "Deletes a comment",
-        "tags": [
-          "Comments"
-        ],
-        "description": "Permanently deletes a comment. Requires ownership or admin role.",
-        "security": [
-          {
-            "session_auth": [
-
-            ]
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "comment deleted"
-          },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "comment not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/comments/{id}/edit": {
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "description": "Comment ID",
-          "required": true,
-          "schema": {
-            "type": "integer"
-          }
-        }
-      ],
-      "get": {
-        "summary": "Get comment edit form",
-        "tags": [
-          "Comments"
-        ],
-        "description": "Returns HTML form for editing comment. Only available for rejected comments.",
-        "security": [
-          {
-            "session_auth": [
-
-            ]
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "edit form retrieved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "form": {
-                      "type": "string",
-                      "description": "HTML form for editing comment"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "forbidden - not editable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
               }
             }
           }
@@ -3293,13 +3296,35 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        }
+                      }
                     }
                   }
                 }
@@ -3327,16 +3352,12 @@
             }
           },
           "422": {
-            "description": "invalid request",
+            "description": "validation error",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
                     "errors": {
                       "type": "array",
                       "items": {
@@ -3365,6 +3386,104 @@
                 "required": [
                   "text"
                 ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/edit": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "description": "Comment ID",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Get comment edit form",
+        "tags": [
+          "Comments"
+        ],
+        "description": "Returns HTML form for editing comment. Only available for rejected comments.",
+        "security": [
+          {
+            "session_auth": [
+
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "edit form retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "comment",
+                    "links"
+                  ],
+                  "properties": {
+                    "comment": {
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "approved",
+                            "rejected"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden - not editable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
               }
             }
           }
@@ -3403,13 +3522,54 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected",
+                            "deleted"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -3427,33 +3587,11 @@
             }
           },
           "403": {
-            "description": "forbidden - insufficient permissions",
+            "description": "forbidden",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -3496,13 +3634,54 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected",
+                            "deleted"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -3525,28 +3704,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "validation error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -3586,7 +3743,7 @@
         }
       ],
       "post": {
-        "summary": "Soft delete comment (pending/approved → deleted)",
+        "summary": "Soft delete comment",
         "tags": [
           "Comments - FSM Transitions"
         ],
@@ -3605,13 +3762,54 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected",
+                            "deleted"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -3634,28 +3832,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }
@@ -3676,7 +3852,7 @@
         }
       ],
       "post": {
-        "summary": "Restore deleted comment (deleted → pending)",
+        "summary": "Restore deleted comment",
         "tags": [
           "Comments - FSM Transitions"
         ],
@@ -3695,13 +3871,54 @@
               "application/json": {
                 "schema": {
                   "type": "object",
+                  "required": [
+                    "comment"
+                  ],
                   "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "comment": {
-                      "$ref": "#/components/schemas/Comment"
+                      "type": "object",
+                      "required": [
+                        "id",
+                        "text",
+                        "status",
+                        "user_id"
+                      ],
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected",
+                            "deleted"
+                          ]
+                        },
+                        "user_id": {
+                          "type": "integer"
+                        },
+                        "rejection_feedback": {
+                          "type": "string",
+                          "nullable": true
+                        },
+                        "links": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/HypermediaLink"
+                          }
+                        }
+                      }
+                    },
+                    "links": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HypermediaLink"
+                      }
                     }
                   }
                 }
@@ -3724,28 +3941,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "invalid state transition",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean",
-                      "example": false
-                    },
-                    "errors": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  }
                 }
               }
             }

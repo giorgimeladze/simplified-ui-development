@@ -186,16 +186,22 @@ RSpec.describe Comment2Policy, type: :policy do
   end
 
   permissions :delete? do
+    let(:comment2) do
+      Comment2ReadModel.create!(
+        id: SecureRandom.uuid,
+        text: 'Test comment',
+        article2_id: article2.id,
+        author_id: editor.id,
+        state: 'approved'
+      )
+    end
+
     it 'grants access to comment owner' do
-      expect(subject).to permit(viewer, comment2)
+      expect(subject).to permit(editor, comment2)
     end
 
     it 'grants access to admin' do
       expect(subject).to permit(admin, comment2)
-    end
-
-    it 'grants access to editor' do
-      expect(subject).to permit(editor, comment2)
     end
 
     it 'denies access to other users' do
@@ -209,6 +215,15 @@ RSpec.describe Comment2Policy, type: :policy do
   end
 
   permissions :restore? do
+    let(:comment2) do
+      Comment2ReadModel.create!(
+        id: SecureRandom.uuid,
+        text: 'Test comment',
+        article2_id: article2.id,
+        author_id: editor.id,
+        state: 'deleted'
+      )
+    end
     it 'grants access to admin' do
       expect(subject).to permit(admin, comment2)
     end

@@ -28,10 +28,10 @@ class Comment2Policy < ApplicationPolicy
   end
 
   def delete?
-    user.id.present? && (record.author_id == user.id || user.admin? || user.editor?)
+    user.id.present? && ((record.author_id == user.id && user.editor?) || user.admin?)
   end
 
   def restore?
-    user.id.present? && (user.admin? || user.editor?)
-  end
+    user.id.present? && ((record.author_id == user.id && user.editor?) || user.admin?)
+end
 end

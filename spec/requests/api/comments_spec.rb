@@ -97,6 +97,90 @@ RSpec.describe 'Comments API', type: :request do
     end
   end
 
+  # POST /articles/:article_id/comments
+  path '/articles/{article_id}/comments' do
+    parameter name: :article_id, in: :path, type: :integer, description: 'Article ID'
+
+    post 'Creates a new comment' do
+      tags 'Comments'
+      consumes 'application/json'
+      produces 'application/json'
+      description 'Creates a new comment in "pending" state. Requires authentication.'
+      security [session_auth: []]
+
+      parameter name: :comment, in: :body, schema: {
+        type: :object,
+        properties: {
+          text: { 
+            type: :string, 
+            example: 'Great article! Very informative.',
+            minLength: 1,
+            maxLength: 250
+          }
+        },
+        required: ['text']
+      }
+
+      response '201', 'comment created' do
+        schema type: :object,
+          required: ['comment'],
+          properties: {
+            comment: {
+              type: :object,
+              required: %w[id text status user_id],
+              properties: {
+                id: { type: :integer },
+                text: { type: :string },
+                status: { type: :string, enum: ['pending'] },
+                user_id: { type: :integer }
+              }
+            }
+          }
+
+        let!(:user) { sign_in_user(role: :viewer) }
+        let(:article) { create(:article, status: 'published') }
+        let(:article_id) { article.id }
+        let(:comment) { { text: 'Great article!' } }
+        
+        run_test!
+      end
+
+      response '401', 'unauthorized' do
+        schema '$ref' => '#/components/schemas/Error'
+  
+        let(:article) { create(:article, status: 'published') }
+        let(:article_id) { article.id }
+        let(:comment) { { text: 'Great article!' } }
+  
+        run_test!
+      end
+
+      response '404', 'article not found' do
+        schema '$ref' => '#/components/schemas/Error'
+  
+        let!(:user) { sign_in_user(role: :viewer) }
+        let(:article_id) { 999999 }
+        let(:comment) { { text: 'Great article!' } }
+  
+        run_test!
+      end
+
+      response '422', 'validation error' do
+        schema type: :object,
+          properties: {
+            errors: { type: :array, items: { type: :string } }
+          }
+
+        let!(:user) { sign_in_user(role: :viewer) }
+        let(:article) { create(:article, status: 'published') }
+        let(:article_id) { article.id }
+        let(:comment) { { text: '' } }
+  
+        run_test!
+      end
+    end
+  end
+
   # GET /comments/:id/edit
   path '/comments/{id}/edit' do
     parameter name: :id, in: :path, type: :integer, description: 'Comment ID'
@@ -221,6 +305,20 @@ RSpec.describe 'Comments API', type: :request do
         let(:id) { comment_record.id }
         let(:comment) { { text: 'Updated comment text' } }
       
+        run_test!
+      end
+
+      response '422', 'validation error' do
+        schema type: :object,
+          properties: {
+            errors: { type: :array, items: { type: :string } }
+          }
+
+        let!(:user) { sign_in_user(role: :editor) }
+        let(:comment_record) { create(:comment, status: 'rejected', user: user) }
+        let(:id) { comment_record.id }
+        let(:comment) { { text: '' } }
+  
         run_test!
       end
     end
