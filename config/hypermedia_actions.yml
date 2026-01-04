@@ -244,6 +244,7 @@ Comment2:
 
 # Navigation links
 Navigation:
+  # CRUD Navigation Links
   all_articles:
     rel: 'collection'
     method: 'GET'
@@ -266,7 +267,13 @@ Navigation:
     link: '/articles/deleted_articles'
     admin_only: true
 
-  # Article2 Navigation Links
+  pending_comments:
+    rel: 'pending-comments'
+    method: 'GET'
+    link: '/comments/pending_comments'
+    admin_only: true
+
+  # Event Sourcing Navigation Links
   all_article2s:
     rel: 'collection'
     method: 'GET'
@@ -295,12 +302,7 @@ Navigation:
     link: '/comment2s/pending_comment2s'
     admin_only: true
 
-  pending_comments:
-    rel: 'pending-comments'
-    method: 'GET'
-    link: '/comments/pending_comments'
-    admin_only: true
-
+  # Audit Navigation Links
   state_transitions:
     rel: 'state-transitions'
     method: 'GET'
@@ -313,6 +315,7 @@ Navigation:
     link: '/events'
     admin_only: true
   
+  # Authentication Navigation Links
   sign_in:
     rel: 'sign-in'
     method: 'GET'
@@ -328,6 +331,7 @@ Navigation:
     method: 'DELETE'
     link: '/users/sign_out'
   
+  # Customization Navigation Links
   custom_template:
     rel: 'custom-template'
     method: 'GET'
