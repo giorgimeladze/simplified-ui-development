@@ -14,7 +14,7 @@ class Article2sController < ApplicationController
   
   def article2s_for_review
     authorize :article2, :article2s_for_review?
-    article2s = Article2ReadModel.where(state: ['review', 'draft'])
+    article2s = Article2ReadModel.where(state: 'review')
     render_article2s_list(article2s, 'Articles for Review')
   end
   

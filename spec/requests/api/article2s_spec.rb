@@ -565,7 +565,7 @@ RSpec.describe 'Article2s API', type: :request do
             article2_id: { type: :string, format: :uuid }
           }
       
-        let(:user) { sign_in_user(role: :editor) }
+        let(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
             id: SecureRandom.uuid,

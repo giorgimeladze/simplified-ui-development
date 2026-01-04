@@ -528,7 +528,7 @@ RSpec.describe 'Articles API', type: :request do
             }
           }
       
-        let(:user) { sign_in_user(role: :editor) }
+        let(:user) { sign_in_user(role: :admin) }
         let(:article_record) { create(:article, user: user, status: 'review') }
         let(:id) { article_record.id }
       

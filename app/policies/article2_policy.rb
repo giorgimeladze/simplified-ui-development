@@ -25,7 +25,7 @@ class Article2Policy < ApplicationPolicy
   end
 
   def approve_private?
-    user.admin? || (user.editor? && record.author_id == user.id)
+    user.admin?
   end
 
   def reject?

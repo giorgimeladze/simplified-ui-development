@@ -4,7 +4,11 @@ class EventsController < ApplicationController
     
     # Read all events from Rails Event Store
     # event_store = Rails.application.config.x.event_store
-    @events = ActiveRecord::Base.connection.execute("SELECT *  FROM event_store_events")
+    @events = ActiveRecord::Base.connection.execute(<<~SQL)
+      SELECT *
+      FROM event_store_events
+      ORDER BY created_at DESC
+    SQL
     @events = @events.map { |event| format_event(event) }
     
     respond_to do |format|

@@ -98,7 +98,7 @@ RSpec.describe ArticlePolicy, type: :policy do
     end
 
     it 'grants access to editor' do
-      expect(subject).to permit(editor, article)
+      expect(subject).not_to permit(editor, article)
     end
 
     it 'denies access to viewer' do
