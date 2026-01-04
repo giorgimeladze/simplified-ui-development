@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ApplicationController < ActionController::Base
   include Pundit
   include LinksRenderer
@@ -14,7 +16,7 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    added_attrs = [:username, :email, :password, :password_confirmation, :remember_me]
+    added_attrs = %i[username email password password_confirmation remember_me]
     devise_parameter_sanitizer.permit(:sign_up, keys: added_attrs)
     devise_parameter_sanitizer.permit(:account_update, keys: added_attrs)
   end
@@ -27,9 +29,9 @@ class ApplicationController < ActionController::Base
 
   def user_not_authorized
     respond_to do |format|
-      format.json { render json: { error: "forbidden" }, status: :forbidden }
+      format.json { render json: { error: 'forbidden' }, status: :forbidden }
       format.html do
-        flash[:alert] = "You are not authorized to perform this action."
+        flash[:alert] = 'You are not authorized to perform this action.'
         redirect_to(request.referrer || root_path)
       end
     end

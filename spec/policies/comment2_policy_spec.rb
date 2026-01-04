@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2Policy, type: :policy do
@@ -241,4 +243,3 @@ RSpec.describe Comment2Policy, type: :policy do
     end
   end
 end
-

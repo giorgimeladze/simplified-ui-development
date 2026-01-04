@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2ReadModel, type: :model do
@@ -143,4 +145,3 @@ RSpec.describe Article2ReadModel, type: :model do
     end
   end
 end
-

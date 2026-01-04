@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment, type: :model do
@@ -165,10 +167,10 @@ RSpec.describe Comment, type: :model do
 
   describe 'HasStateTransitions concern' do
     it 'creates a state transition record after state change' do
-      expect {
+      expect do
         comment.approve!
-      }.to change(StateTransition, :count).by(1)
-      
+      end.to change(StateTransition, :count).by(1)
+
       transition = StateTransition.last
       expect(transition.transitionable).to eq(comment)
       expect(transition.from_state).to eq('pending')

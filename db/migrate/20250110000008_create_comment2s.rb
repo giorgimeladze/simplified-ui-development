@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateComment2s < ActiveRecord::Migration[7.1]
   def change
     create_table :comment2s do |t|
@@ -6,10 +8,10 @@ class CreateComment2s < ActiveRecord::Migration[7.1]
       t.text :text, null: false
       t.string :status, default: 'pending', null: false
       t.text :rejection_feedback
-      
+
       t.timestamps
     end
-    
+
     add_index :comment2s, [:article2_id]
     add_index :comment2s, [:user_id]
     add_index :comment2s, [:status]

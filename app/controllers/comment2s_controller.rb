@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class Comment2sController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
-  before_action :set_article2, only: [:new, :create]
-  before_action :set_comment2, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore, :index]
+  before_action :set_article2, only: %i[new create]
+  before_action :set_comment2,
+                only: %i[show edit update approve reject reject_feedback delete restore index]
 
   def index
     redirect_to article2_path(@comment2.article2_id)
@@ -10,9 +13,13 @@ class Comment2sController < ApplicationController
   def pending_comment2s
     authorize :comment2, :pending_comment2s?
     comment2s = Comment2ReadModel.where(state: 'pending')
-  
-    rendered_comment2s = comment2s.map { |c| { id: c.id, text: c.text, author_id: c.author_id, article2_id: c.article2_id, state: c.state, links: c.hypermedia_index_links(current_user) } }
-    @html_content = render_to_string(partial: 'comment2s/list', locals: { comment2s: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
+
+    rendered_comment2s = comment2s.map do |c|
+      { id: c.id, text: c.text, author_id: c.author_id, article2_id: c.article2_id, state: c.state,
+        links: c.hypermedia_index_links(current_user) }
+    end
+    @html_content = render_to_string(partial: 'comment2s/list',
+                                     locals: { comment2s: rendered_comment2s, title: 'Pending Comments' }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment2')
 
     respond_to do |format|
@@ -22,7 +29,8 @@ class Comment2sController < ApplicationController
   end
 
   def show
-    payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state, article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user), rejection_feedback: @comment2.rejection_feedback }
+    payload = { id: @comment2.id, text: @comment2.text, author_id: @comment2.author_id, state: @comment2.state,
+                article2_id: @comment2.article2_id, links: @comment2.hypermedia_show_links(current_user), rejection_feedback: @comment2.rejection_feedback }
     @html_content = render_to_string(partial: 'comment2s/comment2', locals: { comment2: payload }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2', { id: @comment2.id })
     respond_to do |format|
@@ -44,15 +52,19 @@ class Comment2sController < ApplicationController
 
   def create
     authorize :comment2, :create?
-    
+
     result = Comment2Commands.create_comment(
       comment2_params[:text],
       params[:article2_id],
       current_user
     )
-    
+
     if result[:success]
-      @comment2 = Comment2ReadModel.find(result[:comment2_id]) rescue nil
+      @comment2 = begin
+        Comment2ReadModel.find(result[:comment2_id])
+      rescue StandardError
+        nil
+      end
       respond_to do |format|
         format.html { redirect_to comment2_path(result[:comment2_id]), notice: 'Comment was successfully created.' }
         format.json { render json: { comment2_id: result[:comment2_id] }, status: :created }
@@ -65,9 +77,9 @@ class Comment2sController < ApplicationController
     end
   end
 
-
   def edit
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).update?
+
     @html_content = render_to_string(partial: 'comment2s/form', locals: { comment2: @comment2 }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -78,13 +90,13 @@ class Comment2sController < ApplicationController
 
   def update
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).update?
-    
+
     result = Comment2Commands.update_comment(
       params[:id],
       comment2_params[:text],
       current_user
     )
-    
+
     if result[:success]
       id = result[:comment2_id]
       respond_to do |format|
@@ -102,16 +114,18 @@ class Comment2sController < ApplicationController
   # Event Sourcing Actions
   def approve
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).approve?
+
     result = Comment2Commands.approve_comment(
       params[:id],
       current_user
     )
-    
+
     handle_command_result(result, 'Comment approved.')
   end
 
   def reject_feedback
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).reject?
+
     @html_content = render_to_string(partial: 'comment2s/reject_feedback_form', formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Comment2')
     respond_to do |format|
@@ -123,12 +137,13 @@ class Comment2sController < ApplicationController
   def reject
     if params[:rejection_feedback].present?
       raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).reject?
+
       result = Comment2Commands.reject_comment(
         params[:id],
         params[:rejection_feedback],
         current_user
       )
-      
+
       handle_command_result(result, 'Comment rejected.')
     else
       respond_to do |format|
@@ -140,21 +155,23 @@ class Comment2sController < ApplicationController
 
   def delete
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).delete?
+
     result = Comment2Commands.delete_comment(
       params[:id],
       current_user
     )
-    
+
     handle_command_result(result, 'Comment deleted.')
   end
 
   def restore
     raise Pundit::NotAuthorizedError unless Comment2Policy.new(current_user, @comment2).restore?
+
     result = Comment2Commands.restore_comment(
       params[:id],
       current_user
     )
-    
+
     handle_command_result(result, 'Comment restored.')
   end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe CustomTemplate, type: :model do
@@ -31,7 +33,8 @@ RSpec.describe CustomTemplate, type: :model do
     end
 
     it 'contains expected sections' do
-      expect(CustomTemplate::DEFAULT_TEMPLATE.keys).to include('Article', 'Comment', 'Navigation', 'Article2', 'Comment2')
+      expect(CustomTemplate::DEFAULT_TEMPLATE.keys).to include('Article', 'Comment', 'Navigation', 'Article2',
+                                                               'Comment2')
     end
 
     it 'contains Article actions' do
@@ -56,9 +59,9 @@ RSpec.describe CustomTemplate, type: :model do
       end
 
       it 'creates a new template' do
-        expect {
+        expect do
           CustomTemplate.for_user(new_user)
-        }.to change(CustomTemplate, :count).by(1)
+        end.to change(CustomTemplate, :count).by(1)
       end
 
       it 'creates template with default data' do
@@ -167,4 +170,3 @@ RSpec.describe CustomTemplate, type: :model do
     end
   end
 end
-

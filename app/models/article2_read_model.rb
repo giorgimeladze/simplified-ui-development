@@ -1,13 +1,21 @@
+# frozen_string_literal: true
+
 class Article2ReadModel < ApplicationRecord
   include HasHypermediaLinks
 
   self.table_name = 'article2_read_models'
   self.primary_key = 'id'
-  
+
+  has_many :comment2s,
+           class_name: "Comment2ReadModel",
+           foreign_key: :article2_id,
+           primary_key: :id,
+           inverse_of: :article2
+
   # Override model name for URL generation
   class << self
     def model_name
-      ActiveModel::Name.new(self, nil, "Article2")
+      ActiveModel::Name.new(self, nil, 'Article2')
     end
   end
 
@@ -50,8 +58,6 @@ class Article2ReadModel < ApplicationRecord
   end
 
   def comments
-    Comment2ReadModel.for_article(id)
+    comment2s
   end
 end
-
-

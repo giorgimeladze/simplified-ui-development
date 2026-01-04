@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
@@ -126,13 +128,13 @@ RSpec.describe User, type: :model do
 
   describe 'callbacks' do
     it 'creates a custom_template after user creation' do
-      expect {
+      expect do
         User.create!(
           email: 'newuser@example.com',
           username: 'newuser',
           password: 'password123'
         )
-      }.to change(CustomTemplate, :count).by(1)
+      end.to change(CustomTemplate, :count).by(1)
     end
 
     it 'creates custom_template with default data' do
@@ -141,7 +143,7 @@ RSpec.describe User, type: :model do
         username: 'newuser',
         password: 'password123'
       )
-      
+
       template = new_user.custom_template
       expect(template).to be_present
       expect(template.template_data).to eq(CustomTemplate::DEFAULT_TEMPLATE)

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2Submitted do
@@ -25,4 +27,3 @@ RSpec.describe Article2Submitted do
     end
   end
 end
-

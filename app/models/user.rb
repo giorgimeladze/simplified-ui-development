@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
@@ -21,7 +23,7 @@ class User < ApplicationRecord
   def editor?
     role == 'editor'
   end
-  
+
   def viewer?
     role == 'viewer'
   end

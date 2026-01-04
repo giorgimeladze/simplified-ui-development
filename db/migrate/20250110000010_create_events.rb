@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateEvents < ActiveRecord::Migration[7.1]
   def change
     create_table :events do |t|
@@ -8,8 +10,8 @@ class CreateEvents < ActiveRecord::Migration[7.1]
       t.integer :version, null: false
       t.datetime :occurred_at, null: false
     end
-    
-    add_index :events, [:aggregate_id, :aggregate_type]
+
+    add_index :events, %i[aggregate_id aggregate_type]
     add_index :events, [:event_type]
     add_index :events, [:occurred_at]
   end

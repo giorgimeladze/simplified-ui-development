@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2Projection do
@@ -8,17 +10,17 @@ RSpec.describe Article2Projection do
     describe 'Article2Created event' do
       let(:event) do
         Article2Created.new(data: {
-          article2_id: article2_id,
-          title: 'Test Article',
-          content: 'Test content',
-          user_id: user.id
-        })
+                              article2_id: article2_id,
+                              title: 'Test Article',
+                              content: 'Test content',
+                              user_id: user.id
+                            })
       end
 
       it 'creates an Article2ReadModel' do
-        expect {
+        expect do
           Article2Projection.apply(event)
-        }.to change(Article2ReadModel, :count).by(1)
+        end.to change(Article2ReadModel, :count).by(1)
       end
 
       it 'sets correct attributes' do
@@ -36,11 +38,11 @@ RSpec.describe Article2Projection do
     describe 'Article2Updated event' do
       let(:event) do
         Article2Updated.new(data: {
-          article2_id: article2_id,
-          title: 'Updated Title',
-          content: 'Updated content',
-          user_id: user.id
-        })
+                              article2_id: article2_id,
+                              title: 'Updated Title',
+                              content: 'Updated content',
+                              user_id: user.id
+                            })
       end
 
       before do
@@ -74,9 +76,9 @@ RSpec.describe Article2Projection do
     describe 'Article2Submitted event' do
       let(:event) do
         Article2Submitted.new(data: {
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                                article2_id: article2_id,
+                                user_id: user.id
+                              })
       end
 
       before do
@@ -100,10 +102,10 @@ RSpec.describe Article2Projection do
     describe 'Article2Rejected event' do
       let(:event) do
         Article2Rejected.new(data: {
-          article2_id: article2_id,
-          rejection_feedback: 'Needs improvement',
-          user_id: user.id
-        })
+                               article2_id: article2_id,
+                               rejection_feedback: 'Needs improvement',
+                               user_id: user.id
+                             })
       end
 
       before do
@@ -128,9 +130,9 @@ RSpec.describe Article2Projection do
     describe 'Article2ApprovedPrivate event' do
       let(:event) do
         Article2ApprovedPrivate.new(data: {
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                                      article2_id: article2_id,
+                                      user_id: user.id
+                                    })
       end
 
       before do
@@ -154,9 +156,9 @@ RSpec.describe Article2Projection do
     describe 'Article2Published event' do
       let(:event) do
         Article2Published.new(data: {
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                                article2_id: article2_id,
+                                user_id: user.id
+                              })
       end
 
       before do
@@ -180,9 +182,9 @@ RSpec.describe Article2Projection do
     describe 'Article2Archived event' do
       let(:event) do
         Article2Archived.new(data: {
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                               article2_id: article2_id,
+                               user_id: user.id
+                             })
       end
 
       before do
@@ -207,15 +209,15 @@ RSpec.describe Article2Projection do
   describe '.upsert_created' do
     it 'creates a new Article2ReadModel' do
       event = Article2Created.new(data: {
-        article2_id: article2_id,
-        title: 'Test Article',
-        content: 'Test content',
-        user_id: user.id
-      })
+                                    article2_id: article2_id,
+                                    title: 'Test Article',
+                                    content: 'Test content',
+                                    user_id: user.id
+                                  })
 
-      expect {
+      expect do
         Article2Projection.upsert_created(event)
-      }.to change(Article2ReadModel, :count).by(1)
+      end.to change(Article2ReadModel, :count).by(1)
     end
 
     it 'updates existing Article2ReadModel if it exists' do
@@ -228,15 +230,15 @@ RSpec.describe Article2Projection do
       )
 
       event = Article2Created.new(data: {
-        article2_id: article2_id,
-        title: 'Updated',
-        content: 'Updated content',
-        user_id: user.id
-      })
+                                    article2_id: article2_id,
+                                    title: 'Updated',
+                                    content: 'Updated content',
+                                    user_id: user.id
+                                  })
 
-      expect {
+      expect do
         Article2Projection.upsert_created(event)
-      }.not_to change(Article2ReadModel, :count)
+      end.not_to change(Article2ReadModel, :count)
 
       article2 = Article2ReadModel.find(article2_id)
       expect(article2.title).to eq('Updated')
@@ -247,11 +249,11 @@ RSpec.describe Article2Projection do
   describe '.upsert_updated' do
     let(:event) do
       Article2Updated.new(data: {
-        article2_id: article2_id,
-        title: 'Updated Title',
-        content: 'Updated content',
-        user_id: user.id
-      })
+                            article2_id: article2_id,
+                            title: 'Updated Title',
+                            content: 'Updated content',
+                            user_id: user.id
+                          })
     end
 
     before do
@@ -276,10 +278,10 @@ RSpec.describe Article2Projection do
   describe '.upsert_rejected' do
     let(:event) do
       Article2Rejected.new(data: {
-        article2_id: article2_id,
-        rejection_feedback: 'Feedback',
-        user_id: user.id
-      })
+                             article2_id: article2_id,
+                             rejection_feedback: 'Feedback',
+                             user_id: user.id
+                           })
     end
 
     before do
@@ -304,9 +306,9 @@ RSpec.describe Article2Projection do
   describe '.upsert_state' do
     let(:event) do
       Article2Submitted.new(data: {
-        article2_id: article2_id,
-        user_id: user.id
-      })
+                              article2_id: article2_id,
+                              user_id: user.id
+                            })
     end
 
     before do
@@ -327,4 +329,3 @@ RSpec.describe Article2Projection do
     end
   end
 end
-

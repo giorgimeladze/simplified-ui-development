@@ -1,31 +1,36 @@
-class Article2sController < ApplicationController  
-  skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article2, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+# frozen_string_literal: true
+
+class Article2sController < ApplicationController
+  skip_before_action :authenticate_user!, only: %i[index show]
+  before_action :set_article2,
+                only: %i[submit reject reject_feedback approve_private resubmit archive publish make_visible
+                         make_invisible]
 
   def index
     article2s = Article2ReadModel.where(state: 'published')
     render_article2s_list(article2s, 'All Articles')
   end
-  
+
   def my_article2s
     article2s = Article2ReadModel.by_author(current_user.id)
     render_article2s_list(article2s, 'My Articles')
   end
-  
+
   def article2s_for_review
     authorize :article2, :article2s_for_review?
     article2s = Article2ReadModel.where(state: 'review')
     render_article2s_list(article2s, 'Articles for Review')
   end
-  
+
   def deleted_article2s
     authorize :article2, :deleted_article2s?
     article2s = Article2ReadModel.where(state: 'archived')
     render_article2s_list(article2s, 'Archived Articles')
   end
 
-   # GET /article2s/:id
+  # GET /article2s/:id
   def show
+    @article2 = Article2ReadModel.includes(:comment2s).find(params[:id])
     payload = {
       id: @article2.id,
       title: @article2.title,
@@ -35,7 +40,10 @@ class Article2sController < ApplicationController
       rejection_feedback: @article2.rejection_feedback,
       links: @article2.hypermedia_show_links(current_user),
       _embedded: {
-        comment2s: @article2.comments.map { |c| { id: c.id, text: c.text, author_id: c.author_id, state: c.state, links: c.hypermedia_index_links(current_user) } }
+        comment2s: @article2.comments.map do |c|
+          { id: c.id, text: c.text, author_id: c.author_id, state: c.state,
+            links: c.hypermedia_index_links(current_user) }
+        end
       }
     }
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article2')
@@ -61,15 +69,14 @@ class Article2sController < ApplicationController
   # POST /article2s
   def create
     raise Pundit::NotAuthorizedError unless Article2Policy.new(current_user, @article2).create?
-    
+
     result = Article2Commands.create_article(
       article2_params[:title],
       article2_params[:content],
       current_user
     )
-    
+
     if result[:success]
-      #@article2 = Article2ReadModel.find(result[:article2_id]) rescue nil
       respond_to do |format|
         format.html { redirect_to article2s_path, notice: 'Article was successfully created.' }
         format.json { render json: { success: true }, status: :created }
@@ -89,7 +96,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article submitted for review.')
   end
 
@@ -99,7 +106,9 @@ class Article2sController < ApplicationController
     @links = @article2.hypermedia_edit_links(current_user)
     respond_to do |format|
       format.html { render :reject_feedback }
-      format.json { render json: { article2: @article2.slice(:id, :title, :content, :status, :user_id), links: @links } }
+      format.json do
+        render json: { article2: @article2.slice(:id, :title, :content, :status, :user_id), links: @links }
+      end
     end
   end
 
@@ -111,9 +120,9 @@ class Article2sController < ApplicationController
         params[:rejection_feedback],
         current_user
       )
-      
+
       handle_command_result(result, 'Article rejected.')
-    else  
+    else
       respond_to do |format|
         format.html { redirect_to reject_feedback_article2_path(@article2), alert: 'Rejection feedback is required.' }
         format.json { render json: { errors: ['Rejection feedback is required.'] }, status: :unprocessable_entity }
@@ -127,7 +136,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article approved as private.')
   end
 
@@ -137,7 +146,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article resubmitted for review.')
   end
 
@@ -147,7 +156,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article archived.')
   end
 
@@ -157,7 +166,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article published.')
   end
 
@@ -167,7 +176,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article made visible.')
   end
 
@@ -177,7 +186,7 @@ class Article2sController < ApplicationController
       @article2.id,
       current_user
     )
-    
+
     handle_command_result(result, 'Article made private.')
   end
 
@@ -192,9 +201,13 @@ class Article2sController < ApplicationController
   end
 
   def render_article2s_list(article2s, title)
-    list = article2s.map { |a| { id: a.id, title: a.title, state: a.state, author_id: a.author_id, content: a.content, links: a.hypermedia_index_links(current_user) } }
+    list = article2s.map do |a|
+      { id: a.id, title: a.title, state: a.state, author_id: a.author_id, content: a.content,
+        links: a.hypermedia_index_links(current_user) }
+    end
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article2')
-    @html_content = render_to_string(partial: 'article2s/list', locals: { article2s: list, title: title }, formats: [:html])
+    @html_content = render_to_string(partial: 'article2s/list', locals: { article2s: list, title: title },
+                                     formats: [:html])
     respond_to do |format|
       format.html { render :index, locals: { article2s: list, title: title } }
       format.json { render json: { article2s: list, links: @links } }

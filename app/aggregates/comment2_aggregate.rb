@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Comment2Aggregate
   include AggregateRoot
 
@@ -11,53 +13,53 @@ class Comment2Aggregate
   def create(text:, article2_id:, author_id:)
     raise_standard_error('already created') unless @status == 'unknown'
     apply Comment2Created.new(data: {
-      comment2_id: id,
-      text: text,
-      article2_id: article2_id,
-      user_id: author_id
-    })
+                                comment2_id: id,
+                                text: text,
+                                article2_id: article2_id,
+                                user_id: author_id
+                              })
   end
 
   def approve(actor_id:)
     ensure_in_states(%w[pending])
     apply Comment2Approved.new(data: {
-      comment2_id: id,
-      user_id: actor_id
-    })
+                                 comment2_id: id,
+                                 user_id: actor_id
+                               })
   end
 
   def reject(rejection_feedback:, actor_id:)
     ensure_in_states(%w[pending])
     apply Comment2Rejected.new(data: {
-      comment2_id: id,
-      rejection_feedback: rejection_feedback,
-      user_id: actor_id
-    })
+                                 comment2_id: id,
+                                 rejection_feedback: rejection_feedback,
+                                 user_id: actor_id
+                               })
   end
 
   def delete(actor_id:)
     ensure_in_states(%w[pending approved rejected])
     apply Comment2Deleted.new(data: {
-      comment2_id: id,
-      user_id: actor_id
-    })
+                                comment2_id: id,
+                                user_id: actor_id
+                              })
   end
 
   def restore(actor_id:)
     ensure_in_states(%w[deleted])
     apply Comment2Restored.new(data: {
-      comment2_id: id,
-      user_id: actor_id
-    })
+                                 comment2_id: id,
+                                 user_id: actor_id
+                               })
   end
 
   def update(text:, actor_id:)
     ensure_in_states(%w[rejected])
     apply Comment2Updated.new(data: {
-      comment2_id: id,
-      text: text,
-      user_id: actor_id
-    })
+                                comment2_id: id,
+                                text: text,
+                                user_id: actor_id
+                              })
   end
 
   on Comment2Created do |event|
@@ -101,5 +103,3 @@ class Comment2Aggregate
     raise StandardError, "Comment2Aggregate(#{id}): #{message}"
   end
 end
-
-

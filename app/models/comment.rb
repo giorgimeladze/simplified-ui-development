@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class Comment < ApplicationRecord
   include AASM
   include HasHypermediaLinks
   include HasStateTransitions
 
   belongs_to :article
-  belongs_to :user  # created_by
+  belongs_to :user # created_by
 
   validates :text, presence: true, length: { minimum: 1, maximum: 250 }
   validates :user, :article, presence: true
@@ -26,7 +28,7 @@ class Comment < ApplicationRecord
     end
 
     event :delete do
-      transitions from: [:pending, :approved, :rejected], to: :deleted
+      transitions from: %i[pending approved rejected], to: :deleted
     end
 
     event :restore do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2Commands do
@@ -196,4 +198,3 @@ RSpec.describe Comment2Commands do
     end
   end
 end
-

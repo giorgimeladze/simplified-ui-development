@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe EventPolicy, type: :policy do
@@ -26,4 +28,3 @@ RSpec.describe EventPolicy, type: :policy do
     end
   end
 end
-

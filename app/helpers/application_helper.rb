@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
   include LinksRenderer
 
@@ -41,7 +43,7 @@ module ApplicationHelper
     }[status] || 'bg-secondary'
   end
 
-  def model_link(class_name, action, current_user=nil, event_sourcing=false)
+  def model_link(class_name, action, current_user = nil, event_sourcing = false)
     class_name = event_sourcing ? "#{class_name.camelize}ReadModel" : class_name.camelize
     class_object = class_name.constantize.new
     class_object.build_link(class_object.hypermedia_model_name, action, current_user).values_at(:title, :button_classes)

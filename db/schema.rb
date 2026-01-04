@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -10,114 +12,114 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_30_235135) do
-  create_table "article2_read_models", id: :string, force: :cascade do |t|
-    t.text "title"
-    t.text "content"
-    t.integer "author_id"
-    t.string "state", default: "draft"
-    t.text "rejection_feedback"
-    t.index ["author_id"], name: "index_article2_read_models_on_author_id"
-    t.index ["state"], name: "index_article2_read_models_on_state"
+ActiveRecord::Schema[7.1].define(version: 20_251_030_235_135) do
+  create_table 'article2_read_models', id: :string, force: :cascade do |t|
+    t.text 'title'
+    t.text 'content'
+    t.integer 'author_id'
+    t.string 'state', default: 'draft'
+    t.text 'rejection_feedback'
+    t.index ['author_id'], name: 'index_article2_read_models_on_author_id'
+    t.index ['state'], name: 'index_article2_read_models_on_state'
   end
 
-  create_table "articles", force: :cascade do |t|
-    t.string "title"
-    t.text "content"
-    t.string "status"
-    t.integer "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "rejection_feedback"
-    t.index ["user_id"], name: "index_articles_on_user_id"
+  create_table 'articles', force: :cascade do |t|
+    t.string 'title'
+    t.text 'content'
+    t.string 'status'
+    t.integer 'user_id', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.text 'rejection_feedback'
+    t.index ['user_id'], name: 'index_articles_on_user_id'
   end
 
-  create_table "comment2_read_models", id: :string, force: :cascade do |t|
-    t.text "text"
-    t.string "article2_id"
-    t.integer "author_id"
-    t.string "state", default: "pending"
-    t.text "rejection_feedback"
-    t.index ["article2_id"], name: "index_comment2_read_models_on_article2_id"
-    t.index ["author_id"], name: "index_comment2_read_models_on_author_id"
-    t.index ["state"], name: "index_comment2_read_models_on_state"
+  create_table 'comment2_read_models', id: :string, force: :cascade do |t|
+    t.text 'text'
+    t.string 'article2_id'
+    t.integer 'author_id'
+    t.string 'state', default: 'pending'
+    t.text 'rejection_feedback'
+    t.index ['article2_id'], name: 'index_comment2_read_models_on_article2_id'
+    t.index ['author_id'], name: 'index_comment2_read_models_on_author_id'
+    t.index ['state'], name: 'index_comment2_read_models_on_state'
   end
 
-  create_table "comments", force: :cascade do |t|
-    t.integer "article_id", null: false
-    t.integer "user_id", null: false
-    t.text "text", null: false
-    t.string "status", default: "pending", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "rejection_feedback"
-    t.index ["article_id"], name: "index_comments_on_article_id"
-    t.index ["status"], name: "index_comments_on_status"
-    t.index ["user_id"], name: "index_comments_on_user_id"
+  create_table 'comments', force: :cascade do |t|
+    t.integer 'article_id', null: false
+    t.integer 'user_id', null: false
+    t.text 'text', null: false
+    t.string 'status', default: 'pending', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.text 'rejection_feedback'
+    t.index ['article_id'], name: 'index_comments_on_article_id'
+    t.index ['status'], name: 'index_comments_on_status'
+    t.index ['user_id'], name: 'index_comments_on_user_id'
   end
 
-  create_table "custom_templates", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.json "template_data", default: {}, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_custom_templates_on_user_id"
+  create_table 'custom_templates', force: :cascade do |t|
+    t.integer 'user_id', null: false
+    t.json 'template_data', default: {}, null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['user_id'], name: 'index_custom_templates_on_user_id'
   end
 
-  create_table "event_store_events", force: :cascade do |t|
-    t.string "event_id", limit: 36, null: false
-    t.string "event_type", null: false
-    t.binary "data", null: false
-    t.datetime "created_at", null: false
-    t.binary "metadata"
-    t.datetime "valid_at"
-    t.index ["created_at"], name: "index_event_store_events_on_created_at"
-    t.index ["event_id"], name: "index_event_store_events_on_event_id", unique: true
-    t.index ["event_type"], name: "index_event_store_events_on_event_type"
+  create_table 'event_store_events', force: :cascade do |t|
+    t.string 'event_id', limit: 36, null: false
+    t.string 'event_type', null: false
+    t.binary 'data', null: false
+    t.datetime 'created_at', null: false
+    t.binary 'metadata'
+    t.datetime 'valid_at'
+    t.index ['created_at'], name: 'index_event_store_events_on_created_at'
+    t.index ['event_id'], name: 'index_event_store_events_on_event_id', unique: true
+    t.index ['event_type'], name: 'index_event_store_events_on_event_type'
   end
 
-  create_table "event_store_events_in_streams", force: :cascade do |t|
-    t.string "stream", null: false
-    t.integer "position"
-    t.string "event_id", limit: 36, null: false
-    t.datetime "created_at", null: false
-    t.index ["created_at"], name: "index_event_store_events_in_streams_on_created_at"
-    t.index ["event_id"], name: "index_event_store_events_in_streams_on_event_id"
-    t.index ["stream", "event_id"], name: "index_event_store_events_in_streams_on_stream_and_event_id", unique: true
-    t.index ["stream", "position"], name: "index_event_store_events_in_streams_on_stream_and_position", unique: true
+  create_table 'event_store_events_in_streams', force: :cascade do |t|
+    t.string 'stream', null: false
+    t.integer 'position'
+    t.string 'event_id', limit: 36, null: false
+    t.datetime 'created_at', null: false
+    t.index ['created_at'], name: 'index_event_store_events_in_streams_on_created_at'
+    t.index ['event_id'], name: 'index_event_store_events_in_streams_on_event_id'
+    t.index %w[stream event_id], name: 'index_event_store_events_in_streams_on_stream_and_event_id', unique: true
+    t.index %w[stream position], name: 'index_event_store_events_in_streams_on_stream_and_position', unique: true
   end
 
-  create_table "state_transitions", force: :cascade do |t|
-    t.string "transitionable_type", null: false
-    t.integer "transitionable_id", null: false
-    t.string "from_state", null: false
-    t.string "to_state", null: false
-    t.string "event", null: false
-    t.integer "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["transitionable_type", "transitionable_id"], name: "index_state_transitions_on_transitionable"
-    t.index ["user_id"], name: "index_state_transitions_on_user_id"
+  create_table 'state_transitions', force: :cascade do |t|
+    t.string 'transitionable_type', null: false
+    t.integer 'transitionable_id', null: false
+    t.string 'from_state', null: false
+    t.string 'to_state', null: false
+    t.string 'event', null: false
+    t.integer 'user_id', null: false
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index %w[transitionable_type transitionable_id], name: 'index_state_transitions_on_transitionable'
+    t.index ['user_id'], name: 'index_state_transitions_on_user_id'
   end
 
-  create_table "users", force: :cascade do |t|
-    t.string "email", default: "", null: false
-    t.string "username", null: false
-    t.integer "role", default: 0, null: false
-    t.string "encrypted_password", default: "", null: false
-    t.string "reset_password_token"
-    t.datetime "reset_password_sent_at"
-    t.datetime "remember_created_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+  create_table 'users', force: :cascade do |t|
+    t.string 'email', default: '', null: false
+    t.string 'username', null: false
+    t.integer 'role', default: 0, null: false
+    t.string 'encrypted_password', default: '', null: false
+    t.string 'reset_password_token'
+    t.datetime 'reset_password_sent_at'
+    t.datetime 'remember_created_at'
+    t.datetime 'created_at', null: false
+    t.datetime 'updated_at', null: false
+    t.index ['email'], name: 'index_users_on_email', unique: true
+    t.index ['reset_password_token'], name: 'index_users_on_reset_password_token', unique: true
   end
 
-  add_foreign_key "articles", "users"
-  add_foreign_key "comments", "articles"
-  add_foreign_key "comments", "users"
-  add_foreign_key "custom_templates", "users"
-  add_foreign_key "event_store_events_in_streams", "event_store_events", column: "event_id", primary_key: "event_id"
-  add_foreign_key "state_transitions", "users"
+  add_foreign_key 'articles', 'users'
+  add_foreign_key 'comments', 'articles'
+  add_foreign_key 'comments', 'users'
+  add_foreign_key 'custom_templates', 'users'
+  add_foreign_key 'event_store_events_in_streams', 'event_store_events', column: 'event_id', primary_key: 'event_id'
+  add_foreign_key 'state_transitions', 'users'
 end

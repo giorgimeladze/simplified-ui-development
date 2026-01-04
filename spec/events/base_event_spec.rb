@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe BaseEvent do
@@ -35,4 +37,3 @@ RSpec.describe BaseEvent do
     end
   end
 end
-

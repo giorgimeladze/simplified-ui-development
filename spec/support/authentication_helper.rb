@@ -30,4 +30,3 @@ RSpec.configure do |config|
   config.include AuthenticationHelper, type: :request
   config.include Devise::Test::IntegrationHelpers, type: :request
 end
-

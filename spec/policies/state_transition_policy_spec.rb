@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe StateTransitionPolicy, type: :policy do
@@ -30,4 +32,3 @@ RSpec.describe StateTransitionPolicy, type: :policy do
     end
   end
 end
-

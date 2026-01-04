@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2Aggregate do
@@ -20,9 +22,9 @@ RSpec.describe Comment2Aggregate do
     let(:text) { 'Test comment' }
 
     it 'applies Comment2Created event' do
-      expect {
+      expect do
         aggregate.create(text: text, article2_id: article2_id, author_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Created)
@@ -36,19 +38,19 @@ RSpec.describe Comment2Aggregate do
       aggregate.create(text: text, article2_id: article2_id, author_id: user.id)
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.create(text: text, article2_id: article2_id, author_id: user.id)
-      }.to raise_error(StandardError, /already created/)
+      end.to raise_error(StandardError, /already created/)
     end
 
     context 'when Comment2Created event is applied' do
       it 'sets text, article2_id, author_id, and status' do
         event = Comment2Created.new(data: {
-          comment2_id: aggregate_id,
-          text: text,
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                                      comment2_id: aggregate_id,
+                                      text: text,
+                                      article2_id: article2_id,
+                                      user_id: user.id
+                                    })
         aggregate.apply(event)
 
         expect(aggregate.text).to eq(text)
@@ -67,9 +69,9 @@ RSpec.describe Comment2Aggregate do
     end
 
     it 'applies Comment2Approved event' do
-      expect {
+      expect do
         aggregate.approve(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Approved)
@@ -81,9 +83,9 @@ RSpec.describe Comment2Aggregate do
       aggregate.apply(Comment2Approved.new(data: { comment2_id: aggregate_id, user_id: user.id }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.approve(actor_id: user.id)
-      }.to raise_error(StandardError, /invalid state/)
+      end.to raise_error(StandardError, /invalid state/)
     end
 
     context 'when Comment2Approved event is applied' do
@@ -104,9 +106,9 @@ RSpec.describe Comment2Aggregate do
 
     it 'applies Comment2Rejected event' do
       feedback = 'Inappropriate content'
-      expect {
+      expect do
         aggregate.reject(rejection_feedback: feedback, actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Rejected)
@@ -119,19 +121,19 @@ RSpec.describe Comment2Aggregate do
       aggregate.apply(Comment2Approved.new(data: { comment2_id: aggregate_id, user_id: user.id }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.reject(rejection_feedback: 'Feedback', actor_id: user.id)
-      }.to raise_error(StandardError, /invalid state/)
+      end.to raise_error(StandardError, /invalid state/)
     end
 
     context 'when Comment2Rejected event is applied' do
       it 'changes status to rejected and sets rejection_feedback' do
         feedback = 'Not appropriate'
         event = Comment2Rejected.new(data: {
-          comment2_id: aggregate_id,
-          rejection_feedback: feedback,
-          user_id: user.id
-        })
+                                       comment2_id: aggregate_id,
+                                       rejection_feedback: feedback,
+                                       user_id: user.id
+                                     })
         aggregate.apply(event)
 
         expect(aggregate.status).to eq('rejected')
@@ -147,9 +149,9 @@ RSpec.describe Comment2Aggregate do
     end
 
     it 'applies Comment2Deleted event from pending state' do
-      expect {
+      expect do
         aggregate.delete(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Deleted)
@@ -161,31 +163,31 @@ RSpec.describe Comment2Aggregate do
       aggregate.apply(Comment2Approved.new(data: { comment2_id: aggregate_id, user_id: user.id }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.delete(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
     end
 
     it 'applies Comment2Deleted event from rejected state' do
       aggregate.apply(Comment2Rejected.new(data: {
-        comment2_id: aggregate_id,
-        rejection_feedback: 'Feedback',
-        user_id: user.id
-      }))
+                                             comment2_id: aggregate_id,
+                                             rejection_feedback: 'Feedback',
+                                             user_id: user.id
+                                           }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.delete(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
     end
 
     it 'raises error if not in allowed state' do
       aggregate.apply(Comment2Deleted.new(data: { comment2_id: aggregate_id, user_id: user.id }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.delete(actor_id: user.id)
-      }.to raise_error(StandardError, /invalid state/)
+      end.to raise_error(StandardError, /invalid state/)
     end
 
     context 'when Comment2Deleted event is applied' do
@@ -206,9 +208,9 @@ RSpec.describe Comment2Aggregate do
     end
 
     it 'applies Comment2Restored event' do
-      expect {
+      expect do
         aggregate.restore(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Restored)
@@ -220,9 +222,9 @@ RSpec.describe Comment2Aggregate do
       aggregate.apply(Comment2Restored.new(data: { comment2_id: aggregate_id, user_id: user.id }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.restore(actor_id: user.id)
-      }.to raise_error(StandardError, /invalid state/)
+      end.to raise_error(StandardError, /invalid state/)
     end
 
     context 'when Comment2Restored event is applied' do
@@ -241,18 +243,18 @@ RSpec.describe Comment2Aggregate do
     before do
       aggregate.create(text: 'Original', article2_id: article2_id, author_id: user.id)
       aggregate.apply(Comment2Rejected.new(data: {
-        comment2_id: aggregate_id,
-        rejection_feedback: 'Feedback',
-        user_id: user.id
-      }))
+                                             comment2_id: aggregate_id,
+                                             rejection_feedback: 'Feedback',
+                                             user_id: user.id
+                                           }))
       aggregate.instance_variable_get(:@unpublished_events).clear
     end
 
     it 'applies Comment2Updated event' do
       new_text = 'Updated comment text'
-      expect {
+      expect do
         aggregate.update(text: new_text, actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Comment2Updated)
@@ -263,24 +265,24 @@ RSpec.describe Comment2Aggregate do
 
     it 'raises error if not in rejected state' do
       aggregate.apply(Comment2Updated.new(data: {
-        comment2_id: aggregate_id,
-        text: 'Updated',
-        user_id: user.id
-      }))
+                                            comment2_id: aggregate_id,
+                                            text: 'Updated',
+                                            user_id: user.id
+                                          }))
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.update(text: 'New text', actor_id: user.id)
-      }.to raise_error(StandardError, /invalid state/)
+      end.to raise_error(StandardError, /invalid state/)
     end
 
     context 'when Comment2Updated event is applied' do
       it 'updates text and changes status to pending' do
         event = Comment2Updated.new(data: {
-          comment2_id: aggregate_id,
-          text: 'Updated text',
-          user_id: user.id
-        })
+                                      comment2_id: aggregate_id,
+                                      text: 'Updated text',
+                                      user_id: user.id
+                                    })
         aggregate.apply(event)
 
         expect(aggregate.text).to eq('Updated text')
@@ -289,4 +291,3 @@ RSpec.describe Comment2Aggregate do
     end
   end
 end
-

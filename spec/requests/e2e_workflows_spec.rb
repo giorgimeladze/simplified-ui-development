@@ -33,7 +33,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         get article_path(article_id), headers: { 'Accept' => 'application/json' }
         expect(response).to have_http_status(:ok)
         article = JSON.parse(response.body)['article']
-        
+
         # Draft state should have 'submit' transition link
         submit_link = article['links'].find { |l| l['rel'] == 'transition:submit' }
         expect(submit_link).to be_present
@@ -43,7 +43,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         # Step 3: Submit article for review (draft → review)
         post "/articles/#{article_id}/submit", headers: { 'Accept' => 'application/json' }
         expect(response).to have_http_status(:ok)
-        
+
         get article_path(article_id), headers: { 'Accept' => 'application/json' }
         article = JSON.parse(response.body)['article']
         expect(article['status']).to eq('review')
@@ -62,7 +62,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         article = JSON.parse(response.body)['article']
         publish_link = article['links'].find { |l| l['rel'] == 'transition:publish' }
         expect(publish_link).to be_present
-        
+
         post "/articles/#{article_id}/publish", headers: { 'Accept' => 'application/json' }
         expect(response).to have_http_status(:ok)
 
@@ -88,14 +88,14 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         post articles_path, params: {
           article: { title: 'Article to Reject', content: 'Content' }
         }, headers: { 'Accept' => 'application/json' }
-        
+
         article_id = JSON.parse(response.body)['article']['id']
         post "/articles/#{article_id}/submit", headers: { 'Accept' => 'application/json' }
 
         # Admin rejects article
         sign_out_user
         sign_in_as(admin)
-        
+
         post "/articles/#{article_id}/reject", params: {
           rejection_feedback: 'Needs more detail.'
         }, headers: { 'Accept' => 'application/json' }
@@ -108,7 +108,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         # Editor resubmits (rejected → review)
         sign_out_user
         sign_in_as(editor)
-        
+
         resubmit_link = article['links'].find { |l| l['rel'] == 'transition:resubmit' }
         expect(resubmit_link).to be_present
 
@@ -131,7 +131,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         post articles_path, params: {
           article: { title: 'My Article', content: 'Content' }
         }, headers: { 'Accept' => 'application/json' }
-        
+
         article_id = JSON.parse(response.body)['article']['id']
         post "/articles/#{article_id}/submit", headers: { 'Accept' => 'application/json' }
 
@@ -144,7 +144,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         # Admin sees publish link
         sign_out_user
         sign_in_as(admin)
-        
+
         get article_path(article_id), headers: { 'Accept' => 'application/json' }
         article = JSON.parse(response.body)['article']
         publish_link = article['links'].find { |l| l['rel'] == 'transition:publish' }
@@ -153,7 +153,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
         # Other editor doesn't see owner-specific links
         sign_out_user
         sign_in_as(other_editor)
-        
+
         get article_path(article_id), headers: { 'Accept' => 'application/json' }
         article = JSON.parse(response.body)['article']
         resubmit_link = article['links'].find { |l| l['rel'] == 'transition:resubmit' }
@@ -181,7 +181,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Step 2: Admin approves comment (pending → approved)
       sign_out_user
       sign_in_as(admin)
-      
+
       post "/comments/#{comment_id}/approve", headers: { 'Accept' => 'application/json' }
       expect(response).to have_http_status(:ok)
 
@@ -217,13 +217,13 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post article_comments_path(article), params: {
         comment: { text: 'Needs improvement' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       comment_id = JSON.parse(response.body)['comment']['id']
 
       # Admin rejects with feedback
       sign_out_user
       sign_in_as(admin)
-      
+
       post "/comments/#{comment_id}/reject", params: {
         rejection_feedback: 'Please be more constructive.'
       }, headers: { 'Accept' => 'application/json' }
@@ -235,7 +235,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Author can edit rejected comment
       sign_out_user
       sign_in_as(viewer)
-      
+
       get "/comments/#{comment_id}", headers: { 'Accept' => 'application/json' }
       comment = JSON.parse(response.body)['comment']
       edit_link = comment['links'].find { |l| l['rel'] == 'edit' }
@@ -267,7 +267,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       }, headers: { 'Accept' => 'application/json' }
 
       expect(response).to have_http_status(:created)
-      
+
       # Step 2: Get created article from read model
       # Since create returns { success: true }, we need to find it in the read model
       article2 = Article2ReadModel.find_by(title: 'Event-Sourced Article')
@@ -295,7 +295,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       expect(submit_event).to be_present
 
       # Step 5: Admin publishes via command
-      
+
       post "/article2s/#{article2_id}/publish", headers: { 'Accept' => 'application/json' }
       expect(response).to have_http_status(:ok)
 
@@ -306,7 +306,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Step 6: Verify published event
       get '/events', headers: { 'Accept' => 'application/json' }
       events = JSON.parse(response.body)['events']
-      publish_event = events.find { |e| e['event_type'] == 'Article2Published'}
+      publish_event = events.find { |e| e['event_type'] == 'Article2Published' }
       expect(publish_event).to be_present
     end
 
@@ -315,7 +315,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post article2s_path, params: {
         article2: { title: 'Article with Comments', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article2_id = Article2ReadModel.find_by(title: 'Article with Comments').id
 
       # Submit and publish
@@ -332,7 +332,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Get article with embedded comments (HAL format)
       get "/article2s/#{article2_id}", headers: { 'Accept' => 'application/json' }
       article2 = JSON.parse(response.body)['article2']
-      
+
       expect(article2['_embedded']).to be_present
       expect(article2['_embedded']['comment2s']).to be_an(Array)
       expect(article2['_embedded']['comment2s'].first['text']).to eq('First comment')
@@ -343,7 +343,10 @@ RSpec.describe 'End-to-End Workflows', type: :request do
   describe 'Event-Sourced Comment2 Workflow' do
     let!(:viewer) { sign_in_user(role: :viewer) }
     let!(:admin) { create(:user, role: :admin) }
-    let!(:article2) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1, state: 'published') }
+    let!(:article2) do
+      Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 1,
+                                state: 'published')
+    end
 
     it 'creates comment via command, transitions states, and tracks events' do
       # Create comment via command
@@ -362,7 +365,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Admin approves via command
       sign_out_user
       sign_in_as(admin)
-      
+
       post "/comment2s/#{comment2_id}/approve", headers: { 'Accept' => 'application/json' }
       expect(response).to have_http_status(:ok)
 
@@ -373,7 +376,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Verify approval event
       get '/events', headers: { 'Accept' => 'application/json' }
       events = JSON.parse(response.body)['events']
-      approve_event = events.find { |e| e['event_type'] == 'Comment2Approved'}
+      approve_event = events.find { |e| e['event_type'] == 'Comment2Approved' }
       expect(approve_event).to be_present
     end
 
@@ -382,13 +385,13 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post "/article2s/#{article2.id}/comment2s", params: {
         comment2_read_model: { text: 'Needs work' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       comment2_id = JSON.parse(response.body)['comment2_id']
 
       # Admin rejects
       sign_out_user
       sign_in_as(admin)
-      
+
       post "/comment2s/#{comment2_id}/reject", params: {
         rejection_feedback: 'Please improve'
       }, headers: { 'Accept' => 'application/json' }
@@ -400,7 +403,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Author updates comment (should trigger automatic transition to pending)
       sign_out_user
       sign_in_as(viewer)
-      
+
       patch "/comment2s/#{comment2_id}", params: {
         comment2_read_model: { text: 'Improved version' }
       }, headers: { 'Accept' => 'application/json' }
@@ -421,7 +424,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post articles_path, params: {
         article: { title: 'HATEOAS Test', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article_id = JSON.parse(response.body)['article']['id']
 
       # Draft state links
@@ -433,7 +436,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
 
       # Submit to review
       post "/articles/#{article_id}/submit", headers: { 'Accept' => 'application/json' }
-      
+
       get article_path(article_id), headers: { 'Accept' => 'application/json' }
       article = JSON.parse(response.body)['article']
       review_links = article['links'].map { |l| l['rel'] }
@@ -443,7 +446,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       sign_out_user
       sign_in_as(admin)
       post "/articles/#{article_id}/publish", headers: { 'Accept' => 'application/json' }
-      
+
       get article_path(article_id), headers: { 'Accept' => 'application/json' }
       article = JSON.parse(response.body)['article']
       published_links = article['links'].map { |l| l['rel'] }
@@ -453,7 +456,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
     end
 
     it 'filters links based on user authorization' do
-      editor1 = sign_in_user(role: :editor)
+      sign_in_user(role: :editor)
       editor2 = create(:user, role: :editor)
       admin = create(:user, role: :admin)
 
@@ -461,14 +464,14 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post articles_path, params: {
         article: { title: 'Authorization Test', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article_id = JSON.parse(response.body)['article']['id']
       post "/articles/#{article_id}/submit", headers: { 'Accept' => 'application/json' }
 
       # Editor2 (not owner) doesn't see resubmit
       sign_out_user
       sign_in_as(editor2)
-      
+
       get article_path(article_id), headers: { 'Accept' => 'application/json' }
       article = JSON.parse(response.body)['article']
       non_owner_links = article['links'].map { |l| l['rel'] }
@@ -477,7 +480,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       # Admin sees publish link
       sign_out_user
       sign_in_as(admin)
-      
+
       get article_path(article_id), headers: { 'Accept' => 'application/json' }
       article = JSON.parse(response.body)['article']
       admin_links = article['links'].map { |l| l['rel'] }
@@ -494,7 +497,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post articles_path, params: {
         article: { title: 'Audit Trail Test', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article_id = JSON.parse(response.body)['article']['id']
 
       # Submit
@@ -505,12 +508,12 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       sign_in_as(admin)
 
       # Get state transitions
-      get "/state_transitions?resource_type=Article&resource_id=#{article_id}", 
+      get "/state_transitions?resource_type=Article&resource_id=#{article_id}",
           headers: { 'Accept' => 'application/json' }
 
       transitions = JSON.parse(response.body)['state_transitions']
       expect(transitions.length).to be >= 1
-      
+
       submit_transition = transitions.find { |t| t['event'] == 'submit!' }
       expect(submit_transition).to be_present
       expect(submit_transition['from_state']).to eq('draft')
@@ -519,9 +522,9 @@ RSpec.describe 'End-to-End Workflows', type: :request do
 
       post "/articles/#{article_id}/publish", headers: { 'Accept' => 'application/json' }
 
-      get "/state_transitions?resource_type=Article&resource_id=#{article_id}", 
+      get "/state_transitions?resource_type=Article&resource_id=#{article_id}",
           headers: { 'Accept' => 'application/json' }
-      
+
       transitions = JSON.parse(response.body)['state_transitions']
       publish_transition = transitions.find { |t| t['event'] == 'publish!' }
       expect(publish_transition).to be_present
@@ -536,23 +539,23 @@ RSpec.describe 'End-to-End Workflows', type: :request do
     it 'applies custom templates to hypermedia links' do
       # Set custom template
       patch '/custom_template/update_article',
-      params: {
-        custom_template: {
-          Article: {
-            submit: {
-              title: 'Send for Review',
-              button_classes: 'btn btn-custom'
-            }
-          }
-        }
-      },
-      headers: { 'Accept' => 'application/json' }
+            params: {
+              custom_template: {
+                Article: {
+                  submit: {
+                    title: 'Send for Review',
+                    button_classes: 'btn btn-custom'
+                  }
+                }
+              }
+            },
+            headers: { 'Accept' => 'application/json' }
 
       # Create article
       post articles_path, params: {
         article: { title: 'Template Test', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article_id = JSON.parse(response.body)['article']['id']
 
       # Get article and verify custom template applied
@@ -575,7 +578,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post articles_path, params: {
         article: { title: 'CRUD Article', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       crud_article_id = JSON.parse(response.body)['article']['id']
       post "/articles/#{crud_article_id}/submit", headers: { 'Accept' => 'application/json' }
 
@@ -591,7 +594,7 @@ RSpec.describe 'End-to-End Workflows', type: :request do
       post article2s_path, params: {
         article2: { title: 'Event-Sourced Article', content: 'Content' }
       }, headers: { 'Accept' => 'application/json' }
-      
+
       article2_id = Article2ReadModel.find_by(title: 'Event-Sourced Article').id
       post "/article2s/#{article2_id}/submit", headers: { 'Accept' => 'application/json' }
       post "/article2s/#{article2_id}/publish", headers: { 'Accept' => 'application/json' }
@@ -607,4 +610,3 @@ RSpec.describe 'End-to-End Workflows', type: :request do
     end
   end
 end
-

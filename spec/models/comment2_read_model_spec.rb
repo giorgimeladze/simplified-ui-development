@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2ReadModel, type: :model do
@@ -58,12 +60,6 @@ RSpec.describe Comment2ReadModel, type: :model do
         author_id: user.id,
         state: 'pending'
       )
-    end
-
-    describe '.for_article' do
-      it 'returns comments for specific article' do
-        expect(Comment2ReadModel.for_article(article2.id)).to contain_exactly(comment1)
-      end
     end
   end
 
@@ -133,4 +129,3 @@ RSpec.describe Comment2ReadModel, type: :model do
     end
   end
 end
-

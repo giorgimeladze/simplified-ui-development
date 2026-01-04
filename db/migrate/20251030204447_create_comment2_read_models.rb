@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateComment2ReadModels < ActiveRecord::Migration[7.1]
   def change
     create_table :comment2_read_models, id: :string do |t|

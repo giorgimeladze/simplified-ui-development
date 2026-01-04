@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StateTransition < ApplicationRecord
   belongs_to :transitionable, polymorphic: true
   belongs_to :user

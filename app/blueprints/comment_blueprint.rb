@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 class CommentBlueprint < Blueprinter::Base
   identifier :id
 
   fields :text, :status, :user_id
 
   field :rejection_feedback,
-        if: ->(_field_name, comment, options) do
+        if: lambda { |_field_name, comment, options|
           current_user = options[:context][:current_user]
           current_user&.admin? || current_user&.id == comment.user_id
-        end
+        }
 
   view :show do
     field :links do |comment, _options|

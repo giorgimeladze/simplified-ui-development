@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CustomTemplate < ApplicationRecord
   belongs_to :user
 
@@ -35,9 +37,12 @@ class CustomTemplate < ApplicationRecord
       'all_articles' => { 'title' => 'All Articles', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'my_articles' => { 'title' => 'My Articles', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'review_articles' => { 'title' => 'Review Articles', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
-      'deleted_articles' => { 'title' => 'Deleted Articles', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
-      'pending_comments' => { 'title' => 'Pending Comments', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
-      'state_transitions' => { 'title' => 'State Transitions', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'deleted_articles' => { 'title' => 'Deleted Articles',
+                              'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'pending_comments' => { 'title' => 'Pending Comments',
+                              'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
+      'state_transitions' => { 'title' => 'State Transitions',
+                               'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'events' => { 'title' => 'Event Sourcing Events', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'sign_in' => { 'title' => 'Sign In', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'sign_up' => { 'title' => 'Sign Up', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
@@ -51,12 +56,15 @@ class CustomTemplate < ApplicationRecord
       'show' => { 'title' => 'Show (Event)', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },
       'submit' => { 'title' => 'Submit for Review (Event)', 'button_classes' => 'btn btn-outline-warning btn-sm mx-1' },
       'reject' => { 'title' => 'Submit Rejection (Event)', 'button_classes' => 'btn btn-danger btn-sm mx-1' },
-      'approve_private' => { 'title' => 'Approve Private (Event)', 'button_classes' => 'btn btn-outline-info btn-sm mx-1' },
+      'approve_private' => { 'title' => 'Approve Private (Event)',
+                             'button_classes' => 'btn btn-outline-info btn-sm mx-1' },
       'resubmit' => { 'title' => 'Resubmit (Event)', 'button_classes' => 'btn btn-outline-warning btn-sm mx-1' },
       'archive' => { 'title' => 'Archive (Event)', 'button_classes' => 'btn btn-outline-secondary btn-sm mx-1' },
       'publish' => { 'title' => 'Publish (Event)', 'button_classes' => 'btn btn-outline-success btn-sm mx-1' },
-      'make_visible' => { 'title' => 'Make Visible (Event)', 'button_classes' => 'btn btn-outline-success btn-sm mx-1' },
-      'make_invisible' => { 'title' => 'Make Invisible (Event)', 'button_classes' => 'btn btn-outline-warning btn-sm mx-1' }
+      'make_visible' => { 'title' => 'Make Visible (Event)',
+                          'button_classes' => 'btn btn-outline-success btn-sm mx-1' },
+      'make_invisible' => { 'title' => 'Make Invisible (Event)',
+                            'button_classes' => 'btn btn-outline-warning btn-sm mx-1' }
     },
     'Comment2' => {
       'index' => { 'title' => 'Back to Article2', 'button_classes' => 'btn btn-outline-primary btn-sm mx-1' },

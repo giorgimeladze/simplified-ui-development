@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2Deleted do
@@ -25,4 +27,3 @@ RSpec.describe Comment2Deleted do
     end
   end
 end
-

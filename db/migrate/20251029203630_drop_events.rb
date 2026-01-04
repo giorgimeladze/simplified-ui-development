@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DropEvents < ActiveRecord::Migration[7.1]
   def up
     drop_table :events
@@ -13,7 +15,7 @@ class DropEvents < ActiveRecord::Migration[7.1]
       t.datetime :occurred_at, null: false
     end
 
-    add_index :events, [:aggregate_id, :aggregate_type]
+    add_index :events, %i[aggregate_id aggregate_type]
     add_index :events, [:event_type]
     add_index :events, [:occurred_at]
   end

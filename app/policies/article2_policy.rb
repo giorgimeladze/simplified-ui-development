@@ -1,5 +1,6 @@
-class Article2Policy < ApplicationPolicy
+# frozen_string_literal: true
 
+class Article2Policy < ApplicationPolicy
   def article2s_for_review?
     user.admin?
   end

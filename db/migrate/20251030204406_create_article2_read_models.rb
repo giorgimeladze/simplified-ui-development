@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CreateArticle2ReadModels < ActiveRecord::Migration[7.1]
   def change
     create_table :article2_read_models, id: :string do |t|

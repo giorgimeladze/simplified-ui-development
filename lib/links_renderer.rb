@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module LinksRenderer
   include ActionView::Helpers::UrlHelper
 
@@ -13,14 +15,12 @@ module LinksRenderer
 
     links.map do |link|
       method = (link[:method] || 'GET').to_s.upcase
-      
+
       # Use button_classes from YAML config if available, otherwise fall back to default styles
       classes = link[:button_classes] || DEFAULT_STYLES[method][:class]
-      
+
       # Apply custom styles if provided
-      if custom_styles[method]
-        classes = custom_styles[method][:class] if custom_styles[method][:class]
-      end
+      classes = custom_styles[method][:class] if custom_styles[method] && custom_styles[method][:class]
 
       label = link[:title] || link[:rel].to_s.humanize
       confirm_message = link[:confirm] || DEFAULT_STYLES[method][:confirm]

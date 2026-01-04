@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Comment2Projection do
@@ -9,17 +11,17 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Created event' do
       let(:event) do
         Comment2Created.new(data: {
-          comment2_id: comment2_id,
-          text: 'Test comment',
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                              comment2_id: comment2_id,
+                              text: 'Test comment',
+                              article2_id: article2_id,
+                              user_id: user.id
+                            })
       end
 
       it 'creates a Comment2ReadModel' do
-        expect {
+        expect do
           Comment2Projection.apply(event)
-        }.to change(Comment2ReadModel, :count).by(1)
+        end.to change(Comment2ReadModel, :count).by(1)
       end
 
       it 'sets correct attributes' do
@@ -37,9 +39,9 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Approved event' do
       let(:event) do
         Comment2Approved.new(data: {
-          comment2_id: comment2_id,
-          user_id: user.id
-        })
+                               comment2_id: comment2_id,
+                               user_id: user.id
+                             })
       end
 
       before do
@@ -63,10 +65,10 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Rejected event' do
       let(:event) do
         Comment2Rejected.new(data: {
-          comment2_id: comment2_id,
-          rejection_feedback: 'Inappropriate',
-          user_id: user.id
-        })
+                               comment2_id: comment2_id,
+                               rejection_feedback: 'Inappropriate',
+                               user_id: user.id
+                             })
       end
 
       before do
@@ -91,9 +93,9 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Deleted event' do
       let(:event) do
         Comment2Deleted.new(data: {
-          comment2_id: comment2_id,
-          user_id: user.id
-        })
+                              comment2_id: comment2_id,
+                              user_id: user.id
+                            })
       end
 
       before do
@@ -117,9 +119,9 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Restored event' do
       let(:event) do
         Comment2Restored.new(data: {
-          comment2_id: comment2_id,
-          user_id: user.id
-        })
+                               comment2_id: comment2_id,
+                               user_id: user.id
+                             })
       end
 
       before do
@@ -143,10 +145,10 @@ RSpec.describe Comment2Projection do
     describe 'Comment2Updated event' do
       let(:event) do
         Comment2Updated.new(data: {
-          comment2_id: comment2_id,
-          text: 'Updated comment',
-          user_id: user.id
-        })
+                              comment2_id: comment2_id,
+                              text: 'Updated comment',
+                              user_id: user.id
+                            })
       end
 
       before do
@@ -172,15 +174,15 @@ RSpec.describe Comment2Projection do
   describe '.upsert_created' do
     it 'creates a new Comment2ReadModel' do
       event = Comment2Created.new(data: {
-        comment2_id: comment2_id,
-        text: 'Test comment',
-        article2_id: article2_id,
-        user_id: user.id
-      })
+                                    comment2_id: comment2_id,
+                                    text: 'Test comment',
+                                    article2_id: article2_id,
+                                    user_id: user.id
+                                  })
 
-      expect {
+      expect do
         Comment2Projection.upsert_created(event)
-      }.to change(Comment2ReadModel, :count).by(1)
+      end.to change(Comment2ReadModel, :count).by(1)
     end
 
     it 'updates existing Comment2ReadModel if it exists' do
@@ -193,15 +195,15 @@ RSpec.describe Comment2Projection do
       )
 
       event = Comment2Created.new(data: {
-        comment2_id: comment2_id,
-        text: 'Updated',
-        article2_id: article2_id,
-        user_id: user.id
-      })
+                                    comment2_id: comment2_id,
+                                    text: 'Updated',
+                                    article2_id: article2_id,
+                                    user_id: user.id
+                                  })
 
-      expect {
+      expect do
         Comment2Projection.upsert_created(event)
-      }.not_to change(Comment2ReadModel, :count)
+      end.not_to change(Comment2ReadModel, :count)
 
       comment2 = Comment2ReadModel.find(comment2_id)
       expect(comment2.text).to eq('Updated')
@@ -211,10 +213,10 @@ RSpec.describe Comment2Projection do
   describe '.upsert_updated' do
     let(:event) do
       Comment2Updated.new(data: {
-        comment2_id: comment2_id,
-        text: 'Updated comment',
-        user_id: user.id
-      })
+                            comment2_id: comment2_id,
+                            text: 'Updated comment',
+                            user_id: user.id
+                          })
     end
 
     before do
@@ -239,10 +241,10 @@ RSpec.describe Comment2Projection do
   describe '.upsert_rejected' do
     let(:event) do
       Comment2Rejected.new(data: {
-        comment2_id: comment2_id,
-        rejection_feedback: 'Feedback',
-        user_id: user.id
-      })
+                             comment2_id: comment2_id,
+                             rejection_feedback: 'Feedback',
+                             user_id: user.id
+                           })
     end
 
     before do
@@ -267,9 +269,9 @@ RSpec.describe Comment2Projection do
   describe '.upsert_state' do
     let(:event) do
       Comment2Approved.new(data: {
-        comment2_id: comment2_id,
-        user_id: user.id
-      })
+                             comment2_id: comment2_id,
+                             user_id: user.id
+                           })
     end
 
     before do
@@ -290,4 +292,3 @@ RSpec.describe Comment2Projection do
     end
   end
 end
-

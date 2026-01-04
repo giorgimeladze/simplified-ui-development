@@ -3,7 +3,6 @@
 require 'swagger_helper'
 
 RSpec.describe 'Article2s API', type: :request do
-  
   # GET /article2s
   path '/article2s' do
     get 'Retrieves all published articles' do
@@ -13,17 +12,17 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'articles found' do
         schema type: :object,
-          required: %w[article2s links],
-          properties: {
-            article2s: {
-              type: :array,
-              items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
-            },
-            links: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            }
-          }
+               required: %w[article2s links],
+               properties: {
+                 article2s: {
+                   type: :array,
+                   items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
+                 },
+                 links: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 }
+               }
 
         let!(:user) { sign_in_user(role: :editor) }
         run_test!
@@ -41,17 +40,17 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'my articles found' do
         schema type: :object,
-          required: %w[article2s links],
-          properties: {
-            article2s: {
-              type: :array,
-              items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
-            },
-            links: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            }
-          }
+               required: %w[article2s links],
+               properties: {
+                 article2s: {
+                   type: :array,
+                   items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
+                 },
+                 links: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 }
+               }
 
         let!(:user) { sign_in_user(role: :editor) }
 
@@ -75,22 +74,21 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'articles for review found' do
         schema type: :object,
-          required: %w[article2s links],
-          properties: {
-            article2s: {
-              type: :array,
-              items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
-            },
-            links: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            }
-          }
-      
+               required: %w[article2s links],
+               properties: {
+                 article2s: {
+                   type: :array,
+                   items: { type: :object } # or '$ref' => '#/components/schemas/Article2'
+                 },
+                 links: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 }
+               }
+
         let!(:user) { sign_in_user(role: :admin) }
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
@@ -118,42 +116,41 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'archived articles found' do
         schema type: :object,
-          required: %w[article2s links],
-          properties: {
-            article2s: {
-              type: :array,
-              items: { type: :object } # or '$ref' => '#/components/schemas/Article2' if you have it
-            },
-            links: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            }
-          }
-      
+               required: %w[article2s links],
+               properties: {
+                 article2s: {
+                   type: :array,
+                   items: { type: :object } # or '$ref' => '#/components/schemas/Article2' if you have it
+                 },
+                 links: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 }
+               }
+
         let!(:user) { sign_in_user(role: :editor) }
-      
+
         run_test!
       end
-      
 
       response '200', 'archived articles found' do
         schema type: :object,
-          required: %w[article2s links],
-          properties: {
-            article2s: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/Article2' } # use your real schema, or :object if you don't have one
-            },
-            links: {
-              type: :array,
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            }
-          }
-      
+               required: %w[article2s links],
+               properties: {
+                 article2s: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/Article2' } # use your real schema, or :object if you don't have one
+                 },
+                 links: {
+                   type: :array,
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 }
+               }
+
         let!(:user) { sign_in_user(role: :admin) }
-      
+
         run_test!
-      end      
+      end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
@@ -182,87 +179,90 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'article found' do
         schema type: :object,
-          properties: {
-            id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440000' },
-            title: { type: :string, example: 'Introduction to FSM' },
-            content: { type: :string, example: 'This article explains...' },
-            state: { 
-              type: :string, 
-              enum: ['draft', 'review', 'rejected', 'published', 'privated', 'archived'],
-              example: 'published'
-            },
-            links: {
-              type: :array,
-              description: 'HATEOAS links for available actions',
-              items: { '$ref' => '#/components/schemas/HypermediaLink' }
-            },
-            _embedded: {
-              type: :object,
-              description: 'HAL-style embedded resources',
-              properties: {
-                comment2s: {
-                  type: :array,
-                  description: 'Embedded comments for this article',
-                  items: { '$ref' => '#/components/schemas/Comment' }
-                }
-              }
-            }
-          },
-          example: {
-            id: '550e8400-e29b-41d4-a716-446655440000',
-            title: 'Getting Started with FSM',
-            content: 'Finite State Machines simplify complex workflows...',
-            state: 'published',
-            links: [
-              {
-                rel: 'self',
-                title: 'Show',
-                method: 'GET',
-                href: '/article2s/550e8400-e29b-41d4-a716-446655440000',
-                button_classes: 'btn btn-outline-primary btn-sm mx-1'
-              },
-              {
-                rel: 'transition:archive',
-                title: 'Archive',
-                method: 'POST',
-                href: '/article2s/550e8400-e29b-41d4-a716-446655440000/archive',
-                button_classes: 'btn btn-outline-secondary btn-sm mx-1'
-              }
-            ],
-            _embedded: {
-              comment2s: [
-                {
-                  id: '660e8400-e29b-41d4-a716-446655440000',
-                  text: 'Great article!',
-                  state: 'approved',
-                  links: [
-                    {
-                      rel: 'self',
-                      title: 'Show',
-                      method: 'GET',
-                      href: '/comment2s/660e8400-e29b-41d4-a716-446655440000'
-                    }
-                  ]
-                }
-              ]
-            }
-          }
-          let(:user) { sign_in_user(role: :editor) }
-          let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: user.id, state: 'published') }
-          let(:id) { article.id }
-        
-          run_test!
+               properties: {
+                 id: { type: :string, example: '550e8400-e29b-41d4-a716-446655440000' },
+                 title: { type: :string, example: 'Introduction to FSM' },
+                 content: { type: :string, example: 'This article explains...' },
+                 state: {
+                   type: :string,
+                   enum: %w[draft review rejected published privated archived],
+                   example: 'published'
+                 },
+                 links: {
+                   type: :array,
+                   description: 'HATEOAS links for available actions',
+                   items: { '$ref' => '#/components/schemas/HypermediaLink' }
+                 },
+                 _embedded: {
+                   type: :object,
+                   description: 'HAL-style embedded resources',
+                   properties: {
+                     comment2s: {
+                       type: :array,
+                       description: 'Embedded comments for this article',
+                       items: { '$ref' => '#/components/schemas/Comment' }
+                     }
+                   }
+                 }
+               },
+               example: {
+                 id: '550e8400-e29b-41d4-a716-446655440000',
+                 title: 'Getting Started with FSM',
+                 content: 'Finite State Machines simplify complex workflows...',
+                 state: 'published',
+                 links: [
+                   {
+                     rel: 'self',
+                     title: 'Show',
+                     method: 'GET',
+                     href: '/article2s/550e8400-e29b-41d4-a716-446655440000',
+                     button_classes: 'btn btn-outline-primary btn-sm mx-1'
+                   },
+                   {
+                     rel: 'transition:archive',
+                     title: 'Archive',
+                     method: 'POST',
+                     href: '/article2s/550e8400-e29b-41d4-a716-446655440000/archive',
+                     button_classes: 'btn btn-outline-secondary btn-sm mx-1'
+                   }
+                 ],
+                 _embedded: {
+                   comment2s: [
+                     {
+                       id: '660e8400-e29b-41d4-a716-446655440000',
+                       text: 'Great article!',
+                       state: 'approved',
+                       links: [
+                         {
+                           rel: 'self',
+                           title: 'Show',
+                           method: 'GET',
+                           href: '/comment2s/660e8400-e29b-41d4-a716-446655440000'
+                         }
+                       ]
+                     }
+                   ]
+                 }
+               }
+        let(:user) { sign_in_user(role: :editor) }
+        let(:article) do
+          Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: user.id,
+                                    state: 'published')
+        end
+        let(:id) { article.id }
+
+        run_test!
       end
 
       response '404', 'article not found' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:id) { 'nonexistent-id' }
-  
+
         before do
           sign_in_user(role: :viewer)
         end
-  
+
         run_test!
       end
     end
@@ -283,41 +283,41 @@ RSpec.describe 'Article2s API', type: :request do
           title: { type: :string, example: 'Introduction to FSM' },
           content: { type: :string, example: 'This article explains finite state machines...' }
         },
-        required: ['title', 'content']
+        required: %w[title content]
       }
 
       response '201', 'article created' do
         schema type: :object,
-          properties: {
-            success: { type: :boolean, example: true }
-          },
-          required: ['success']
-  
+               properties: {
+                 success: { type: :boolean, example: true }
+               },
+               required: ['success']
+
         before do
           sign_in_user(role: :editor)
         end
         let(:article2) { { title: 'Intro', content: 'Hello' } }
-  
+
         run_test!
       end
-  
+
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:article2) { { title: 'Intro', content: 'Hello' } }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-      
+
         before do
           sign_in_user(role: :viewer)
         end
-      
+
         let(:article2) { { title: 'Intro', content: 'Hello' } }
-      
+
         run_test!
       end
     end
@@ -336,11 +336,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let(:user) { sign_in_user(role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -352,14 +352,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -371,7 +370,7 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
@@ -381,9 +380,13 @@ RSpec.describe 'Article2s API', type: :request do
         before do
           sign_in_user(role: :editor)
         end
-        let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 999, state: 'draft') } # different owner
+        # different owner
+        let(:article) do
+          Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 999,
+                                    state: 'draft')
+        end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -401,11 +404,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
@@ -417,13 +420,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -435,13 +438,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :viewer)
         end
@@ -456,7 +459,7 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -483,11 +486,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
@@ -500,14 +503,13 @@ RSpec.describe 'Article2s API', type: :request do
         end
         let(:id) { article.id }
         let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -520,13 +522,13 @@ RSpec.describe 'Article2s API', type: :request do
         end
         let(:id) { article.id }
         let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :editor)
         end
@@ -542,7 +544,7 @@ RSpec.describe 'Article2s API', type: :request do
         end
         let(:id) { article.id }
         let(:rejection_feedback) { { rejection_feedback: 'Needs improvements.' } }
-  
+
         run_test!
       end
     end
@@ -560,11 +562,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
@@ -576,14 +578,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -595,13 +596,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :viewer)
         end
@@ -616,7 +617,7 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -634,11 +635,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let(:user) { sign_in_user(role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -650,14 +651,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -669,19 +669,23 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :editor)
         end
-        let(:article) { Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 999, state: 'rejected') } # different owner
+        # different owner
+        let(:article) do
+          Article2ReadModel.create!(id: SecureRandom.uuid, title: 'Test', content: 'Content', author_id: 999,
+                                    state: 'rejected')
+        end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -699,11 +703,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let!(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
@@ -715,14 +719,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -734,13 +737,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :editor)
         end
@@ -755,7 +758,7 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -773,11 +776,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let!(:user) { sign_in_user(role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -789,14 +792,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
-      
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -808,13 +810,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :viewer)
         end
@@ -829,7 +831,7 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
@@ -847,11 +849,11 @@ RSpec.describe 'Article2s API', type: :request do
 
       response '200', 'transition successful' do
         schema type: :object,
-          required: %w[article2_id],
-          properties: {
-            article2_id: { type: :string, format: :uuid }
-          }
-      
+               required: %w[article2_id],
+               properties: {
+                 article2_id: { type: :string, format: :uuid }
+               }
+
         let(:user) { sign_in_user(role: :admin) }
         let(:article) do
           Article2ReadModel.create!(
@@ -863,13 +865,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-      
+
         run_test!
       end
 
       response '401', 'unauthorized' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         let(:other_user) { create(:user, role: :editor) }
         let(:article) do
           Article2ReadModel.create!(
@@ -881,13 +883,13 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
 
       response '403', 'forbidden' do
         schema '$ref' => '#/components/schemas/Error'
-  
+
         before do
           sign_in_user(role: :viewer)
         end
@@ -902,10 +904,9 @@ RSpec.describe 'Article2s API', type: :request do
           )
         end
         let(:id) { article.id }
-  
+
         run_test!
       end
     end
   end
 end
-

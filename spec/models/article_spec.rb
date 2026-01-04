@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article, type: :model do
@@ -187,7 +189,7 @@ RSpec.describe Article, type: :model do
       it 'returns approved comments and their own rejected comments' do
         other_user = create(:user, role: :viewer)
         own_rejected = create(:comment, article: article, status: 'rejected', user: other_user)
-        
+
         expect(article.visible_comments(other_user)).to contain_exactly(approved_comment, own_rejected)
       end
     end
@@ -206,10 +208,10 @@ RSpec.describe Article, type: :model do
 
   describe 'HasStateTransitions concern' do
     it 'creates a state transition record after state change' do
-      expect {
+      expect do
         article.submit!
-      }.to change(StateTransition, :count).by(1)
-      
+      end.to change(StateTransition, :count).by(1)
+
       transition = StateTransition.last
       expect(transition.transitionable).to eq(article)
       expect(transition.from_state).to eq('draft')

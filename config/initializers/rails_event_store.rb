@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_event_store'
 require 'aggregate_root'
 
@@ -31,33 +33,33 @@ Rails.application.reloader.to_prepare do
   require_dependency Rails.root.join('app/events/comment2_rejected').to_s
   require_dependency Rails.root.join('app/events/comment2_deleted').to_s
   require_dependency Rails.root.join('app/events/comment2_restored').to_s
-  
+
   es = Rails.application.config.x.event_store
 
   # # Avoid duplicate subscriptions by resetting a flag on reload
   # next if Rails.application.config.x.respond_to?(:res_subscribed) && Rails.application.config.x.res_subscribed
 
-  puts("[RES] Registering subscribers...")
+  puts('[RES] Registering subscribers...')
   es.subscribe(Article2ProjectionSubscriber.new, to: [
-    Article2Created,
-    Article2Updated,
-    Article2Submitted,
-    Article2Rejected,
-    Article2ApprovedPrivate,
-    Article2Published,
-    Article2Archived
-  ])
-  puts("[RES] Article2ProjectionSubscriber registered")
+                 Article2Created,
+                 Article2Updated,
+                 Article2Submitted,
+                 Article2Rejected,
+                 Article2ApprovedPrivate,
+                 Article2Published,
+                 Article2Archived
+               ])
+  puts('[RES] Article2ProjectionSubscriber registered')
 
   es.subscribe(Comment2ProjectionSubscriber.new, to: [
-    Comment2Created,
-    Comment2Updated,
-    Comment2Approved,
-    Comment2Rejected,
-    Comment2Deleted,
-    Comment2Restored
-  ])
-  puts("[RES] Comment2ProjectionSubscriber registered")
+                 Comment2Created,
+                 Comment2Updated,
+                 Comment2Approved,
+                 Comment2Rejected,
+                 Comment2Deleted,
+                 Comment2Restored
+               ])
+  puts('[RES] Comment2ProjectionSubscriber registered')
 
   Rails.application.config.x.res_subscribed = true
 end

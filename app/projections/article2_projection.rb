@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Article2Projection
   def self.build
     RubyEventStore::Projection
@@ -26,30 +28,30 @@ class Article2Projection
   def self.upsert_created(event)
     id = event.data[:article2_id]
     Article2ReadModel.upsert({
-      id: id,
-      title: event.data[:title],
-      content: event.data[:content],
-      author_id: event.data[:user_id],
-      state: 'draft'
-    }, unique_by: :id)
+                               id: id,
+                               title: event.data[:title],
+                               content: event.data[:content],
+                               author_id: event.data[:user_id],
+                               state: 'draft'
+                             }, unique_by: :id)
   end
 
   def self.upsert_updated(event)
     id = event.data[:article2_id]
     Article2ReadModel.upsert({
-      id: id,
-      title: event.data[:title],
-      content: event.data[:content]
-    }, unique_by: :id)
+                               id: id,
+                               title: event.data[:title],
+                               content: event.data[:content]
+                             }, unique_by: :id)
   end
 
   def self.upsert_rejected(event)
     id = event.data[:article2_id]
     Article2ReadModel.upsert({
-      id: id,
-      state: 'rejected',
-      rejection_feedback: event.data[:rejection_feedback]
-    }, unique_by: :id)
+                               id: id,
+                               state: 'rejected',
+                               rejection_feedback: event.data[:rejection_feedback]
+                             }, unique_by: :id)
   end
 
   def self.upsert_state(event, state)
@@ -57,5 +59,3 @@ class Article2Projection
     Article2ReadModel.upsert({ id: id, state: state }, unique_by: :id)
   end
 end
-
-

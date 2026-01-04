@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 class Article2Commands
   class << self
@@ -8,7 +10,7 @@ class Article2Commands
       repository.store(aggregate, Article2Created, expected_version: :none)
       { success: true, article2_id: aggregate_id }
     end
-    
+
     def submit_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.submit(actor_id: user.id)
@@ -22,49 +24,49 @@ class Article2Commands
       repository.store(aggregate, Article2Rejected)
       { success: true, article2_id: article2_id }
     end
-    
+
     def approve_private_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.approve_private(actor_id: user.id)
       repository.store(aggregate, Article2ApprovedPrivate)
       { success: true, article2_id: article2_id }
     end
-    
+
     def publish_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.publish(actor_id: user.id)
       repository.store(aggregate, Article2Published)
       { success: true, article2_id: article2_id }
     end
-    
+
     def archive_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.archive(actor_id: user.id)
       repository.store(aggregate, Article2Archived)
       { success: true, article2_id: article2_id }
     end
-    
+
     def update_article(article2_id, title, content, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.update(title: title, content: content, actor_id: user.id)
       repository.store(aggregate, Article2Updated)
       { success: true, article2_id: article2_id }
     end
-    
+
     def resubmit_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.submit(actor_id: user.id)
       repository.store(aggregate, Article2Submitted)
       { success: true, article2_id: article2_id }
     end
-    
+
     def make_visible_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.publish(actor_id: user.id)
       repository.store(aggregate, Article2Published)
       { success: true, article2_id: article2_id }
     end
-    
+
     def make_invisible_article(article2_id, user)
       aggregate = repository.load(Article2Aggregate, article2_id)
       aggregate.approve_private(actor_id: user.id)

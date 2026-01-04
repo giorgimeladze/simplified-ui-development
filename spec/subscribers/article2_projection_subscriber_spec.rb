@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2ProjectionSubscriber do
@@ -9,11 +11,11 @@ RSpec.describe Article2ProjectionSubscriber do
     context 'with Article2Created event' do
       let(:event) do
         Article2Created.new(data: {
-          article2_id: article2_id,
-          title: 'Test Article',
-          content: 'Test content',
-          user_id: user.id
-        })
+                              article2_id: article2_id,
+                              title: 'Test Article',
+                              content: 'Test content',
+                              user_id: user.id
+                            })
       end
 
       it 'calls Article2Projection.apply with the event' do
@@ -22,20 +24,20 @@ RSpec.describe Article2ProjectionSubscriber do
       end
 
       it 'creates Article2ReadModel' do
-        expect {
+        expect do
           subscriber.call(event)
-        }.to change(Article2ReadModel, :count).by(1)
+        end.to change(Article2ReadModel, :count).by(1)
       end
     end
 
     context 'with Article2Updated event' do
       let(:event) do
         Article2Updated.new(data: {
-          article2_id: article2_id,
-          title: 'Updated Title',
-          content: 'Updated content',
-          user_id: user.id
-        })
+                              article2_id: article2_id,
+                              title: 'Updated Title',
+                              content: 'Updated content',
+                              user_id: user.id
+                            })
       end
 
       before do
@@ -56,7 +58,7 @@ RSpec.describe Article2ProjectionSubscriber do
       it 'updates Article2ReadModel' do
         subscriber.call(event)
         article2 = Article2ReadModel.find(article2_id)
-        
+
         expect(article2.title).to eq('Updated Title')
         expect(article2.content).to eq('Updated content')
       end
@@ -65,9 +67,9 @@ RSpec.describe Article2ProjectionSubscriber do
     context 'with Article2Submitted event' do
       let(:event) do
         Article2Submitted.new(data: {
-          article2_id: article2_id,
-          user_id: user.id
-        })
+                                article2_id: article2_id,
+                                user_id: user.id
+                              })
       end
 
       before do
@@ -88,7 +90,7 @@ RSpec.describe Article2ProjectionSubscriber do
       it 'updates state to review' do
         subscriber.call(event)
         article2 = Article2ReadModel.find(article2_id)
-        
+
         expect(article2.state).to eq('review')
       end
     end
@@ -96,11 +98,11 @@ RSpec.describe Article2ProjectionSubscriber do
     context 'when an error occurs' do
       let(:event) do
         Article2Created.new(data: {
-          article2_id: article2_id,
-          title: 'Test Article',
-          content: 'Test content',
-          user_id: user.id
-        })
+                              article2_id: article2_id,
+                              title: 'Test Article',
+                              content: 'Test content',
+                              user_id: user.id
+                            })
       end
 
       before do
@@ -108,11 +110,10 @@ RSpec.describe Article2ProjectionSubscriber do
       end
 
       it 'raises the error' do
-        expect {
+        expect do
           subscriber.call(event)
-        }.to raise_error(StandardError, 'Test error')
+        end.to raise_error(StandardError, 'Test error')
       end
     end
   end
 end
-

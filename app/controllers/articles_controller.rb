@@ -1,45 +1,50 @@
-class ArticlesController < ApplicationController  
-  skip_before_action :authenticate_user!, only: [:index, :show]
-  before_action :set_article, only: [:show, :submit, :reject, :reject_feedback, :approve_private, :resubmit, :archive, :publish, :make_visible, :make_invisible]
+# frozen_string_literal: true
+
+class ArticlesController < ApplicationController
+  skip_before_action :authenticate_user!, only: %i[index show]
+  before_action :set_article,
+                only: %i[show submit reject reject_feedback approve_private resubmit archive publish make_visible
+                         make_invisible]
 
   def index
     articles = Article.visible
-  
+
     rendering_articles(articles, 'All Articles')
   end
-  
+
   def my_articles
     articles = current_user.articles
-  
+
     rendering_articles(articles, 'My Articles')
   end
-  
+
   def articles_for_review
     authorize Article, :articles_for_review?
-  
+
     articles = Article.where(status: 'review')
-  
+
     rendering_articles(articles, 'Articles for Review')
   end
-  
+
   def deleted_articles
     authorize Article, :deleted_articles?
-  
+
     articles = current_user.admin? ? Article.where(status: 'archived') : current_user.articles.where(status: 'archived')
-  
+
     rendering_articles(articles, 'Archived Articles')
   end
 
-   # GET /articles/:id
-   def show
+  # GET /articles/:id
+  def show
     rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
-    article_comments = CommentBlueprint.render_as_hash(@article.visible_comments(current_user), view: :index, context: { current_user: current_user })
-    
+    article_comments = CommentBlueprint.render_as_hash(@article.visible_comments(current_user), view: :index,
+                                                                                                context: { current_user: current_user })
+
     # HAL-style _embedded format
     rendered_article[:_embedded] = {
       comments: article_comments
     }
-    
+
     @html_content = render_to_string(partial: 'article', locals: { article: rendered_article }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_show(current_user, 'Article')
 
@@ -67,10 +72,12 @@ class ArticlesController < ApplicationController
     @article.user = current_user
     authorize @article
 
-    if @article.save!
+    if @article.save
       respond_to do |format|
         format.html { redirect_to article_path(@article), notice: 'Article was successfully created.' }
-        format.json { render json: { article: @article.slice(:id, :title, :content, :status, :user_id) }, status: :created }
+        format.json do
+          render json: { article: @article.slice(:id, :title, :content, :status, :user_id) }, status: :created
+        end
       end
     else
       respond_to do |format|
@@ -143,7 +150,8 @@ class ArticlesController < ApplicationController
 
   def rendering_articles(articles, title)
     rendered_articles = ArticleBlueprint.render_as_hash(articles, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles, title: title }, formats: [:html])
+    @html_content = render_to_string(partial: 'list', locals: { articles: rendered_articles, title: title },
+                                     formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Article')
 
     respond_to do |format|
@@ -155,16 +163,15 @@ class ArticlesController < ApplicationController
   def transition_article(event)
     # Event-level authorization
     policy = ArticlePolicy.new(current_user, @article)
-    unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
-      raise Pundit::NotAuthorizedError
-    end
+    raise Pundit::NotAuthorizedError unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
 
     if @article.aasm.may_fire_event?(event)
       @article.aasm.fire!(event)
       respond_to do |format|
         format.html { redirect_to article_path(@article), notice: 'Transition applied.' }
         format.json do
-          rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show, context: { current_user: current_user })
+          rendered_article = ArticleBlueprint.render_as_hash(@article, view: :show,
+                                                                       context: { current_user: current_user })
           render json: { article: rendered_article }, status: :ok
         end
       end

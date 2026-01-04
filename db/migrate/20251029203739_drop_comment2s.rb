@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DropComment2s < ActiveRecord::Migration[7.1]
   def up
     drop_table :comment2s
@@ -10,10 +12,10 @@ class DropComment2s < ActiveRecord::Migration[7.1]
       t.text :text, null: false
       t.string :status, default: 'draft', null: false
       t.text :rejection_feedback
-      
+
       t.timestamps
     end
-    
+
     add_index :comment2s, [:status]
   end
 end

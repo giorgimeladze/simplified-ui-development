@@ -1,16 +1,16 @@
+# frozen_string_literal: true
+
 class EventsController < ApplicationController
   def index
     authorize :event, :index?
-    
-    # Read all events from Rails Event Store
-    # event_store = Rails.application.config.x.event_store
+
     @events = ActiveRecord::Base.connection.execute(<<~SQL)
       SELECT *
       FROM event_store_events
       ORDER BY created_at DESC
     SQL
     @events = @events.map { |event| format_event(event) }
-    
+
     respond_to do |format|
       format.html { render :index }
       format.json { render json: { events: @events } }

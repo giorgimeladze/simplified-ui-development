@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2Aggregate do
@@ -20,9 +22,9 @@ RSpec.describe Article2Aggregate do
     let(:content) { 'Test content' }
 
     it 'applies Article2Created event' do
-      expect {
+      expect do
         aggregate.create(title: title, content: content, author_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2Created)
@@ -36,19 +38,19 @@ RSpec.describe Article2Aggregate do
       aggregate.create(title: title, content: content, author_id: user.id)
       aggregate.instance_variable_get(:@unpublished_events).clear
 
-      expect {
+      expect do
         aggregate.create(title: title, content: content, author_id: user.id)
-      }.to raise_error(StandardError, /already created/)
+      end.to raise_error(StandardError, /already created/)
     end
 
     context 'when Article2Created event is applied' do
       it 'sets title, content, and author_id' do
         event = Article2Created.new(data: {
-          article2_id: aggregate_id,
-          title: title,
-          content: content,
-          user_id: user.id
-        })
+                                      article2_id: aggregate_id,
+                                      title: title,
+                                      content: content,
+                                      user_id: user.id
+                                    })
         aggregate.apply(event)
 
         expect(aggregate.title).to eq(title)
@@ -70,9 +72,9 @@ RSpec.describe Article2Aggregate do
       new_title = 'Updated Title'
       new_content = 'Updated content'
 
-      expect {
+      expect do
         aggregate.update(title: new_title, content: new_content, actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2Updated)
@@ -85,11 +87,11 @@ RSpec.describe Article2Aggregate do
     context 'when Article2Updated event is applied' do
       it 'updates title and content' do
         event = Article2Updated.new(data: {
-          article2_id: aggregate_id,
-          title: 'New Title',
-          content: 'New content',
-          user_id: user.id
-        })
+                                      article2_id: aggregate_id,
+                                      title: 'New Title',
+                                      content: 'New content',
+                                      user_id: user.id
+                                    })
         aggregate.apply(event)
 
         expect(aggregate.title).to eq('New Title')
@@ -105,9 +107,9 @@ RSpec.describe Article2Aggregate do
     end
 
     it 'applies Article2Submitted event' do
-      expect {
+      expect do
         aggregate.submit(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2Submitted)
@@ -136,9 +138,9 @@ RSpec.describe Article2Aggregate do
 
     it 'applies Article2Rejected event' do
       feedback = 'Needs improvement'
-      expect {
+      expect do
         aggregate.reject(rejection_feedback: feedback, actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2Rejected)
@@ -151,10 +153,10 @@ RSpec.describe Article2Aggregate do
       it 'changes status to rejected and sets rejection_feedback' do
         feedback = 'Not good enough'
         event = Article2Rejected.new(data: {
-          article2_id: aggregate_id,
-          rejection_feedback: feedback,
-          user_id: user.id
-        })
+                                       article2_id: aggregate_id,
+                                       rejection_feedback: feedback,
+                                       user_id: user.id
+                                     })
         aggregate.apply(event)
 
         expect(aggregate.status).to eq('rejected')
@@ -171,9 +173,9 @@ RSpec.describe Article2Aggregate do
     end
 
     it 'applies Article2ApprovedPrivate event' do
-      expect {
+      expect do
         aggregate.approve_private(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2ApprovedPrivate)
@@ -199,9 +201,9 @@ RSpec.describe Article2Aggregate do
     end
 
     it 'applies Article2Published event' do
-      expect {
+      expect do
         aggregate.publish(actor_id: user.id)
-      }.to change { aggregate.unpublished_events.count }.by(1)
+      end.to change { aggregate.unpublished_events.count }.by(1)
 
       event = aggregate.unpublished_events.to_a.last
       expect(event).to be_a(Article2Published)
@@ -228,17 +230,17 @@ RSpec.describe Article2Aggregate do
       before do
         aggregate.apply(Article2Submitted.new(data: { article2_id: aggregate_id, user_id: user.id }))
         aggregate.apply(Article2Rejected.new(data: {
-          article2_id: aggregate_id,
-          rejection_feedback: 'Feedback',
-          user_id: user.id
-        }))
+                                               article2_id: aggregate_id,
+                                               rejection_feedback: 'Feedback',
+                                               user_id: user.id
+                                             }))
         aggregate.instance_variable_get(:@unpublished_events).clear
       end
 
       it 'applies Article2Archived event' do
-        expect {
+        expect do
           aggregate.archive(actor_id: user.id)
-        }.to change { aggregate.unpublished_events.count }.by(1)
+        end.to change { aggregate.unpublished_events.count }.by(1)
 
         event = aggregate.unpublished_events.to_a.last
         expect(event).to be_a(Article2Archived)
@@ -260,9 +262,9 @@ RSpec.describe Article2Aggregate do
       end
 
       it 'applies Article2Archived event' do
-        expect {
+        expect do
           aggregate.archive(actor_id: user.id)
-        }.to change { aggregate.unpublished_events.count }.by(1)
+        end.to change { aggregate.unpublished_events.count }.by(1)
       end
     end
 
@@ -274,11 +276,10 @@ RSpec.describe Article2Aggregate do
       end
 
       it 'applies Article2Archived event' do
-        expect {
+        expect do
           aggregate.archive(actor_id: user.id)
-        }.to change { aggregate.unpublished_events.count }.by(1)
+        end.to change { aggregate.unpublished_events.count }.by(1)
       end
     end
   end
 end
-

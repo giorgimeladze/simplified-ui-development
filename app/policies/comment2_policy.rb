@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Comment2Policy < ApplicationPolicy
   def index?
     true
@@ -16,7 +18,7 @@ class Comment2Policy < ApplicationPolicy
   end
 
   def update?
-    user.id.present? && record.author_id == user.id && (record.state == 'pending' || record.state == 'rejected')
+    user.id.present? && record.author_id == user.id && %w[pending rejected].include?(record.state)
   end
 
   def approve?
@@ -33,5 +35,5 @@ class Comment2Policy < ApplicationPolicy
 
   def restore?
     user.id.present? && ((record.author_id == user.id && user.editor?) || user.admin?)
-end
+  end
 end

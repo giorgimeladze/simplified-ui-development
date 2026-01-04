@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module HasStateTransitions
   extend ActiveSupport::Concern
 
@@ -15,9 +17,9 @@ module HasStateTransitions
     from_state = aasm.from_state
     to_state = aasm.to_state
     event_name = aasm.current_event
-    
+
     return unless from_state && to_state && event_name
-    
+
     StateTransition.create!(
       transitionable: self,
       from_state: from_state.to_s,

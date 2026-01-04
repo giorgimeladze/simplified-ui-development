@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe EventRepository do
@@ -97,7 +99,7 @@ RSpec.describe EventRepository do
       # Now aggregate has both Article2Created and Article2Submitted
       # But we're only storing Article2Created
       repository.store(aggregate, Article2Created, expected_version: :none)
-      
+
       # The Article2Submitted should still be in unpublished_events
       # But the store method only publishes the last event if it matches the class
       expect(aggregate.unpublished_events.count).to eq(2)
@@ -107,11 +109,11 @@ RSpec.describe EventRepository do
       it 'does not publish if last event is not of specified class' do
         # Create aggregate with Article2Created
         repository.store(aggregate, Article2Created, expected_version: :none)
-        
+
         # Try to store Article2Submitted but aggregate has no unpublished events
         aggregate2 = repository.load(Article2Aggregate, aggregate_id)
         aggregate2.submit(actor_id: user.id)
-        
+
         # If we try to store Article2Created but last event is Article2Submitted
         # it should not publish
         expect(event_store).not_to receive(:publish)
@@ -122,18 +124,17 @@ RSpec.describe EventRepository do
 
   describe 'stream_name' do
     it 'generates correct stream name for Article2Aggregate' do
-      aggregate = Article2Aggregate.new(aggregate_id)
+      Article2Aggregate.new(aggregate_id)
       stream = repository.send(:stream_name, Article2Aggregate, aggregate_id)
-      
+
       expect(stream).to eq("Article2$#{aggregate_id}")
     end
 
     it 'generates correct stream name for Comment2Aggregate' do
       comment_id = SecureRandom.uuid
       stream = repository.send(:stream_name, Comment2Aggregate, comment_id)
-      
+
       expect(stream).to eq("Comment2$#{comment_id}")
     end
   end
 end
-

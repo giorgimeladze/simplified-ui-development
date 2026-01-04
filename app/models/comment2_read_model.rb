@@ -1,10 +1,17 @@
+# frozen_string_literal: true
+
 class Comment2ReadModel < ApplicationRecord
   include HasHypermediaLinks
 
   self.table_name = 'comment2_read_models'
   self.primary_key = 'id'
 
-  scope :for_article, ->(article2_id) { where(article2_id: article2_id) }
+  belongs_to :article2,
+             class_name: "Article2ReadModel",
+             foreign_key: :article2_id,
+             primary_key: :id,
+             inverse_of: :comment2s,
+             optional: true
 
   # Hypermedia model mapping
   def hypermedia_model_name
@@ -40,5 +47,3 @@ class Comment2ReadModel < ApplicationRecord
     Comment2Policy.new(current_user, self)
   end
 end
-
-

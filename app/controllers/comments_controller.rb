@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 class CommentsController < ApplicationController
   skip_before_action :authenticate_user!, only: [:show]
-  before_action :set_article, only: [:new, :create]
-  before_action :set_comment, only: [:show, :edit, :update, :approve, :reject, :reject_feedback, :delete, :restore, :index]
+  before_action :set_article, only: %i[new create]
+  before_action :set_comment,
+                only: %i[show edit update approve reject reject_feedback delete restore index]
 
   def index
     redirect_to article_path(@comment.article_id)
@@ -10,9 +13,10 @@ class CommentsController < ApplicationController
   def pending_comments
     authorize :comment, :pending_comments?
     comments = Comment.awaiting_moderation
-  
+
     rendered_comments = CommentBlueprint.render_as_hash(comments, view: :index, context: { current_user: current_user })
-    @html_content = render_to_string(partial: 'list', locals: { comments: rendered_comments, title: 'Pending Comments' }, formats: [:html])
+    @html_content = render_to_string(partial: 'list',
+                                     locals: { comments: rendered_comments, title: 'Pending Comments' }, formats: [:html])
     @links = HasHypermediaLinks.hypermedia_general_index(current_user, 'Comment')
 
     respond_to do |format|
@@ -58,7 +62,7 @@ class CommentsController < ApplicationController
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: { errors: @comment.errors.full_messages }, status: :unprocessable_entity }
       end
-    end 
+    end
   end
 
   def edit
@@ -73,13 +77,11 @@ class CommentsController < ApplicationController
 
   def update
     authorize @comment, :update?
-    
+
     if @comment.update(comment_params)
       # Move from rejected to pending after update
-      if @comment.rejected?
-        @comment.aasm.fire!(:resubmit) if @comment.aasm.may_fire_event?(:resubmit)
-      end
-      
+      @comment.aasm.fire!(:resubmit) if @comment.rejected? && @comment.aasm.may_fire_event?(:resubmit)
+
       respond_to do |format|
         format.html { redirect_to article_path(@comment.article), notice: 'Comment was successfully updated.' }
         format.json { render json: { comment: @comment.slice(:id, :text, :status, :user_id) }, status: :ok }
@@ -144,16 +146,15 @@ class CommentsController < ApplicationController
   def transition_comment(event)
     # Event-level authorization
     policy = CommentPolicy.new(current_user, @comment)
-    unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
-      raise Pundit::NotAuthorizedError
-    end
+    raise Pundit::NotAuthorizedError unless policy.respond_to?("#{event}?") && policy.public_send("#{event}?")
 
     if @comment.aasm.may_fire_event?(event)
       @comment.aasm.fire!(event)
       respond_to do |format|
         format.html { redirect_to article_path(@comment.article), notice: 'Transition applied.' }
         format.json do
-          rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show, context: { current_user: current_user })
+          rendered_comment = CommentBlueprint.render_as_hash(@comment, view: :show,
+                                                                       context: { current_user: current_user })
           render json: { comment: rendered_comment }, status: :ok
         end
       end

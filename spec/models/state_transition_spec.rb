@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe StateTransition, type: :model do
@@ -22,15 +24,15 @@ RSpec.describe StateTransition, type: :model do
 
   describe 'creating state transitions' do
     it 'creates a state transition through article state change' do
-      expect {
+      expect do
         article.submit!
-      }.to change(StateTransition, :count).by(1)
+      end.to change(StateTransition, :count).by(1)
     end
 
     it 'stores correct transition data' do
       article.submit!
       transition = StateTransition.last
-      
+
       expect(transition.transitionable).to eq(article)
       expect(transition.from_state).to eq('draft')
       expect(transition.to_state).to eq('review')
@@ -40,11 +42,11 @@ RSpec.describe StateTransition, type: :model do
 
     it 'creates state transition for comment state change' do
       comment = create(:comment, article: article, user: user)
-      
-      expect {
+
+      expect do
         comment.approve!
-      }.to change(StateTransition, :count).by(1)
-      
+      end.to change(StateTransition, :count).by(1)
+
       transition = StateTransition.last
       expect(transition.transitionable).to eq(comment)
       expect(transition.from_state).to eq('pending')
@@ -99,4 +101,3 @@ RSpec.describe StateTransition, type: :model do
     end
   end
 end
-

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Article2Policy, type: :policy do
@@ -229,7 +231,7 @@ RSpec.describe Article2Policy, type: :policy do
 
     context 'when user is admin' do
       it 'returns all article2s' do
-        # Note: Article2ReadModel doesn't have a user association, so scope uses author_id
+        # NOTE: Article2ReadModel doesn't have a user association, so scope uses author_id
         # The scope implementation uses where(user: user) which won't work for Article2ReadModel
         # This test documents the current behavior
         scope = Article2Policy::Scope.new(admin, Article2ReadModel)
@@ -255,4 +257,3 @@ RSpec.describe Article2Policy, type: :policy do
     end
   end
 end
-

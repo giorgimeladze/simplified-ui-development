@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DropArticle2s < ActiveRecord::Migration[7.1]
   def up
     drop_table :article2s
@@ -10,10 +12,10 @@ class DropArticle2s < ActiveRecord::Migration[7.1]
       t.string :status, default: 'draft'
       t.references :user, null: false, foreign_key: true
       t.text :rejection_feedback
-      
+
       t.timestamps
     end
-    
+
     add_index :article2s, [:status]
   end
 end

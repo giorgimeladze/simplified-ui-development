@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Comment2Projection
   def self.build
     RubyEventStore::Projection
@@ -24,30 +26,30 @@ class Comment2Projection
   def self.upsert_created(event)
     id = event.data[:comment2_id]
     Comment2ReadModel.upsert({
-      id: id,
-      text: event.data[:text],
-      article2_id: event.data[:article2_id],
-      author_id: event.data[:user_id],
-      state: 'pending'
-    }, unique_by: :id)
+                               id: id,
+                               text: event.data[:text],
+                               article2_id: event.data[:article2_id],
+                               author_id: event.data[:user_id],
+                               state: 'pending'
+                             }, unique_by: :id)
   end
 
   def self.upsert_updated(event)
     id = event.data[:comment2_id]
     Comment2ReadModel.upsert({
-      id: id,
-      text: event.data[:text],
-      state: 'pending'
-    }, unique_by: :id)
+                               id: id,
+                               text: event.data[:text],
+                               state: 'pending'
+                             }, unique_by: :id)
   end
 
   def self.upsert_rejected(event)
     id = event.data[:comment2_id]
     Comment2ReadModel.upsert({
-      id: id,
-      state: 'rejected',
-      rejection_feedback: event.data[:rejection_feedback]
-    }, unique_by: :id)
+                               id: id,
+                               state: 'rejected',
+                               rejection_feedback: event.data[:rejection_feedback]
+                             }, unique_by: :id)
   end
 
   def self.upsert_state(event, state)
@@ -55,5 +57,3 @@ class Comment2Projection
     Comment2ReadModel.upsert({ id: id, state: state }, unique_by: :id)
   end
 end
-
-

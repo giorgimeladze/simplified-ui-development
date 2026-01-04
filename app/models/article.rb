@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Article < ApplicationRecord
   include AASM
   include HasHypermediaLinks
@@ -30,7 +32,7 @@ class Article < ApplicationRecord
     end
 
     event :archive do
-      transitions from: [:rejected, :published, :privated], to: :archived
+      transitions from: %i[rejected published privated], to: :archived
     end
 
     event :publish do
@@ -47,13 +49,13 @@ class Article < ApplicationRecord
   end
 
   scope :visible, -> { where(status: 'published') }
-  scope :admin_visible, -> { where(status: ['published', 'privated', 'review']) }  
+  scope :admin_visible, -> { where(status: %w[published privated review]) }
 
   def visible_comments(current_user)
     if current_user.nil?
       comments.where(status: 'approved')
     elsif current_user.admin?
-      comments.where(status: ['approved', 'rejected'])
+      comments.where(status: %w[approved rejected])
     else
       comments.where(status: 'approved').or(comments.where(user: current_user, status: 'rejected'))
     end

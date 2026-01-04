@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe HasStateTransitions, type: :model do
@@ -23,15 +25,15 @@ RSpec.describe HasStateTransitions, type: :model do
 
   describe 'state transition logging' do
     it 'creates a state transition record after state change' do
-      expect {
+      expect do
         article.submit!
-      }.to change(StateTransition, :count).by(1)
+      end.to change(StateTransition, :count).by(1)
     end
 
     it 'logs correct transition data' do
       article.submit!
       transition = StateTransition.last
-      
+
       expect(transition.transitionable).to eq(article)
       expect(transition.from_state).to eq('draft')
       expect(transition.to_state).to eq('review')
@@ -42,14 +44,14 @@ RSpec.describe HasStateTransitions, type: :model do
     it 'logs multiple transitions correctly' do
       article.submit!
       article.publish!
-      
+
       transitions = article.state_transitions.order(:created_at)
       expect(transitions.count).to eq(2)
-      
+
       expect(transitions.first.from_state).to eq('draft')
       expect(transitions.first.to_state).to eq('review')
       expect(transitions.first.event).to eq('submit!')
-      
+
       expect(transitions.last.from_state).to eq('review')
       expect(transitions.last.to_state).to eq('published')
       expect(transitions.last.event).to eq('publish!')
@@ -58,10 +60,10 @@ RSpec.describe HasStateTransitions, type: :model do
     it 'handles errors gracefully' do
       # Mock StateTransition.create! to raise an error
       allow(StateTransition).to receive(:create!).and_raise(StandardError.new('Test error'))
-      
-      expect {
+
+      expect do
         article.submit!
-      }.not_to raise_error
+      end.not_to raise_error
     end
   end
 
@@ -69,10 +71,10 @@ RSpec.describe HasStateTransitions, type: :model do
     let(:comment) { create(:comment, article: article, user: user) }
 
     it 'logs comment state transitions' do
-      expect {
+      expect do
         comment.approve!
-      }.to change(StateTransition, :count).by(1)
-      
+      end.to change(StateTransition, :count).by(1)
+
       transition = StateTransition.last
       expect(transition.transitionable).to eq(comment)
       expect(transition.from_state).to eq('pending')
@@ -94,4 +96,3 @@ RSpec.describe HasStateTransitions, type: :model do
     end
   end
 end
-
